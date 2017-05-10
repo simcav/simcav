@@ -1,4 +1,4 @@
-# simcav
+# SimCav
 Laser cavity simulation
 
 
