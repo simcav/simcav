@@ -1,6 +1,9 @@
 # SimCav
 Laser cavity simulation
 
+[![DOI](https://zenodo.org/badge/90370020.svg)](https://zenodo.org/badge/latestdoi/90370020)
+
+
 
 Simcav is a PC program to simulate laser cavities. It is able to calculate a stable cavity for someconditions given by the user. It also provides common functionalities, such as drawing the cavities,calculate beam sizes and provide stability ranges.
 
