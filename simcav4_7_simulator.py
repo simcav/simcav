@@ -21,8 +21,10 @@ def matrix(E_list, proy):
     # with an entry called "matrix"
     # "proy" states for the proyection, either 0 for tangential or 1 for sagital.
     M_cav = np.identity(2)
+    
+    #print(E_list,"\n\n")
 
-    # Tangential proyection        
+    # Tangential or saggital proyection     
     for element in E_list[1:]:
         #print("element type, value :" + element['type'] + "\n " + str(element['matrix']))
         M_cav = np.dot(element['matrix'][proy],M_cav)
