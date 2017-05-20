@@ -8,13 +8,16 @@ Simcav is a PC program to simulate laser cavities. It is able to calculate a sta
 ## How to launch SimCav
 
 * Windows:
+
 Download the latest release. Simply download and unzip at your preferred location. Then run the SimCav shortcut. 
 If you prefer you can run it from the source code.
 
 * GNU/Linux:
+
 There is no compiled version so far, you need to run the source code.
 
 * Mac:
+
 Same as in GNU/Linux... maybe!
 
 ## Runing the source code
