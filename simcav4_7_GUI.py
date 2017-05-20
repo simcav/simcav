@@ -49,8 +49,8 @@ class Toolbar(tk.Frame):
         self.img_save = tk.PhotoImage(file="Icons/black_save.gif")
         self.img_load = tk.PhotoImage(file="Icons/black_load.gif")
         self.img_compute = tk.PhotoImage(file="Icons/final_compute.gif")
-        self.img_quit = tk.PhotoImage(file="Icons/quit2.png")
-        self.img_test = tk.PhotoImage(file="Icons/test.png")
+        self.img_quit = tk.PhotoImage(file="Icons/quit2.gif")
+        #self.img_test = tk.PhotoImage(file="Icons/test.gif")
         
         # Creating buttons
         self.toolbar_buttons['a_button_new'] = tk.Button(self, text='New', 
@@ -291,15 +291,28 @@ class Physics():
     def calc_stability(self, **kw):
         stable = SIMU.stability(self.matrix, **kw)
         return stable
+        
+    def closed_cavity(self, **kw):
+        # Check that both sides of the cavity have mirrors
+        # ie. check that is closed cavity, not open
+        side1 = self.element_list[0]["type"]
+        side2 = self.element_list[-1]["type"]
+        
+        if "mirror" in (side1 and side2): 
+            return True
+        else:
+            return False
     
     def calc_cavity(self, proy):
         master.toolbar.eval_entry_wl("<Return>")
-        self.matrix = self.calc_matrix(self.element_list, proy)
+        self.matrix = self.calc_matrix(self.element_list, proy)       
         
         # Before anything check stability
-        self.stable = self.calc_stability()        
+        self.stable = self.calc_stability()
+        # And also check that it is a closed cavity
+        self.closed = self.closed_cavity()
         
-        if self.stable:
+        if self.stable and self.closed:
             master.warningbar.warbar_message('Cavity stable!', 'lawn green')
             self.q0 = SIMU.q0(self.matrix)
             if proy == 0:
@@ -312,7 +325,10 @@ class Physics():
             master.framecentral.cavityplot.plot(1, 1, 1, 1)
             master.framecentral.cavityplot.figureplot.clear()
             master.framecentral.cavityplot.canvas.show()
-            master.warningbar.warbar_message('Cavity not stable!', 'firebrick')
+            if self.closed:
+                master.warningbar.warbar_message('Cavity not stable!', 'firebrick')
+            else:
+                master.warningbar.warbar_message('Mirrors needed at the sides of the cavity!', 'firebrick')
             return False
 
     def stability_plot(self, item, xstart, xend):
@@ -797,7 +813,7 @@ class Cavityplot(tk.Frame):
         # Clear figure in case next won't not stable
         self.figureplot.clear()
         
-        if master.physics.stable:
+        if master.physics.stable and master.physics.closed:
             if len(x1) > 1:        
                 for zrow, wrow in zip(x1,y1):
                     self.figureplot.plot(zrow,wrow*1000)
@@ -836,8 +852,8 @@ class Cavityelements(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         
-        self.img_del = tk.PhotoImage(file="Icons/Delete_bin.png")
-        self.img_del2 = tk.PhotoImage(file="Icons/Delete_bin2.png")
+        self.img_del = tk.PhotoImage(file="Icons/Delete_bin.gif")
+        self.img_del2 = tk.PhotoImage(file="Icons/Delete_bin2.gif")
         
         self.label_title = tk.Label(self, text='Modify Cavity', fg='white', bg='sea green', font='bold')
         

@@ -1,0 +1,26 @@
+#1
+Issue: Flat mirror + curved mirror + distance = stable!!!
+
+Thoughts: I think the ABCD indeed gives a correct result, but the cavity is open!!
+
+Solution: Check that first and last elements are mirrors.
+
+Solved: YES
+
+
+
+#2
+Issue: Icons quit2 and test are in png format, and therefore not compatible with linux/mac.
+
+Solution: Change file format to .gif and rewrite the call to call the new format.
+
+Solved: I think so. Need to check simcav works in linux / mac.
+
+
+
+#3
+Issue: Wrong file uploaded to github (scrolledframe_famed).
+
+Solution: Upload the correct file (scrolledframe).
+
+Solved: YES
