@@ -366,8 +366,9 @@ class Physics():
                 y.append(stab_val)
 
             self.yvec.append(y)
+            xname = 'Element '+str(item)+' variation (mm)'
 
-        master.framecentral.stabilityplot.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]))
+        master.framecentral.stabilityplot.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]), xname)
 
 #==============================================================================
 
@@ -782,7 +783,7 @@ class Stabilityplot(tk.Frame):
         self.figuretoolbar.configure(bg='white')
         self.figuretoolbar.update()
 
-    def plot(self, x0, y0, x1, y1):
+    def plot(self, x0, y0, x1, y1, xaxis):
         #master.show_stabilityplot()
         self.figureplot.clear()
 
@@ -796,7 +797,7 @@ class Stabilityplot(tk.Frame):
         plt.xlim((xmin,xmax))
         plt.ylim((-1,1))
 
-        self.figureplot.set_xlabel('z (mm)')
+        self.figureplot.set_xlabel(xaxis)
         self.figureplot.set_ylabel('Saggital            Stability            Tangential')
         self.canvas.show()
 
