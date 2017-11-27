@@ -964,10 +964,10 @@ class Cavitycomputation(tk.Frame):
         # Stores conditions
         self.condition_number = 0
         self.conditions_list = []
-        self.conditions_available = ['w₀ size', 'Waist','Cav. distance']
+        self.conditions_available = ['w(0) size', 'Waist','Cav. distance']
 
         self.conditions_call = {
-                                'w₀ size' : self.cond_w0_size,
+                                'w(0) size' : self.cond_w0_size,
                                 'Waist' : self.cond_waist,
                                 'Cav. distance' : self.cav_distance,
                                 }
@@ -1057,11 +1057,11 @@ class Cavitycomputation(tk.Frame):
         self.func_add_condition()
         # First condition musn't be deleted, and its always w0_size.
         self.conditions_list[0]['delete_button'].grid_forget()
-        self.conditions_list[0]['condition_var'].set('w₀ size')
+        self.conditions_list[0]['condition_var'].set('w(0) size')
         self.check_condition(0, self.conditions_list[0])
 
 #==============================================================================
-#         self.conditions_list[0]['condition_var'].set('w₀ size')
+#         self.conditions_list[0]['condition_var'].set('w(0) size')
 #         self.conditions_list[0]['element_menu'].config(state='disable')
 #==============================================================================
 
@@ -1137,7 +1137,7 @@ class Cavitycomputation(tk.Frame):
         var['entry1'].bind("<FocusIn>", self.delete_units)
         var['entry2'].bind("<FocusIn>", self.delete_units)
 
-        if var['condition_var'].get() == 'w₀ size':
+        if var['condition_var'].get() == 'w(0) size':
             var['element_menu'].config(state='disable')
             # Shows apropiate units
             self.show_micro(var)
