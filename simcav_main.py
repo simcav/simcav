@@ -458,7 +458,7 @@ class Physics():
                 stab_matrix = self.calc_matrix(stab_list, proy)
                 stab_val = SIMU.stabilitycalc(stab_matrix)
                 y.append(stab_val)
-                
+
             self.yvec.append(y)
             
         xname = 'Element '+str(item)+' variation (mm)'
@@ -1596,7 +1596,7 @@ class Cavitycomputation(tk.Frame):
         self.resultswindow.grab_set()
         
         root.update_idletasks()
-        
+
         for element in self.computation_elements:
             myDict = {}
             a = float(element['entry_rangestart'].get())
