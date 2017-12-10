@@ -21,6 +21,7 @@ import simcav4_7_abcd as ABCD
 import itertools
 import pickle
 import numpy as np
+import os
 
 # Imports for plotting
 import matplotlib
@@ -31,6 +32,18 @@ import matplotlib.pyplot as plt
 # import for scrolled window
 import scrolledframe as scrollf
 import tooltips as tt
+
+
+# File path function for deployment in single file with PyInstaller
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 
 #==============================================================================
@@ -45,13 +58,13 @@ class Toolbar(tk.Frame):
         self.toolbar_buttons = {}
 
         # Loading icons
-        self.img_new = tk.PhotoImage(file="Icons/black_new.gif")
-        self.img_add = tk.PhotoImage(file="Icons/black_add.gif")
-        self.img_save = tk.PhotoImage(file="Icons/black_save.gif")
-        self.img_load = tk.PhotoImage(file="Icons/black_load.gif")
-        self.img_compute = tk.PhotoImage(file="Icons/final_compute.gif")
-        self.img_quit = tk.PhotoImage(file="Icons/quit2.gif")
-        #self.img_test = tk.PhotoImage(file="Icons/test.gif")
+        self.img_new = tk.PhotoImage(file=resource_path("Icons/black_new.gif"))
+        self.img_add = tk.PhotoImage(file=resource_path("Icons/black_add.gif"))
+        self.img_save = tk.PhotoImage(file=resource_path("Icons/black_save.gif"))
+        self.img_load = tk.PhotoImage(file=resource_path("Icons/black_load.gif"))
+        self.img_compute = tk.PhotoImage(file=resource_path("Icons/final_compute.gif"))
+        self.img_quit = tk.PhotoImage(file=resource_path("Icons/quit2.gif"))
+        #self.img_test = tk.PhotoImage(file="test.gif")
 
         # Creating buttons
         self.toolbar_buttons['a_button_new'] = tk.Button(self, text='New',
@@ -365,8 +378,9 @@ class Physics():
                 y.append(stab_val)
 
             self.yvec.append(y)
+            xname = 'Element '+str(item)+' variation (mm)'
 
-        master.framecentral.stabilityplot.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]))
+        master.framecentral.stabilityplot.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]), xname)
 
 #==============================================================================
 
@@ -377,7 +391,7 @@ class Elementbox(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.pack_propagate(0)
-        self.icon_go = tk.PhotoImage(file="Icons/final_go.gif")
+        self.icon_go = tk.PhotoImage(file=resource_path("Icons/final_go.gif"))
 
         #self.img_calc = tk.PhotoImage(file="black_calc.gif")
         self.label_title = tk.Label(self, text='Cavity', width=30, fg='white', bg='sea green', font='bold')
@@ -405,7 +419,7 @@ class Elementbox(tk.Frame):
         self.stab_var = tk.IntVar(self)
         self.optionmenu = tk.OptionMenu(self, self.stab_var, *range(len(master.physics.element_list)))
         self.optionmenu.configure(bg='white', activebackground='white', highlightbackground='white')
-        self.optionmenu['menu'].configure(bg='white', activebackground='aquamarine')
+        self.optionmenu['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
         self.stability_entry1 = tk.Entry(self, width=5, justify='right')
         self.stability_entry2 = tk.Entry(self, width=5, justify='right')
         self.stability_entry1.insert(0, 0)
@@ -781,7 +795,7 @@ class Stabilityplot(tk.Frame):
         self.figuretoolbar.configure(bg='white')
         self.figuretoolbar.update()
 
-    def plot(self, x0, y0, x1, y1):
+    def plot(self, x0, y0, x1, y1, xaxis):
         #master.show_stabilityplot()
         self.figureplot.clear()
 
@@ -795,7 +809,7 @@ class Stabilityplot(tk.Frame):
         plt.xlim((xmin,xmax))
         plt.ylim((-1,1))
 
-        self.figureplot.set_xlabel('z (mm)')
+        self.figureplot.set_xlabel(xaxis)
         self.figureplot.set_ylabel('Saggital            Stability            Tangential')
         self.canvas.show()
 
@@ -864,8 +878,8 @@ class Cavityelements(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
-        self.img_del = tk.PhotoImage(file="Icons/Delete_bin.gif")
-        self.img_del2 = tk.PhotoImage(file="Icons/Delete_bin2.gif")
+        self.img_del = tk.PhotoImage(file=resource_path("Icons/Delete_bin.gif"))
+        self.img_del2 = tk.PhotoImage(file=resource_path("Icons/Delete_bin2.gif"))
 
         self.label_title = tk.Label(self, text='Modify Cavity', fg='white', bg='sea green', font='bold')
 
@@ -955,17 +969,17 @@ class Cavitycomputation(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
         # Icons
-        self.icon_go = tk.PhotoImage(file="Icons/final_go.gif")
-        self.icon_add_cond = tk.PhotoImage(file="Icons/final_add_cond.gif")
-        self.icon_del_cond = tk.PhotoImage(file="Icons/final_del_cond.gif")
+        self.icon_go = tk.PhotoImage(file=resource_path("Icons/final_go.gif"))
+        self.icon_add_cond = tk.PhotoImage(file=resource_path("Icons/final_add_cond.gif"))
+        self.icon_del_cond = tk.PhotoImage(file=resource_path("Icons/final_del_cond.gif"))
 
         # Stores conditions
         self.condition_number = 0
         self.conditions_list = []
-        self.conditions_available = ['w₀ size', 'Waist','Cav. distance']
+        self.conditions_available = ['w(0) size', 'Waist','Cav. distance']
 
         self.conditions_call = {
-                                'w₀ size' : self.cond_w0_size,
+                                'w(0) size' : self.cond_w0_size,
                                 'Waist' : self.cond_waist,
                                 'Cav. distance' : self.cav_distance,
                                 }
@@ -1055,11 +1069,11 @@ class Cavitycomputation(tk.Frame):
         self.func_add_condition()
         # First condition musn't be deleted, and its always w0_size.
         self.conditions_list[0]['delete_button'].grid_forget()
-        self.conditions_list[0]['condition_var'].set('w₀ size')
+        self.conditions_list[0]['condition_var'].set('w(0) size')
         self.check_condition(0, self.conditions_list[0])
 
 #==============================================================================
-#         self.conditions_list[0]['condition_var'].set('w₀ size')
+#         self.conditions_list[0]['condition_var'].set('w(0) size')
 #         self.conditions_list[0]['element_menu'].config(state='disable')
 #==============================================================================
 
@@ -1101,10 +1115,10 @@ class Cavitycomputation(tk.Frame):
         myDict['delete_button'].grid(column=0, row = self.rownumber)
         myDict['condition_menu'].grid(column=1, row=self.rownumber, sticky="ew")
         myDict['condition_menu'].configure(bg='white', activebackground='white', highlightbackground='white', width=12)
-        myDict['condition_menu']['menu'].configure(bg='white', activebackground='aquamarine')
+        myDict['condition_menu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
         myDict['element_menu'].grid(column=2, row=self.rownumber, sticky="ew")
         myDict['element_menu'].configure(bg='white', activebackground='white', highlightbackground='white')
-        myDict['element_menu']['menu'].configure(bg='white', activebackground='aquamarine')
+        myDict['element_menu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
         myDict['entry1'].grid(column=3, row=self.rownumber)
         myDict['entry2'].grid(column=4, row=self.rownumber)
 
@@ -1135,7 +1149,7 @@ class Cavitycomputation(tk.Frame):
         var['entry1'].bind("<FocusIn>", self.delete_units)
         var['entry2'].bind("<FocusIn>", self.delete_units)
 
-        if var['condition_var'].get() == 'w₀ size':
+        if var['condition_var'].get() == 'w(0) size':
             var['element_menu'].config(state='disable')
             # Shows apropiate units
             self.show_micro(var)
@@ -1712,10 +1726,10 @@ if __name__ == "__main__":
     root.wm_title("SimCav 4.7")
     try:
         # This is for windows
-        root.wm_iconbitmap("Icons/Icon2.ico")
+        root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))
     except:
         # This is for linux
-        myicon = tk.PhotoImage(file="Icons/Icon2.png")
+        myicon = tk.PhotoImage(file=resource_path("Icons/Icon2.png"))
         root.tk.call('wm', 'iconphoto', root._w, myicon)
 
     # Kill process when click on window close button
