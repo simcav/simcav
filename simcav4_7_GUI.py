@@ -993,7 +993,7 @@ class Cavitycomputation(tk.Frame):
         self.button_computation.bind('<Leave>', master.toolbar.func_color_leave)
 
         # Titles row
-        self.label_title = tk.Label(self, text='Cavity Computation', fg='white', bg='sea green', font='bold')
+        self.label_title = tk.Label(self, text='Design Calculator', fg='white', bg='sea green', font='bold')
         self.label_title.grid(row=0, column=0, columnspan=5, sticky='ew')
         # Stores the title labels
         self.label_subtitle = []
@@ -1729,7 +1729,7 @@ if __name__ == "__main__":
         root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))
     except:
         # This is for linux
-        myicon = tk.PhotoImage(file=resource_path("Icons/Icon2.png"))
+        myicon = tk.PhotoImage(file=resource_path("Icons/logo-tg3.png"))
         root.tk.call('wm', 'iconphoto', root._w, myicon)
 
     # Kill process when click on window close button
