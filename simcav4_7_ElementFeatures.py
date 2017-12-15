@@ -83,7 +83,7 @@ def assignment(element, entry1, entry2, refr_index):
         myDict['refr_index'] = entry2
         myDict['done'] = 1
     
-    # --------------- ITERFACES -----------------------        
+    # --------------- INTERFACES -----------------------        
     # Flat interface
     elif element == 'Flat interface':
         I = abcd.flat_interface(refr_index, entry2)

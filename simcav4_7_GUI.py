@@ -303,6 +303,20 @@ class Physics():
         self.wl_mm = 675E-6
         self.element_list = []
         self.refr_index = 1
+    
+    # element_list holds all the information of every element in the cavity:
+    # checkbutton_var: PY_VAR6
+    # checkbutton: .!mainapplication.!elementbox.!checkbutton2
+    # label: .!mainapplication.!elementbox.!label10
+    # entry1: .!mainapplication.!elementbox.!entry5
+    # entry2: .!mainapplication.!elementbox.!entry6
+    # type:         Type of element, as the element button names
+    # matrix:       ABCD matrix
+    # distance:     first column value
+    # refr_index:   second column value
+    # itemnumber:   position in the caviity.
+    # itemnumber_label: .!mainapplication.!elementbox.!label11
+
 
     def calc_matrix(self, el_list, proy):
         matrix = SIMU.matrix(el_list, proy)
@@ -327,33 +341,49 @@ class Physics():
             return True
         else:
             return False
+        
+    def element_lengths(self, **kw):
+        for element in self.element_list:
+            if element['type'] in ['Distance','Block','Brewster plate','Brewster crystal']:
+                if element['distance'] == 0:
+                    self.zeroelement = element['itemnumber']
+                    return False
+        return True
+                
 
     def calc_cavity(self, proy):
         master.toolbar.eval_entry_wl("<Return>")
         self.matrix = self.calc_matrix(self.element_list, proy)
-
-        # Before anything check stability
-        self.stable = self.calc_stability()
+        
+        # Check no 0-length distance elements
+        self.nozeros = self.element_lengths()
         # And also check that it is a closed cavity
         self.closed = self.closed_cavity()
-
-        if self.stable and self.closed:
+        # Before anything check stability
+        self.stable = self.calc_stability()
+        
+        # The conditions here should also be added in "Cavityplot(tk.Frame)"
+        #       inside the function "plot(self, x1, y1, x2, y2)"
+        #       in the (first?) condition.
+        if (self.stable and self.closed and self.nozeros):
             master.warningbar.warbar_message('Cavity stable!', 'lawn green')
             self.q0 = SIMU.q0(self.matrix)
             if proy == 0:
-                self.z_tan, self.wz_tan = SIMU.propagation(self.element_list, self.q0, self.wl_mm, proy,master.toolbar.chivato)
+                self.z_tan, self.wz_tan = SIMU.propagation(self.element_list, self.q0, self.wl_mm, proy, master.toolbar.chivato)
             elif proy == 1:
-                self.z_sag, self.wz_sag = SIMU.propagation(self.element_list, self.q0, self.wl_mm, proy,master.toolbar.chivato)
+                self.z_sag, self.wz_sag = SIMU.propagation(self.element_list, self.q0, self.wl_mm, proy, master.toolbar.chivato)
             return True
-
+        # If any of the conditions aren't matched, stop calculation, throw error
         else:
             master.framecentral.cavityplot.plot(1, 1, 1, 1)
             master.framecentral.cavityplot.figureplot.clear()
             master.framecentral.cavityplot.canvas.show()
-            if self.closed:
-                master.warningbar.warbar_message('Cavity not stable!', 'firebrick')
-            else:
+            if not self.closed:
                 master.warningbar.warbar_message('Mirrors needed at the sides of the cavity!', 'firebrick')
+            elif not self.nozeros:
+                master.warningbar.warbar_message(['Element',self.zeroelement,'no distance defined'], 'firebrick')
+            else:
+                master.warningbar.warbar_message('Cavity not stable!', 'firebrick')
             return False
 
     def stability_plot(self, item, xstart, xend):
@@ -412,7 +442,6 @@ class Elementbox(tk.Frame):
         self.label_column3.grid(row=1, column=3)
         self.label_column4.grid(row=1, column=4)
 
-
     def show_stability(self):
         self.separator = ttk.Separator(self, orient=tk.HORIZONTAL)
         self.label_stability = tk.Label(self, text='Stability', width=30, fg='white', bg='sea green', font='bold')
@@ -449,11 +478,9 @@ class Elementbox(tk.Frame):
         master.elementbox.stability_entry2.destroy()
         master.elementbox.stability_button_calc.destroy()
 
-#==============================================================================
-#     def choose_stab_var(self):
-#         pass
-#==============================================================================
-
+#==============================================================
+#       Adding ELEMENTS
+#==============================================================
     def add_element(self, kind):
         master.warningbar.label_warning.configure(text='Added ' + kind)
         # Adds elements in the frame, with boxes for options
@@ -471,7 +498,7 @@ class Elementbox(tk.Frame):
         myDict['entry2'].bind("<Return>", self.pressed_enter)
 
         # Default values for the entries
-        if kind == 'Distance':
+        if kind in ['Distance','Block','Brewster plate','Brewster crystal']:
             myDict['entry1'].insert(0, 1)
             myDict['entry2'].insert(0, 1)
         elif kind in ['Curved mirror','Thin lens']:
@@ -839,7 +866,7 @@ class Cavityplot(tk.Frame):
         # Clear figure in case next won't not stable
         self.figureplot.clear()
 
-        if master.physics.stable and master.physics.closed:
+        if (master.physics.stable and master.physics.closed and master.physics.nozeros):
             if len(x1) > 1:
                 for zrow, wrow in zip(x1,y1):
                     self.figureplot.plot(zrow,wrow*1000)
@@ -1031,7 +1058,7 @@ class Cavitycomputation(tk.Frame):
             myDict['entry_rangestart'].insert(0, element['entry1'].get())
             myDict['entry_rangestop'].insert(0, element['entry1'].get())
             myDict['entry_points'].insert(0, 1)
-            if myDict['type'] in ['Distance','Block','Brewster plate']:
+            if myDict['type'] in ['Distance','Block','Brewster plate','Brewster crystal']:
                 myDict['z'] = z
                 z += 1
             else:
@@ -1347,20 +1374,6 @@ class Cavitycomputation(tk.Frame):
                         break
                     else:
                         results.append(round(answer*1E3,4))
-#==============================================================================
-#                         if condition['condition_var'].get() == 'cav_distance':
-#                             print('Especial')
-#                             print(condition['condition_var'].get())
-#                             results.append(round(answer*100)/100)
-#                         else:
-#                             print('No especial')
-#                             print(condition['condition_var'].get())
-#                             results.append(round(answer*1E3,4))
-#==============================================================================
-#==============================================================================
-#                         master.warningbar.warbar_message('''Unbelievable complex calculations in progress...
-#                                                     solutions found''', 'lawn green')
-#==============================================================================
                 if results:
                     self.combination_final.append(combination)
                     self.results_final.append(results)
@@ -1433,24 +1446,6 @@ class ResultsWindow(scrollf.VerticalScrolledFrame):
         self.destroy()
         master.warningbar.warbar_message('No messages','grey')
 
-#==============================================================================
-
-#==============================================================================
-# #%% Results window (parent - scroll container)
-# # This puts the results in the bottom frame
-# class ResultsWindow3(scrollf4.VerticalScrolledFrame):
-#     def __init__(self, parent, *args, **kwargs):
-#         scrollf4.VerticalScrolledFrame.__init__(self, parent, *args, **kwargs)
-#         self.config(background='white')
-#         self.inner_frame = ResultsWindow2(self.interior)
-#         self.inner_frame.grid(column=0, row=0)
-#
-#     def results_window_close(self):
-#         #self.destroy()
-#         master.warningbar.warbar_message('No messages','grey')
-#
-# # I DONT LIKE THIS IDEA
-#
 #==============================================================================
 
 #==============================================================================
