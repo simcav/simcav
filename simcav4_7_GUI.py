@@ -62,7 +62,7 @@ class Toolbar(tk.Frame):
         self.img_add = tk.PhotoImage(file=resource_path("Icons/black_add.gif"))
         self.img_save = tk.PhotoImage(file=resource_path("Icons/black_save.gif"))
         self.img_load = tk.PhotoImage(file=resource_path("Icons/black_load.gif"))
-        self.img_compute = tk.PhotoImage(file=resource_path("Icons/final_compute.gif"))
+        self.img_compute = tk.PhotoImage(file=resource_path("Icons/final_compute2.gif"))
         self.img_quit = tk.PhotoImage(file=resource_path("Icons/quit2.gif"))
         #self.img_test = tk.PhotoImage(file="test.gif")
 
@@ -108,7 +108,7 @@ class Toolbar(tk.Frame):
         self.testtip = tt.createToolTip(self.toolbar_buttons['b_button_load'], "Load cavity")
         self.testtip = tt.createToolTip(self.toolbar_buttons['c_button_save'], "Save cavity")
         self.testtip = tt.createToolTip(self.toolbar_buttons['d_button_add'], "Modify cavity")
-        self.testtip = tt.createToolTip(self.toolbar_buttons['e_button_computation'], "Calculate solutions")
+        self.testtip = tt.createToolTip(self.toolbar_buttons['e_button_computation'], "Design calculator")
         self.testtip = tt.createToolTip(self.toolbar_buttons['z_button_quit'], "Quit")
 
         # Wavelength labels and entry.
@@ -907,6 +907,17 @@ class Cavityelements(tk.Frame):
 
         self.img_del = tk.PhotoImage(file=resource_path("Icons/Delete_bin.gif"))
         self.img_del2 = tk.PhotoImage(file=resource_path("Icons/Delete_bin2.gif"))
+        # ELEMENTS
+        self.img_flatmirror = tk.PhotoImage(file=resource_path("Icons/flat_mirror.png"))
+        self.img_curvedmirror = tk.PhotoImage(file=resource_path("Icons/curved_mirror.png"))
+        self.img_distance = tk.PhotoImage(file=resource_path("Icons/distance.png"))
+        self.img_block = tk.PhotoImage(file=resource_path("Icons/block.png"))
+        self.img_brwplate = tk.PhotoImage(file=resource_path("Icons/brewster_plate.png"))
+        self.img_brwcrystal = tk.PhotoImage(file=resource_path("Icons/brewster_crystal.png"))
+        self.img_thinlens = tk.PhotoImage(file=resource_path("Icons/thin_lens.png"))
+        self.img_flatinter = tk.PhotoImage(file=resource_path("Icons/flat_interface.png"))
+        self.img_curvedinter = tk.PhotoImage(file=resource_path("Icons/curved_interface.png"))
+        self.img_custom = tk.PhotoImage(file=resource_path("Icons/custom_element.png"))
 
         self.label_title = tk.Label(self, text='Modify Cavity', fg='white', bg='sea green', font='bold')
 
@@ -922,55 +933,72 @@ class Cavityelements(tk.Frame):
 
         self.item_button = {}
 
-        self.item_button['a_flat_mirror'] = tk.Button(self, text = 'Flat Mirror', width=20,
-                                       command=lambda: master.elementbox.add_element('Flat mirror'),
-                                       highlightthickness=0)
-        self.item_button['b_curved_mirror'] = tk.Button(self, text = 'Curved Mirror', width=20,
-                                       command=lambda: master.elementbox.add_element('Curved mirror'),
-                                       highlightthickness=0)
-        self.item_button['c_distance'] = tk.Button(self, text = 'Distance', width=20,
-                                         command=lambda: master.elementbox.add_element('Distance'),
+        self.item_button['a_flat_mirror'] = tk.Button(self, text = 'Flat Mirror',
+                                         image=self.img_flatmirror, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Flat mirror'),
                                          highlightthickness=0)
-        self.item_button['d_block'] = tk.Button(self, text = 'Block', width=20,
+        self.item_button['b_curved_mirror'] = tk.Button(self, text = 'Curved Mirror',
+                                         image=self.img_curvedmirror, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Curved mirror'), highlightthickness=0)
+        self.item_button['c_distance'] = tk.Button(self, text = 'Distance', 
+                                         image=self.img_distance, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Distance'),
+                                         highlightthickness=0)
+        self.item_button['d_block'] = tk.Button(self, text = 'Block', 
+                                         image=self.img_block, width=120, 
+                                         height=30,
                                          command=lambda: master.elementbox.add_element('Block'),
                                          highlightthickness=0)
-        self.item_button['e_brewster_plate'] = tk.Button(self, text = 'Brewster plate', width=20,
-                                         command=lambda: master.elementbox.add_element('Brewster plate'),
+        self.item_button['e_brewster_plate'] = tk.Button(self, text = 'Brewster plate', 
+                                         image=self.img_brwplate, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Brewster plate'),
                                          highlightthickness=0)
-        self.item_button['f_brewster_crystal'] = tk.Button(self, text = 'Brewster crystal', width=20,
-                                         command=lambda: master.elementbox.add_element('Brewster crystal'),
+        self.item_button['f_brewster_crystal'] = tk.Button(self, text = 'Brewster crystal', 
+                                         image=self.img_brwcrystal, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Brewster crystal'),
                                          highlightthickness=0)
-        self.item_button['g_thin_lens'] = tk.Button(self, text = 'Thin lens', width=20,
-                                         command=lambda: master.elementbox.add_element('Thin lens'),
+        self.item_button['g_thin_lens'] = tk.Button(self, text = 'Thin lens',
+                                         image=self.img_thinlens, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Thin lens'),
                                          highlightthickness=0)
-        self.item_button['h_custom_element'] = tk.Button(self, text = 'Custom element', width=20,
-                                         command=lambda: master.elementbox.add_element('Custom element'),
+        self.item_button['h_custom_element'] = tk.Button(self, text = 
+                                         'Custom element', 
+                                         image=self.img_custom, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Custom element'),
                                          highlightthickness=0)
-        self.item_button['i_flat_interface'] = tk.Button(self, text = 'Flat interface', width=20,
-                                         command=lambda: master.elementbox.add_element('Flat interface'),
+        self.item_button['i_flat_interface'] = tk.Button(self, text = 'Flat interface', 
+                                         image=self.img_flatinter, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Flat interface'),
                                          highlightthickness=0)
-        self.item_button['j_curved_interface'] = tk.Button(self, text = 'Curved interface', width=20,
-                                         command=lambda: master.elementbox.add_element('Curved interface'),
+        self.item_button['j_curved_interface'] = tk.Button(self, text = 'Curved interface', 
+                                         image=self.img_curvedinter, width=120, 
+                                         height=30, command=lambda: master.elementbox.add_element('Curved interface'),
                                          highlightthickness=0)
 
         self.button_delete = tk.Button(self, text = 'Delete', image=self.img_del2,
                                         command=lambda: master.elementbox.func_delete_button(),
                                         highlightthickness=0)
-
+                                        
+        # Delete button config
         self.button_delete.config(width=190, height=30, bd=0, bg='white')
         self.button_delete.bind('<Enter>', self.button_delete_enter)
         self.button_delete.bind('<Leave>', self.button_delete_leave)
 
         self.label_title.grid(row=0, column=0, columnspan=2, sticky='ew')
 
-        self.button_delete.grid(row=1, column=0, columnspan=2, pady=5)
+        self.button_delete.grid(row=100, column=0, columnspan=2, pady=10)
 
         for i,button in enumerate(sorted(self.item_button)):
             self.item_button[button].config(bd=0, bg='white', activebackground='aquamarine')
             # THIS BINDS ARE TOTALLY NEEDED: they don't do the same as activebackground!
             self.item_button[button].bind('<Enter>', self.func_color_enter)
             self.item_button[button].bind('<Leave>', self.func_color_leave)
-            self.item_button[button].grid(row=3+i-i%2 , column=i%2 )
+            self.item_button[button].grid(row=3+i-i%2, column=i%2, pady=7 )
+        
+        #============ ATENTION =================
+        # CUSTOM ELEMENT DISABLED UNTIL IT WORKS
+        self.item_button['h_custom_element'].config(state=tk.DISABLED)
+        self.customtip = tt.createToolTip(self.item_button['h_custom_element'], "Work in progress")
 
     def button_delete_enter(self, event):
         event.widget.configure(image=self.img_del2)
