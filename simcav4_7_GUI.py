@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Created on Sat May 23 21:14:11 2015
 
@@ -1747,7 +1747,7 @@ if __name__ == "__main__":
     root.wm_title("SimCav 4.7")
     try:
         # This is for windows
-        root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))
+        root.wm_iconbitmap(resource_path("Icons/logo-tg3.ico"))#root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))
     except:
         # This is for linux
         myicon = tk.PhotoImage(file=resource_path("Icons/logo-tg3.png"))
