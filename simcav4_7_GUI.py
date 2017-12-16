@@ -58,12 +58,13 @@ class Toolbar(tk.Frame):
         self.toolbar_buttons = {}
 
         # Loading icons
-        self.img_new = tk.PhotoImage(file=resource_path("Icons/black_new.gif"))
-        self.img_add = tk.PhotoImage(file=resource_path("Icons/black_add.gif"))
-        self.img_save = tk.PhotoImage(file=resource_path("Icons/black_save.gif"))
-        self.img_load = tk.PhotoImage(file=resource_path("Icons/black_load.gif"))
-        self.img_compute = tk.PhotoImage(file=resource_path("Icons/final_compute2.gif"))
-        self.img_quit = tk.PhotoImage(file=resource_path("Icons/quit2.gif"))
+        self.img_new = tk.PhotoImage(file=resource_path("Icons/t_new.png"))
+        self.img_add = tk.PhotoImage(file=resource_path("Icons/t_edit.png"))
+        self.img_save = tk.PhotoImage(file=resource_path("Icons/t_save.png"))
+        self.img_load = tk.PhotoImage(file=resource_path("Icons/t_load.png"))
+        self.img_compute = tk.PhotoImage(file=resource_path("Icons/t_calcu.png"))
+        self.img_quit = tk.PhotoImage(file=resource_path("Icons/t_quit.png"))
+        self.img_quit2 = tk.PhotoImage(file=resource_path("Icons/t_quit2.png"))
         #self.img_test = tk.PhotoImage(file="test.gif")
 
         # Creating buttons
@@ -93,12 +94,12 @@ class Toolbar(tk.Frame):
             # Adding features to all icons and packing them.
             if button == 'z_button_quit':
                 # But quit icon goes apart
-                self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white', activebackground='red')
-                self.toolbar_buttons[button].bind('<Enter>', self.func_color_enter2)
-                self.toolbar_buttons[button].bind('<Leave>', self.func_color_leave)
+                self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white', activebackground='white')
                 self.toolbar_buttons[button].pack(side='right')
+                self.toolbar_buttons[button].bind("<Enter>", self.func_quit_enter)
+                self.toolbar_buttons[button].bind("<Leave>", self.func_quit_leave)
             else:
-                self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white', activebackground='aquamarine')
+                self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white')#, activebackground='aquamarine')
                 self.toolbar_buttons[button].bind('<Enter>', self.func_color_enter)
                 self.toolbar_buttons[button].bind('<Leave>', self.func_color_leave)
                 self.toolbar_buttons[button].pack(side='left')
@@ -109,7 +110,8 @@ class Toolbar(tk.Frame):
         self.testtip = tt.createToolTip(self.toolbar_buttons['c_button_save'], "Save cavity")
         self.testtip = tt.createToolTip(self.toolbar_buttons['d_button_add'], "Modify cavity")
         self.testtip = tt.createToolTip(self.toolbar_buttons['e_button_computation'], "Design calculator")
-        self.testtip = tt.createToolTip(self.toolbar_buttons['z_button_quit'], "Quit")
+        # Quit tooltip removed because it interferes with icon change.
+        #self.testtip = tt.createToolTip(self.toolbar_buttons['z_button_quit'], "Quit")
 
         # Wavelength labels and entry.
         self.label_wl = tk.Label(self, text='Wavelength = ', padx=2, pady=4, bd=0, width=25, bg='white', anchor='e')
@@ -261,12 +263,13 @@ class Toolbar(tk.Frame):
     # Probably unseful functions... Thsi is handled by the activebackground property of each widget
     def func_color_enter(self, event):
         event.widget.configure(bg='aquamarine')
-
-    def func_color_enter2(self, event):
-        event.widget.configure(bg='red')
-
     def func_color_leave(self, event):
         event.widget.configure(bg='white')
+
+    def func_quit_enter(self, event):
+        event.widget.configure(image=self.img_quit2)
+    def func_quit_leave(self, event):
+        event.widget.configure(image=self.img_quit)
     #--------------------------------------------
 
 #==============================================================================
@@ -702,22 +705,19 @@ class Framecentral(tk.Frame):
         self.framebutton.pack(side='top', fill='x', expand=False)
 
         # Buttons go inside its frame
+        #       Change active background by adding 
+        #       "activebackground=COLOR" to button options
         self.buttoncav = tk.Button(self.framebutton, text='Cavity', width=1,
                                    command=self.show_cavityplot, bg='white',
-                                   bd=0, activebackground='aquamarine',
-                                   highlightthickness=0)
+                                   bd=0, highlightthickness=0)
         self.buttonstab = tk.Button(self.framebutton, text='Stability', width=1,
                                    command=self.show_stabilityplot, bg='white',
-                                   bd=0, activebackground='aquamarine',
-                                   highlightthickness=0)
-        self.buttontest = tk.Button(self.framebutton, text='Test', width=1,
-                                   command=self.show_test, bg='white',
-                                   bd=0, activebackground='aquamarine',
-                                   highlightthickness=0)
+                                   bd=0, highlightthickness=0)
+        #self.buttontest = tk.Button(self.framebutton, text='Test', width=1,
+        #                           command=self.show_test, bg='white',
+        #                           bd=0, activebackground='aquamarine',
+        #                           highlightthickness=0)
 
-        #self.buttoncav.grid(row=0, column=0)
-        #self.buttonstab.grid(row=0, column=1)
-        #self.buttontest.grid(row=0, column=2)
         self.buttoncav.pack(side='left', fill='both', expand='yes')
         self.buttonstab.pack(side='left', fill='both', expand='yes')
         #self.buttontest.pack(side='left', fill='both', expand='yes')
@@ -737,23 +737,21 @@ class Framecentral(tk.Frame):
         self.buttoncav.bind('<Leave>', self.func_color_leave)
         self.buttonstab.bind('<Enter>', self.func_color_enter)
         self.buttonstab.bind('<Leave>', self.func_color_leave)
+        #self.buttontest.bind('<Enter>', self.func_color_enter)
+        #self.buttontest.bind('<Leave>', self.func_color_leave)
 
-        #self.mycanvas = ResizingCanvas(self,width=850, height=400, bg="white", highlightthickness=0)
-        # add some widgets to the canvas
-        #self.mycanvas.create_line(0, 0, 200, 100)
-        #self.mycanvas.create_line(0, 100, 200, 0, fill="white", dash=(4, 4))
-        #self.mycanvas.create_rectangle(50, 25, 150, 75, fill="white")
-        # tag all of the drawn widgets
-        #self.mycanvas.addtag_all("all")
-
+    #==================================================================
+    # These two functions change the button (normal) color.
+    # However when mouse enters, the button color is "activebackground"
+    # So to modify, simply change that option when defining the button.
+    # Maybe on windows it works differently tho!
     def func_color_enter(self, event):
         if event.widget.cget('state') == 'normal':
-            self.colorbutton = event.widget.cget('bg')
             event.widget.configure(bg='aquamarine')
-
     def func_color_leave(self, event):
-        if event.widget.cget('state') == 'normal':
-            event.widget.configure(bg = self.colorbutton)
+        if event.widget.cget('state') != 'disabled':
+            event.widget.configure(bg='grey')
+    #==================================================================
 
     def show_test(self):
         try:
@@ -905,19 +903,19 @@ class Cavityelements(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
-        self.img_del = tk.PhotoImage(file=resource_path("Icons/Delete_bin.gif"))
-        self.img_del2 = tk.PhotoImage(file=resource_path("Icons/Delete_bin2.gif"))
+        self.img_del1 = tk.PhotoImage(file=resource_path("Icons/e_delete.png"))
+        self.img_del2 = tk.PhotoImage(file=resource_path("Icons/e_delete2.png"))
         # ELEMENTS
-        self.img_flatmirror = tk.PhotoImage(file=resource_path("Icons/flat_mirror.png"))
-        self.img_curvedmirror = tk.PhotoImage(file=resource_path("Icons/curved_mirror.png"))
-        self.img_distance = tk.PhotoImage(file=resource_path("Icons/distance.png"))
-        self.img_block = tk.PhotoImage(file=resource_path("Icons/block.png"))
-        self.img_brwplate = tk.PhotoImage(file=resource_path("Icons/brewster_plate.png"))
-        self.img_brwcrystal = tk.PhotoImage(file=resource_path("Icons/brewster_crystal.png"))
-        self.img_thinlens = tk.PhotoImage(file=resource_path("Icons/thin_lens.png"))
-        self.img_flatinter = tk.PhotoImage(file=resource_path("Icons/flat_interface.png"))
-        self.img_curvedinter = tk.PhotoImage(file=resource_path("Icons/curved_interface.png"))
-        self.img_custom = tk.PhotoImage(file=resource_path("Icons/custom_element.png"))
+        self.img_flatmirror = tk.PhotoImage(file=resource_path("Icons/e_flat_mirror.png"))
+        self.img_curvedmirror = tk.PhotoImage(file=resource_path("Icons/e_curved_mirror.png"))
+        self.img_distance = tk.PhotoImage(file=resource_path("Icons/e_distance.png"))
+        self.img_block = tk.PhotoImage(file=resource_path("Icons/e_block.png"))
+        self.img_brwplate = tk.PhotoImage(file=resource_path("Icons/e_brewster_plate.png"))
+        self.img_brwcrystal = tk.PhotoImage(file=resource_path("Icons/e_brewster_crystal.png"))
+        self.img_thinlens = tk.PhotoImage(file=resource_path("Icons/e_thin_lens.png"))
+        self.img_flatinter = tk.PhotoImage(file=resource_path("Icons/e_flat_interface.png"))
+        self.img_curvedinter = tk.PhotoImage(file=resource_path("Icons/e_curved_interface.png"))
+        self.img_custom = tk.PhotoImage(file=resource_path("Icons/e_custom_element.png"))
 
         self.label_title = tk.Label(self, text='Modify Cavity', fg='white', bg='sea green', font='bold')
 
@@ -975,12 +973,12 @@ class Cavityelements(tk.Frame):
                                          height=30, command=lambda: master.elementbox.add_element('Curved interface'),
                                          highlightthickness=0)
 
-        self.button_delete = tk.Button(self, text = 'Delete', image=self.img_del2,
+        self.button_delete = tk.Button(self, text = 'Delete', image=self.img_del1,
                                         command=lambda: master.elementbox.func_delete_button(),
                                         highlightthickness=0)
                                         
         # Delete button config
-        self.button_delete.config(width=190, height=30, bd=0, bg='white')
+        self.button_delete.config(width=120, height=30, bd=0, bg='white')
         self.button_delete.bind('<Enter>', self.button_delete_enter)
         self.button_delete.bind('<Leave>', self.button_delete_leave)
 
@@ -989,7 +987,7 @@ class Cavityelements(tk.Frame):
         self.button_delete.grid(row=100, column=0, columnspan=2, pady=10)
 
         for i,button in enumerate(sorted(self.item_button)):
-            self.item_button[button].config(bd=0, bg='white', activebackground='aquamarine')
+            self.item_button[button].config(bd=0, bg='white') #, activebackground='aquamarine')
             # THIS BINDS ARE TOTALLY NEEDED: they don't do the same as activebackground!
             self.item_button[button].bind('<Enter>', self.func_color_enter)
             self.item_button[button].bind('<Leave>', self.func_color_leave)
@@ -1004,7 +1002,7 @@ class Cavityelements(tk.Frame):
         event.widget.configure(image=self.img_del2)
 
     def button_delete_leave(self, event):
-        event.widget.configure(image=self.img_del2)
+        event.widget.configure(image=self.img_del1)
 
     def func_color_enter(self, event):
         event.widget.configure(bg='aquamarine')
