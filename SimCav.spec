@@ -25,5 +25,5 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          icon='Icons/Icon2.ico',
+          icon='Icons/logo-tg3.ico',
           console=False )
