@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Sat May 23 21:14:11 2015
 
@@ -24,6 +24,9 @@ import numpy as np
 import os
 import requests         # To fetch version status
 import webbrowser       # To open webbrowser
+
+# Import for images
+from PIL import ImageTk,Image 
 
 # Imports for plotting
 import matplotlib
@@ -59,13 +62,13 @@ class Toolbar(tk.Frame):
         self.toolbar_buttons = {}
 
         # Loading icons
-        self.img_new = tk.PhotoImage(file=resource_path("Icons/t_new.png"))
-        self.img_add = tk.PhotoImage(file=resource_path("Icons/t_edit.png"))
-        self.img_save = tk.PhotoImage(file=resource_path("Icons/t_save.png"))
-        self.img_load = tk.PhotoImage(file=resource_path("Icons/t_load.png"))
-        self.img_compute = tk.PhotoImage(file=resource_path("Icons/t_calcu.png"))
-        self.img_quit = tk.PhotoImage(file=resource_path("Icons/t_quit.png"))
-        self.img_quit2 = tk.PhotoImage(file=resource_path("Icons/t_quit2.png"))
+        self.img_new = ImageTk.PhotoImage(Image.open(resource_path("Icons/t_new.png")))
+        self.img_add = ImageTk.PhotoImage(Image.open(resource_path("Icons/t_edit.png")))
+        self.img_save = ImageTk.PhotoImage(Image.open(resource_path("Icons/t_save.png")))
+        self.img_load = ImageTk.PhotoImage(Image.open(resource_path("Icons/t_load.png")))
+        self.img_compute = ImageTk.PhotoImage(Image.open(resource_path("Icons/t_calcu.png")))
+        self.img_quit = ImageTk.PhotoImage(Image.open(resource_path("Icons/t_quit.png")))
+        self.img_quit2 = ImageTk.PhotoImage(Image.open(resource_path("Icons/t_quit2.png")))
         #self.img_test = tk.PhotoImage(file="test.gif")
 
         # Creating buttons
@@ -450,6 +453,9 @@ class Elementbox(tk.Frame):
         self.icon_go = tk.PhotoImage(file=resource_path("Icons/final_go.gif"))
         self.img_del1 = tk.PhotoImage(file=resource_path("Icons/e_delete.png"))
         self.img_del2 = tk.PhotoImage(file=resource_path("Icons/e_delete2.png"))
+        self.icon_go = ImageTk.PhotoImage(Image.open(resource_path("Icons/final_go.gif")))
+        self.icon_del1 = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_delete.png")))
+        self.icon_del2 = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_delete2.png")))
 
         #self.img_calc = tk.PhotoImage(file="black_calc.gif")
         self.label_title = tk.Label(self, text='Cavity', width=30, fg='white', bg='sea green', font=('bold',13))
@@ -1148,19 +1154,19 @@ class Cavityelements(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
-        self.img_del1 = tk.PhotoImage(file=resource_path("Icons/e_delete.png"))
-        self.img_del2 = tk.PhotoImage(file=resource_path("Icons/e_delete2.png"))
+        self.img_del1 = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_delete.png")))
+        self.img_del2 = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_delete2.png")))
         # ELEMENTS
-        self.img_flatmirror = tk.PhotoImage(file=resource_path("Icons/e_flat_mirror.png"))
-        self.img_curvedmirror = tk.PhotoImage(file=resource_path("Icons/e_curved_mirror.png"))
-        self.img_distance = tk.PhotoImage(file=resource_path("Icons/e_distance.png"))
-        self.img_block = tk.PhotoImage(file=resource_path("Icons/e_block.png"))
-        self.img_brwplate = tk.PhotoImage(file=resource_path("Icons/e_brewster_plate.png"))
-        self.img_brwcrystal = tk.PhotoImage(file=resource_path("Icons/e_brewster_crystal.png"))
-        self.img_thinlens = tk.PhotoImage(file=resource_path("Icons/e_thin_lens.png"))
-        self.img_flatinter = tk.PhotoImage(file=resource_path("Icons/e_flat_interface.png"))
-        self.img_curvedinter = tk.PhotoImage(file=resource_path("Icons/e_curved_interface.png"))
-        self.img_custom = tk.PhotoImage(file=resource_path("Icons/e_custom_element.png"))
+        self.img_flatmirror = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_flat_mirror.png")))
+        self.img_curvedmirror = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_curved_mirror.png")))
+        self.img_distance = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_distance.png")))
+        self.img_block = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_block.png")))
+        self.img_brwplate = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_brewster_plate.png")))
+        self.img_brwcrystal = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_brewster_crystal.png")))
+        self.img_thinlens = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_thin_lens.png")))
+        self.img_flatinter = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_flat_interface.png")))
+        self.img_curvedinter = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_curved_interface.png")))
+        self.img_custom = ImageTk.PhotoImage(Image.open(resource_path("Icons/e_custom_element.png")))
 
         self.label_title = tk.Label(self, text='Modify Cavity', fg='white', bg='sea green', font=('bold',13))
 
@@ -1237,7 +1243,7 @@ class Cavityelements(tk.Frame):
             # THIS BINDS ARE TOTALLY NEEDED: they don't do the same as activebackground!
             self.item_button[button].bind('<Enter>', self.func_color_enter)
             self.item_button[button].bind('<Leave>', self.func_color_leave)
-            self.item_button[button].grid(row=3+i-i%2, column=i%2, pady=7 )
+            self.item_button[button].grid(row=3+i-i%2, column=i%2, padx=1, pady=2 )
         
         #============ ATENTION =================
         # CUSTOM ELEMENT DISABLED UNTIL IT WORKS
@@ -1268,9 +1274,9 @@ class Cavitycomputation(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
         # Icons
-        self.icon_go = tk.PhotoImage(file=resource_path("Icons/final_go.gif"))
-        self.icon_add_cond = tk.PhotoImage(file=resource_path("Icons/final_add_cond.gif"))
-        self.icon_del_cond = tk.PhotoImage(file=resource_path("Icons/final_del_cond.gif"))
+        self.icon_go = ImageTk.PhotoImage(Image.open(resource_path("Icons/final_go.gif")))
+        self.icon_add_cond = ImageTk.PhotoImage(Image.open(resource_path("Icons/final_add_cond.gif")))
+        self.icon_del_cond = ImageTk.PhotoImage(Image.open(resource_path("Icons/final_del_cond.gif")))
 
         # Stores conditions
         self.condition_number = 0
@@ -1941,7 +1947,8 @@ class MainApplication(tk.Frame):
         self.toolbar = Toolbar(self, bg='white', bd=0, pady=2)
         self.warningbar = Warningbar(self, relief='solid', bd=0)
         self.elementbox = Elementbox(self, relief='solid', borderwidth=3, width=300, bg='white')
-        self.frameright = Frameright(self, relief='solid', borderwidth=3, width=360, height=300, bg='white')
+        self.frameright = Frameright(self, relief='solid', borderwidth=3, width=300, height=300, bg='white')
+
         self.physics = Physics()
         self.framecentral = Framecentral(self, relief='solid', borderwidth=3, bg='white')
         #---------------------- Constructing GUI -------------------------------
@@ -2036,7 +2043,7 @@ if __name__ == "__main__":
         root.wm_iconbitmap(resource_path("Icons/logo-tg3.ico"))#root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))
     except:
         # This is for linux
-        myicon = tk.PhotoImage(file=resource_path("Icons/logo-tg3.png"))
+        myicon = ImageTk.PhotoImage(Image.open(resource_path("Icons/logo-tg3.png")))
         root.tk.call('wm', 'iconphoto', root._w, myicon)
     root.minsize(1100,400)
     # Kill process when click on window close button
