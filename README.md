@@ -20,7 +20,7 @@ There is no compiled version so far, you need to run the source code.
 
 Same as in GNU/Linux... maybe!
 
-## Runing the source code
+## Running the source code
 The main file is simcav4_7_GUI. Of course the rest of the source files are also needed.
 You need Python 3.x installed in your computer.
 Due to changes in the Matplotlib libraries that are not backwards compatible, you need at least version 1.5 of Matplotlib.
