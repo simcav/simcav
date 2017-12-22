@@ -8,8 +8,13 @@ a = Analysis(['simcav4_7_GUI.py'],
              binaries=[],
              datas=[('Icons/', 'Icons/')],
              hiddenimports=[],
+<<<<<<< HEAD
              hookspath=['pyinstaller-hooks'],
              runtime_hooks=['pyinstaller-hooks/pyi_rth__tkinter.py'],
+=======
+             hookspath=[],
+             runtime_hooks=[],
+>>>>>>> Fix Mac compilation.
              excludes=[],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
