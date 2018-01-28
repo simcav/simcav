@@ -707,36 +707,52 @@ class Framecentral(tk.Frame):
         # Buttons go inside its frame
         #       Change active background by adding 
         #       "activebackground=COLOR" to button options
-        self.buttoncav = tk.Button(self.framebutton, text='Cavity', width=1,
+        self.buttons = {}
+        self.buttons['a_cav'] = tk.Button(self.framebutton, text='Cavity', width=1,
                                    command=self.show_cavityplot, bg='white',
                                    bd=0, highlightthickness=0)
-        self.buttonstab = tk.Button(self.framebutton, text='Stability', width=1,
+        self.buttons['b_stab'] = tk.Button(self.framebutton, text='Stability', width=1,
                                    command=self.show_stabilityplot, bg='white',
+                                   bd=0, highlightthickness=0)
+        self.buttons['c_size'] = tk.Button(self.framebutton, text='Beam size', width=1,
+                                   command=self.show_beamsizeplot, bg='white',
                                    bd=0, highlightthickness=0)
         #self.buttontest = tk.Button(self.framebutton, text='Test', width=1,
         #                           command=self.show_test, bg='white',
         #                           bd=0, activebackground='aquamarine',
         #                           highlightthickness=0)
 
-        self.buttoncav.pack(side='left', fill='both', expand='yes')
-        self.buttonstab.pack(side='left', fill='both', expand='yes')
+        # Pack the buttons
+        for element in sorted(self.buttons):
+            self.buttons[element].pack(side='left', fill='both', expand='yes')
+            self.buttons[element].config(state='normal', bg='grey')
+            self.buttons[element].bind('<Enter>', self.func_color_enter)
+            self.buttons[element].bind('<Leave>', self.func_color_leave)
+        #self.buttoncav.pack(side='left', fill='both', expand='yes')
+        #self.buttonstab.pack(side='left', fill='both', expand='yes')
+        #self.buttonsize.pack(side='left', fill='both', expand='yes')
         #self.buttontest.pack(side='left', fill='both', expand='yes')
+        
+        # Disable cavity button
+        self.buttons['a_cav'].config(state='disable', bg='lawngreen')
+        #self.buttonstab.config(state='normal', bg='grey')
+        #self.buttonsize.config(state='normal', bg='grey')
 
         self.cavityplot = Cavityplot(self, relief='flat', borderwidth=0, bg='white')
         self.cavityplot.pack(side='top', fill='both', expand=True)
 
-        self.stabilityplot = Stabilityplot(self, relief='flat', borderwidth=0,
-                                           bg='white')
+        self.stabilityplot = Stabilityplot(self, relief='flat', borderwidth=0, bg='white')
+        self.beamsizeplot = Beamsizeplot(self, relief='flat', borderwidth=0, bg='white')
         #self.frametest = tk.Frame(self, bd=0, bg='blue')
         #self.frametest.pack(fill='both', expand=True)
-        self.buttoncav.config(state='disable', bg='lawngreen')
-        self.buttonstab.config(state='normal', bg='grey')
-
+        
         # Binds for color change (I think they aren't needed in linux)
-        self.buttoncav.bind('<Enter>', self.func_color_enter)
-        self.buttoncav.bind('<Leave>', self.func_color_leave)
-        self.buttonstab.bind('<Enter>', self.func_color_enter)
-        self.buttonstab.bind('<Leave>', self.func_color_leave)
+        #self.buttoncav.bind('<Enter>', self.func_color_enter)
+        #self.buttoncav.bind('<Leave>', self.func_color_leave)
+        #self.buttonstab.bind('<Enter>', self.func_color_enter)
+        #self.buttonstab.bind('<Leave>', self.func_color_leave)
+        #self.buttonsize.bind('<Enter>', self.func_color_enter)
+        #self.buttonsize.bind('<Leave>', self.func_color_leave)
         #self.buttontest.bind('<Enter>', self.func_color_enter)
         #self.buttontest.bind('<Leave>', self.func_color_leave)
 
@@ -753,14 +769,18 @@ class Framecentral(tk.Frame):
             event.widget.configure(bg='grey')
     #==================================================================
 
-    def show_test(self):
-        try:
-            self.stabilityplot.pack_forget()
-            self.cavityplot.pack_forget()
-        except:
-            pass
-        self.mycanvas.pack(fill='both', expand='yes')
-
+    # def show_test(self):
+    #     try:
+    #         self.stabilityplot.pack_forget()
+    #         self.cavityplot.pack_forget()
+    #     except:
+    #         pass
+    #     self.mycanvas.pack(fill='both', expand='yes')
+    def disablebuttons(self, currentbutton):
+        for element in self.buttons:
+            self.buttons[element].config(state='normal', bg='grey')
+        self.buttons[currentbutton].config(state='disable', bg='lawngreen')
+        
     def show_cavityplot(self):
         self.colorbutton = 'lawngreen'
         try:
@@ -771,8 +791,7 @@ class Framecentral(tk.Frame):
         except:
             pass
         self.cavityplot.pack(fill='both', expand='yes')
-        self.buttoncav.config(state='disable', bg='lawngreen')
-        self.buttonstab.config(state='normal', bg='grey')
+        self.disablebuttons('a_cav')
         #master.warningbar.warbar_message('Cavity plot','lawn green')
         return True
 
@@ -789,13 +808,78 @@ class Framecentral(tk.Frame):
             self.mycanvas.pack_forget()
         except:
             pass
-        self.buttonstab.config(state='disable', bg='lawngreen')
-        self.buttoncav.config(state='normal', bg='grey')
+        #self.buttonstab.config(state='disable', bg='lawngreen')
+        #self.buttoncav.config(state='normal', bg='grey')
+        self.disablebuttons('b_stab')
         #master.warningbar.warbar_message('Stability plot','lawn green')
         #self.stabilityplot = Cavitycomputation(self, bd=0, bg='white')
         self.stabilityplot.pack(side='top', fill='both', expand=True)
         #self.stabilityplot.columnconfigure((0,1,2,3,4), weight=1)
+            
+    def show_beamsizeplot(self):
+        # Remove Cavity plot frame
+        try:
+            self.cavityplot.pack_forget()
+        except:
+            pass
+        # Remove Stability plot frame
+        try:
+            self.stabilityplot.pack_forget()
+        except:
+            pass
+        #self.buttonsize.config(state='disable', bg='lawngreen')
+        #self.buttoncav.config(state='normal', bg='grey')
+        #self.buttonstab.config(state='normal', bg='grey')
+        self.disablebuttons('c_size')
+        # Pack beam size frameon
+        self.beamsizeplot.pack(side='top', fill='both', expand=True)        
 
+#==============================================================================
+
+#==============================================================================
+#%% centralplot object that should be used by central frames with plots
+class centralplot(tk.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
+        #self.label = tk.Label(self, text='Plotting...')
+        self.figure = plt.figure(2, figsize=(1,1), facecolor='white', edgecolor=None,
+                                 linewidth=0.0, frameon=None)  #figsize=(5,4), dpi=100
+        self.figureplot = self.figure.add_subplot(111)
+        self.create_canvas()
+
+    def create_canvas(self):
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self)
+        self.canvas.get_tk_widget().pack(side='bottom', fill='x', expand=1)
+        self.canvas.get_tk_widget().configure(bg='white', bd=0, highlightthickness=0)
+        self.canvas._tkcanvas.pack(side='top', fill='both', expand=1)
+        self.figuretoolbar = NavigationToolbar2TkAgg(self.canvas, self)
+        self.figuretoolbar.configure(bg='white')
+        self.figuretoolbar.update()
+
+    def plot(self, x0, y0, x1, y1, xmin, xmax, xaxis, yaxis, ymin=None, ymax=None):
+        self.figureplot.clear()
+
+        self.figureplot.plot(x0, y0)
+        self.figureplot.set_prop_cycle(None)
+        self.figureplot.plot(x1, y1)
+        
+        # xmin and xmax should be an input to the plot function
+        #xmin = float(master.elementbox.stability_entry1.get())
+        #xmax = float(master.elementbox.stability_entry2.get())
+        plt.xlim((xmin,xmax))
+        if ymin and ymax:
+            plt.ylim((ymin,ymax))
+
+        self.figureplot.set_xlabel(xaxis)
+        self.figureplot.set_ylabel(yaxis)
+        self.canvas.show()
+#==============================================================================
+
+#==============================================================================
+#%% Plotting Beam Size frame
+class Beamsizeplot(tk.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
 #==============================================================================
 
 
