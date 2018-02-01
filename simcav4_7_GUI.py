@@ -411,10 +411,10 @@ class Physics():
                 y.append(stab_val)
 
             self.yvec.append(y)
-            xname = 'Element '+str(item)+' variation (mm)'
-
-        master.framecentral.stabilityplot.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]), xname)
-
+        
+        xname = 'Element '+str(item)+' variation (mm)'
+        yname = 'Saggital         Stability (norm.)       Tangential'
+        master.framecentral.stabilityplot.plotframe.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]), xstart, xend, xname, yname, ymin=-1, ymax=1)
 #==============================================================================
 
 
@@ -443,43 +443,6 @@ class Elementbox(tk.Frame):
         self.label_column2.grid(row=1, column=2)
         self.label_column3.grid(row=1, column=3)
         self.label_column4.grid(row=1, column=4)
-
-    def show_stability(self):
-        self.separator = ttk.Separator(self, orient=tk.HORIZONTAL)
-        self.label_stability = tk.Label(self, text='Stability', width=30, fg='white', bg='sea green', font='bold')
-        self.stab_var = tk.IntVar(self)
-        self.optionmenu = tk.OptionMenu(self, self.stab_var, *range(len(master.physics.element_list)))
-        self.optionmenu.configure(bg='white', activebackground='white', highlightbackground='white')
-        self.optionmenu['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
-        self.stability_entry1 = tk.Entry(self, width=5, justify='right')
-        self.stability_entry2 = tk.Entry(self, width=5, justify='right')
-        self.stability_entry1.insert(0, 0)
-        self.stability_entry2.insert(0, 100)
-        self.stability_entry1.bind("<Return>", self.pressed_enter_stab)
-        self.stability_entry2.bind("<Return>", self.pressed_enter_stab)
-        self.stability_button_calc = tk.Button(self, text='CALCULATE', image=self.icon_go,
-                                               command=self.func_stab_button_calc, bg='white',
-                                               bd=0, activebackground='aquamarine',
-                                               highlightthickness=2)
-        self.stability_button_calc.bind('<Enter>', master.toolbar.func_color_enter)
-        self.stability_button_calc.bind('<Leave>', master.toolbar.func_color_leave)
-
-        self.separator.grid(row=51, columnspan=5, sticky='ew', pady=5)
-        self.label_stability.grid(row=52, columnspan=5, sticky='ew')
-        self.optionmenu.grid(row=53, column=0, columnspan=2, sticky='w')
-        self.stability_entry1.grid(row=53, column=2, padx=1, pady=10)
-        self.stability_entry2.grid(row=53, column=3, padx=1)
-        self.stability_button_calc.grid(row=54, column=4,  padx=1)
-
-    def del_stability(self):
-        # Destroy the stability widgets
-        master.elementbox.separator.destroy()
-        master.elementbox.label_stability.destroy()
-        master.elementbox.optionmenu.destroy()
-        master.elementbox.stability_entry1.destroy()
-        master.elementbox.stability_entry2.destroy()
-        master.elementbox.stability_button_calc.destroy()
-
 #==============================================================
 #       Adding ELEMENTS
 #==============================================================
@@ -557,7 +520,7 @@ class Elementbox(tk.Frame):
             self.show_last_element(myDict)
 
         try:
-            self.del_stability()
+            master.framecentral.stabilityplot.update_menus()
         except:
             pass
         try:
@@ -565,8 +528,6 @@ class Elementbox(tk.Frame):
         except:
             #print('i cant delete it')
             pass
-
-        self.show_stability()
         #----------------------------------------------------------------------
 
     def show_last_element(self,element):
@@ -636,10 +597,9 @@ class Elementbox(tk.Frame):
         if len(master.physics.element_list) == 0:
             self.button_calc.grid_forget()
         try:
-            self.del_stability()
+            master.framecentral.stabilityplot.update_menus()
         except:
             pass
-        
         try:
             master.framecentral.beamsizeplot.update_menus()
         except:
@@ -647,9 +607,6 @@ class Elementbox(tk.Frame):
             pass
 
         self.show_elements()
-        #print(len(master.physics.element_list))
-        if len(master.physics.element_list) != 0:
-            self.show_stability()
 
     def func_button_calc(self):
         for i,element in enumerate(master.physics.element_list):
@@ -691,22 +648,8 @@ class Elementbox(tk.Frame):
         master.framecentral.disablebuttons('a_cav')
         master.framecentral.show_cavityplot()
 
-    def func_stab_button_calc(self):
-        self.func_button_calc()
-        se1 = float(self.stability_entry1.get())
-        se2 = float(self.stability_entry2.get())
-
-        master.physics.stability_plot(self.stab_var.get(), se1, se2)
-
-        master.framecentral.show_stabilityplot()
-
     def pressed_enter(self, event):
         self.func_button_calc()
-
-    def pressed_enter_stab(self, event):
-        self.func_stab_button_calc()
-
-
 #==============================================================================
 
 #==============================================================================
@@ -777,12 +720,12 @@ class Framecentral(tk.Frame):
             #master.cavityplot.pack_forget()
             #master.stabilityplot.pack_forget()
             self.stabilityplot.pack_forget()
-            self.mycanvas.pack_forget() # This is needed to remove the canvas plot
+            self.beamsizeplot.plotframe.canvas.pack_forget() 
         except:
             pass
         try:
             self.beamsizeplot.pack_forget()
-            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
+            self.beamsizeplot.plotframe.canvas.pack_forget() 
         except:
             pass
         self.cavityplot.pack(fill='both', expand='yes')
@@ -800,43 +743,38 @@ class Framecentral(tk.Frame):
 
         try:
             self.cavityplot.pack_forget()
-            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
+            self.mycanvas.pack_forget() 
         except:
             pass
         try:
             self.beamsizeplot.pack_forget()
-            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
+            self.beamsizeplot.plotframe.canvas.pack_forget() 
         except:
             pass
-        #self.buttonstab.config(state='disable', bg='lawngreen')
-        #self.buttoncav.config(state='normal', bg='grey')
+        # Update tab buttons status
         self.disablebuttons('b_stab')
-        #master.warningbar.warbar_message('Stability plot','lawn green')
-        #self.stabilityplot = Cavitycomputation(self, bd=0, bg='white')
+        # Pack stability frame
         self.stabilityplot.pack(side='top', fill='both', expand=True)
-        #self.stabilityplot.columnconfigure((0,1,2,3,4), weight=1)
+        if not self.stabilityplot.controlexists:
+            self.stabilityplot.createcontrol()
             
     def show_beamsizeplot(self):
         # Remove Cavity plot frame
         try:
             self.cavityplot.pack_forget()
-            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
+            self.mycanvas.pack_forget() 
         except:
             pass
         # Remove Stability plot frame
         try:
             self.stabilityplot.pack_forget()
-            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
+            self.beamsizeplot.plotframe.canvas.pack_forget()  
         except:
             pass
-        # Tab button control
+        # Update tab buttons status
         self.disablebuttons('c_size')
         # Pack beam size frame
         self.beamsizeplot.pack(side='top', fill='both', expand=True)
-        # try:
-        #     controlexists
-        # except NameError:
-        #     controlexists = False
         if not self.beamsizeplot.controlexists:
             self.beamsizeplot.createcontrol()      
 
@@ -848,7 +786,7 @@ class Centralplot(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         #self.label = tk.Label(self, text='Plotting...')
-        self.figure = plt.figure(2, figsize=(1,1), facecolor='white', edgecolor=None,
+        self.figure = plt.figure(figsize=(1,1), facecolor='white', edgecolor=None,
                                  linewidth=0.0, frameon=None)  #figsize=(5,4), dpi=100
         self.figureplot = self.figure.add_subplot(111)
         self.create_canvas()
@@ -896,7 +834,7 @@ class Beamsizeplot(tk.Frame):
         self.plotframe.pack(side='top', fill='both', expand=True)
         
         self.controlexists = False
-        #self.createcontrol()
+        self.plotframe.plot(0, 0, 0, 0, 0, 1, 'Varying parameter (mm)', 'Beam size (µm)')
     
     def createcontrol(self):
         self.controlexists = True
@@ -1017,39 +955,75 @@ class Stabilityplot(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         #self.label = tk.Label(self, text='Plotting...')
-        self.figure = plt.figure(2, figsize=(1,1), facecolor='white', edgecolor=None,
-                                 linewidth=0.0, frameon=None)  #figsize=(5,4), dpi=100
-        self.figureplot = self.figure.add_subplot(111)
-        self.create_canvas()
+        #self.figure = plt.figure(2, figsize=(1,1), facecolor='white', edgecolor=None,
+        #                         linewidth=0.0, frameon=None)  #figsize=(5,4), dpi=100
+        #self.figureplot = self.figure.add_subplot(111)
+        #self.create_canvas()
+        
+        self.controlframe = tk.Frame(self, bd=0, bg='white', padx=5, pady=5)
+        self.separator = ttk.Separator(self, orient='horizontal')
+        self.plotframe = Centralplot(self, bd=0, bg='white')
+        
+        self.controlframe.pack(side='top', fill='x', expand=False)
+        self.separator.pack(side='top', fill='x')
+        self.plotframe.pack(side='top', fill='both', expand=True)
+        
+        self.controlexists = False
+        self.plotframe.plot(0, 0, 0, 0, 0, 1, 'Varying parameter (mm)', 'Stability (norm.)', ymin=-1, ymax=1)
+        
+    def createcontrol(self):
+        self.controlexists = True
+        # List for size elements
+        #self.param_list = []
+        #for element in master.physics.element_list:
+        #    self.param_list.append(element['itemnumber'])
+        
+        # Var for size in element choice
+        self.elemsize_var = tk.IntVar(self)
+        # Var for parameter element
+        self.elemparam_var = tk.IntVar(self)
+        # Var containing visible elements
+        self.controls = {}
+        self.controls['c_labelsize'] = tk.Label(self.controlframe, text='Varying parameter:   ', bg='white', bd=0, highlightthickness=0)
+        self.controls['d_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemparam_var, *range(len(master.physics.element_list)))
+        self.controls['d_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
+        self.controls['d_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
+        self.controls['e_labelsize'] = tk.Label(self.controlframe, text='    Variation from... ', bg='white', bd=0, highlightthickness=0)
+        self.controls['f_entry1'] = tk.Entry(self.controlframe, width=5, justify='right')
+        self.controls['g_labelsize'] = tk.Label(self.controlframe, text='     to... ', bg='white', bd=0, highlightthickness=0)
+        self.controls['h_entry2'] = tk.Entry(self.controlframe, width=5, justify='right')
+        self.controls['i_labelsize'] = tk.Label(self.controlframe, text='             ', bg='white', bd=0, highlightthickness=0)
+        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, activebackground='aquamarine', highlightthickness=2)
+        
+        # Adjust entry values
+        self.controls['f_entry1'].insert(0, 0)
+        self.controls['h_entry2'].insert(0, 100)
+        self.controls['f_entry1'].bind("<Return>", self.pressed_enter)
+        self.controls['h_entry2'].bind("<Return>", self.pressed_enter)
+        
+        # Place items
+        for element in self.controls:
+            self.controls[element].pack(side='left')
+        
+    def update_menus(self):
+        for element in self.controls:
+            self.controls[element].destroy()
+        self.createcontrol()
+        
+    def pressed_enter(self, event):
+        self.pressed_go()
+        
+    def pressed_go(self):
+        # Optionmenus variables
+        item1 = self.elemparam_var.get()
+        # Entry variables
+        se1 = float(self.controls['f_entry1'].get())
+        se2 = float(self.controls['h_entry2'].get())
+        # Call calculation
+        master.physics.stability_plot(item1, se1, se2)
 
-    def create_canvas(self):
-
-        self.canvas = FigureCanvasTkAgg(self.figure, master=self)
-        self.canvas.get_tk_widget().pack(side='bottom', fill='x', expand=1)
-        self.canvas.get_tk_widget().configure(bg='white', bd=0, highlightthickness=0)
-        self.canvas._tkcanvas.pack(side='top', fill='both', expand=1)
-        self.figuretoolbar = NavigationToolbar2TkAgg(self.canvas, self)
-        self.figuretoolbar.configure(bg='white')
-        self.figuretoolbar.update()
-
-    def plot(self, x0, y0, x1, y1, xaxis):
-        #master.show_stabilityplot()
-        self.figureplot.clear()
-
-        self.figureplot.plot(x0, y0)
-        #self.figureplot.set_color_cycle(None)   # Deprecated
-        self.figureplot.set_prop_cycle(None)
-        self.figureplot.plot(x1, y1)
-
-        xmin = float(master.elementbox.stability_entry1.get())
-        xmax = float(master.elementbox.stability_entry2.get())
-        plt.xlim((xmin,xmax))
-        plt.ylim((-1,1))
-
-        self.figureplot.set_xlabel(xaxis)
-        self.figureplot.set_ylabel('Saggital            Stability            Tangential')
-        self.canvas.show()
-
+        master.warningbar.warbar_message('Calculation finished!', 'lawngreen')
+        return 0
 #==============================================================================
 
 
@@ -1919,26 +1893,14 @@ class MainApplication(tk.Frame):
         self.frameright = Frameright(self, relief='solid', borderwidth=3, width=360, height=300, bg='white')
 
         self.physics = Physics()
-        #self.cavityplot = Cavityplot(self, relief='solid', borderwidth=3, bg='white')
         self.framecentral = Framecentral(self, relief='solid', borderwidth=3, bg='white')
 
         self.toolbar.pack(side="top", fill="x", padx=3, pady=3, ipadx=5, ipady=2)
         self.warningbar.pack(side="bottom", fill="x")
         self.elementbox.pack(side='left', fill='y', ipady=3, padx=3, pady=3)
         self.frameright.pack(side='right', fill='y', ipady=3, padx=3, pady=3)
-        #self.cavityplot.pack(side='top', fill='x', pady=3)
         self.framecentral.pack(side='top', fill='both', anchor='s', expand=True,
                                pady=3, ipady=0, ipadx=0)
-        #self.stabilityplot.pack(side='bottom', fill='x', pady=3)
-
-    #def show_cavityplot(self):
-        #self.frameright.cavityelements.pack_forget()
-        #self.cavityplot.pack(side='top', fill='x', pady=3)
-
-#==============================================================================
-#     def show_stabilityplot(self):
-#         #self.frameright.cavityelements.pack_forget()
-#         self.stabilityplot.pack(side='bottom', fill='x', pady=3)
 #==============================================================================
 
 
