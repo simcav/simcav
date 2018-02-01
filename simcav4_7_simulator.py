@@ -34,13 +34,31 @@ def matrix(E_list, proy):
     
     return M_cav
 
- #%% ------------------- Starting point size calculation ----------------------    
+ #%% ------------------- Starting point size calculation -----------------------    
 def q0(M_cav):
     # Beam complex paramenter
     q0 = abcd.q_resonator(M_cav)
     return q0
 
-
+#%% ------------- Calculate q at any dimensionless (z) element ----------------- 
+def qx(q0, elementX, E_list, proy):
+    # Propagation from q0 to elementX.
+    # elementX is the itemnumber of the element in element_list
+    
+    # If elementX is a length element, stop function, return False
+    #   Makes no sense to calculate the beam size for an element with
+    #   a z dimension (in this case).
+    if E_list[elementX]['isvector']:
+        return False
+    
+    M_cav = np.identity(2)
+    for element in E_list[1:elementX-1]:
+        #print("element type, value :" + element['type'] + "\n " + str(element['matrix']))
+        M_cav = np.dot(element['matrix'][proy],M_cav)
+    # Calculate q(x)
+    q = abcd.q_propagation(M_cav,q0)
+    return q    
+    
 #%% -------------------- Stability Condition --------------------
 # Calculates stability and prints out if stable or not.    
 def stability(M_cav, v=False):

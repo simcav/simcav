@@ -317,7 +317,7 @@ class Physics():
     # matrix:       ABCD matrix
     # distance:     first column value
     # refr_index:   second column value
-    # itemnumber:   position in the caviity.
+    # itemnumber:   position in the cavity.
     # itemnumber_label: .!mainapplication.!elementbox.!label11
 
 
@@ -431,7 +431,6 @@ class Elementbox(tk.Frame):
         self.button_calc = tk.Button(self, text='CALCULATE', image=self.icon_go, command=self.func_button_calc,
                                      bg='white', bd=0, activebackground='aquamarine',
                                      highlightthickness=2)
-
         self.label_column0 = tk.Label(self, text='Item', bg='white')
         self.label_column1 = tk.Label(self, bg='white')
         self.label_column2 = tk.Label(self, text='Kind', bg='white')
@@ -499,6 +498,12 @@ class Elementbox(tk.Frame):
         # Return key binding for entries
         myDict['entry1'].bind("<Return>", self.pressed_enter)
         myDict['entry2'].bind("<Return>", self.pressed_enter)
+        
+        # Add var to differentiate lengths-elements or not.
+        if kind in ['Distance','Block','Brewster plate','Brewster crystal']:
+            myDict['isvector'] = True
+        else:
+            myDict['isvector'] = False             
 
         # Default values for the entries
         if kind in ['Distance','Block','Brewster plate','Brewster crystal']:
@@ -553,6 +558,10 @@ class Elementbox(tk.Frame):
 
         try:
             self.del_stability()
+        except:
+            pass
+        try:
+            master.framecentral.beamsizeplot.update_menus()
         except:
             #print('i cant delete it')
             pass
@@ -629,6 +638,11 @@ class Elementbox(tk.Frame):
         try:
             self.del_stability()
         except:
+            pass
+        
+        try:
+            master.framecentral.beamsizeplot.update_menus()
+        except:
             #print('i cant delete it')
             pass
 
@@ -673,7 +687,8 @@ class Elementbox(tk.Frame):
         if calc_cav:
             master.framecentral.cavityplot.plot(master.physics.z_tan, master.physics.wz_tan,
                                    master.physics.z_sag, master.physics.wz_sag)
-
+        
+        master.framecentral.disablebuttons('a_cav')
         master.framecentral.show_cavityplot()
 
     def func_stab_button_calc(self):
@@ -717,27 +732,18 @@ class Framecentral(tk.Frame):
         self.buttons['c_size'] = tk.Button(self.framebutton, text='Beam size', width=1,
                                    command=self.show_beamsizeplot, bg='white',
                                    bd=0, highlightthickness=0)
-        #self.buttontest = tk.Button(self.framebutton, text='Test', width=1,
-        #                           command=self.show_test, bg='white',
-        #                           bd=0, activebackground='aquamarine',
-        #                           highlightthickness=0)
 
         # Pack the buttons
         for element in sorted(self.buttons):
             self.buttons[element].pack(side='left', fill='both', expand='yes')
-            self.buttons[element].config(state='normal', bg='grey')
+            self.buttons[element].config(state='disable', bg='grey')
+            # Binds for color change (I think they aren't needed in linux)
             self.buttons[element].bind('<Enter>', self.func_color_enter)
             self.buttons[element].bind('<Leave>', self.func_color_leave)
-        #self.buttoncav.pack(side='left', fill='both', expand='yes')
-        #self.buttonstab.pack(side='left', fill='both', expand='yes')
-        #self.buttonsize.pack(side='left', fill='both', expand='yes')
-        #self.buttontest.pack(side='left', fill='both', expand='yes')
+            
+        # Disable cavity button (cause it is the one active at start)
+        #self.buttons['a_cav'].config(state='disable', bg='lawngreen')
         
-        # Disable cavity button
-        self.buttons['a_cav'].config(state='disable', bg='lawngreen')
-        #self.buttonstab.config(state='normal', bg='grey')
-        #self.buttonsize.config(state='normal', bg='grey')
-
         self.cavityplot = Cavityplot(self, relief='flat', borderwidth=0, bg='white')
         self.cavityplot.pack(side='top', fill='both', expand=True)
 
@@ -746,16 +752,6 @@ class Framecentral(tk.Frame):
         #self.frametest = tk.Frame(self, bd=0, bg='blue')
         #self.frametest.pack(fill='both', expand=True)
         
-        # Binds for color change (I think they aren't needed in linux)
-        #self.buttoncav.bind('<Enter>', self.func_color_enter)
-        #self.buttoncav.bind('<Leave>', self.func_color_leave)
-        #self.buttonstab.bind('<Enter>', self.func_color_enter)
-        #self.buttonstab.bind('<Leave>', self.func_color_leave)
-        #self.buttonsize.bind('<Enter>', self.func_color_enter)
-        #self.buttonsize.bind('<Leave>', self.func_color_leave)
-        #self.buttontest.bind('<Enter>', self.func_color_enter)
-        #self.buttontest.bind('<Leave>', self.func_color_leave)
-
     #==================================================================
     # These two functions change the button (normal) color.
     # However when mouse enters, the button color is "activebackground"
@@ -768,14 +764,8 @@ class Framecentral(tk.Frame):
         if event.widget.cget('state') != 'disabled':
             event.widget.configure(bg='grey')
     #==================================================================
-
-    # def show_test(self):
-    #     try:
-    #         self.stabilityplot.pack_forget()
-    #         self.cavityplot.pack_forget()
-    #     except:
-    #         pass
-    #     self.mycanvas.pack(fill='both', expand='yes')
+    
+    # Function for color control of tab buttons
     def disablebuttons(self, currentbutton):
         for element in self.buttons:
             self.buttons[element].config(state='normal', bg='grey')
@@ -787,7 +777,12 @@ class Framecentral(tk.Frame):
             #master.cavityplot.pack_forget()
             #master.stabilityplot.pack_forget()
             self.stabilityplot.pack_forget()
-            self.mycanvas.pack_forget()
+            self.mycanvas.pack_forget() # This is needed to remove the canvas plot
+        except:
+            pass
+        try:
+            self.beamsizeplot.pack_forget()
+            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
         except:
             pass
         self.cavityplot.pack(fill='both', expand='yes')
@@ -805,7 +800,12 @@ class Framecentral(tk.Frame):
 
         try:
             self.cavityplot.pack_forget()
-            self.mycanvas.pack_forget()
+            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
+        except:
+            pass
+        try:
+            self.beamsizeplot.pack_forget()
+            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
         except:
             pass
         #self.buttonstab.config(state='disable', bg='lawngreen')
@@ -820,25 +820,31 @@ class Framecentral(tk.Frame):
         # Remove Cavity plot frame
         try:
             self.cavityplot.pack_forget()
+            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
         except:
             pass
         # Remove Stability plot frame
         try:
             self.stabilityplot.pack_forget()
+            #self.mycanvas.pack_forget() # This is needed to remove the canvas plot
         except:
             pass
-        #self.buttonsize.config(state='disable', bg='lawngreen')
-        #self.buttoncav.config(state='normal', bg='grey')
-        #self.buttonstab.config(state='normal', bg='grey')
+        # Tab button control
         self.disablebuttons('c_size')
-        # Pack beam size frameon
-        self.beamsizeplot.pack(side='top', fill='both', expand=True)        
+        # Pack beam size frame
+        self.beamsizeplot.pack(side='top', fill='both', expand=True)
+        # try:
+        #     controlexists
+        # except NameError:
+        #     controlexists = False
+        if not self.beamsizeplot.controlexists:
+            self.beamsizeplot.createcontrol()      
 
 #==============================================================================
 
 #==============================================================================
 #%% centralplot object that should be used by central frames with plots
-class centralplot(tk.Frame):
+class Centralplot(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         #self.label = tk.Label(self, text='Plotting...')
@@ -880,6 +886,128 @@ class centralplot(tk.Frame):
 class Beamsizeplot(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
+        
+        self.controlframe = tk.Frame(self, bd=0, bg='white', padx=5, pady=5)
+        self.separator = ttk.Separator(self, orient='horizontal')
+        self.plotframe = Centralplot(self, bd=0, bg='white')
+        
+        self.controlframe.pack(side='top', fill='x', expand=False)
+        self.separator.pack(side='top', fill='x')
+        self.plotframe.pack(side='top', fill='both', expand=True)
+        
+        self.controlexists = False
+        #self.createcontrol()
+    
+    def createcontrol(self):
+        self.controlexists = True
+        # List for size elements
+        self.size_list = []
+        self.param_list = []
+        for element in master.physics.element_list:
+            self.param_list.append(element['itemnumber'])
+            if not element['isvector']:
+                self.size_list.append(element['itemnumber'])
+                
+        # Var for size in element choice
+        self.elemsize_var = tk.IntVar(self)
+        # Var for parameter element
+        self.elemparam_var = tk.IntVar(self)
+        # Var containing visible elements
+        self.controls = {}
+        self.controls['a_labelsize'] = tk.Label(self.controlframe, text='Beam size at element: ', bg='white', bd=0, highlightthickness=0)
+        self.controls['b_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemsize_var, *self.size_list)
+        self.controls['b_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
+        self.controls['b_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
+        self.controls['c_labelsize'] = tk.Label(self.controlframe, text='     Varying parameter: ', bg='white', bd=0, highlightthickness=0)
+        self.controls['d_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemparam_var, *self.param_list)
+        self.controls['d_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
+        self.controls['d_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
+        self.controls['e_labelsize'] = tk.Label(self.controlframe, text='    Variation from... ', bg='white', bd=0, highlightthickness=0)
+        self.controls['f_entry1'] = tk.Entry(self.controlframe, width=5, justify='right')
+        self.controls['g_labelsize'] = tk.Label(self.controlframe, text='     to... ', bg='white', bd=0, highlightthickness=0)
+        self.controls['h_entry2'] = tk.Entry(self.controlframe, width=5, justify='right')
+        self.controls['i_labelsize'] = tk.Label(self.controlframe, text='             ', bg='white', bd=0, highlightthickness=0)
+        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, activebackground='aquamarine', highlightthickness=2)
+        
+        # Adjust entry values
+        self.controls['f_entry1'].insert(0, 0)
+        self.controls['h_entry2'].insert(0, 100)
+        self.controls['f_entry1'].bind("<Return>", self.pressed_enter)
+        self.controls['h_entry2'].bind("<Return>", self.pressed_enter)
+        
+        # Place items
+        for element in self.controls:
+            self.controls[element].pack(side='left')
+            
+    def update_menus(self):
+        for element in self.controls:
+            self.controls[element].destroy()
+        self.createcontrol()        
+        
+    def pressed_enter(self, event):
+        self.pressed_go()
+        
+    def pressed_go(self):
+        master.warningbar.warbar_message('Calculating beam size variation', 'lawngreen')
+        # Optionmenus variables
+        item1 = self.elemsize_var.get()
+        item2 = self.elemparam_var.get()
+        # Entry variables
+        se1 = float(self.controls['f_entry1'].get())
+        se2 = float(self.controls['h_entry2'].get())
+        # Call calculation
+        self.calculate_variation(item1, item2, se1, se2)
+        
+    def calculate_variation(self, item1, item2, xstart, xend):
+        # X axis vector for plotting
+        self.xvec = np.linspace(xstart, xend, np.abs(xend-xstart)*100)
+        # Element list for this calculation
+        beamsize_list = master.physics.element_list
+        
+        # Creation of Y axis vector
+        self.yvec = []
+        # Done for tangential and sagital
+        for proy in [0,1]:
+            y = []
+            # For every value of the X axis vector
+            for number in self.xvec:
+                # Now modify ONLY the first entry of the chosen item, and the associated matrix:
+                e1 = number
+                e2 = float(beamsize_list[item2]['entry2'].get())
+                kind = beamsize_list[item2]['type']
+                if kind == 'Custom element':
+                    pass
+                else:
+                    beamsize_list[item2].update(EF.assignment(kind, e1, e2, master.physics.refr_index))
+                beamsize_matrix = SIMU.matrix(beamsize_list, proy)
+                q0 = SIMU.q0(beamsize_matrix)
+                
+                # Maybe need to check stability
+                
+                # Complex beam parameter at desired element (elementY)
+                elementY = beamsize_list[item1]['itemnumber']
+                q = SIMU.qx(q0, elementY, beamsize_list, proy)
+                
+                # Refractive index
+                if 'refr_index' in beamsize_list[item1].keys():
+                    refr_index = beamsize_list[item1]['refr_index']
+                else:
+                    refr_index = 1.0
+                # Wavelength (micrometres)
+                wl = master.physics.wl_mm
+                # Calculate beamsize
+                R, w = ABCD.r_w(q, wl, refr_index)
+                y.append(w)
+            # Y vectors for each projection
+            self.yvec.append(y)
+            
+        # Plot axis labels
+        xname = 'Element '+str(beamsize_list[item2]['itemnumber'])+' variation (mm)'
+        yname = 'Saggital         Beam size at element '+str(elementY)+' (µm)       Tangential'
+        self.plotframe.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1])*(-1), xstart, xend, xname, yname)
+        
+        master.warningbar.warbar_message('Calculation finished!', 'lawngreen')
+        return 0
 #==============================================================================
 
 
