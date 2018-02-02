@@ -856,7 +856,7 @@ class Beamsizeplot(tk.Frame):
         self.controls['b_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemsize_var, *self.size_list)
         self.controls['b_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
         self.controls['b_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
-        self.controls['c_labelsize'] = tk.Label(self.controlframe, text='     Varying parameter: ', bg='white', bd=0, highlightthickness=0)
+        self.controls['c_labelsize'] = tk.Label(self.controlframe, text='     Varying element: ', bg='white', bd=0, highlightthickness=0)
         self.controls['d_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemparam_var, *self.param_list)
         self.controls['d_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
         self.controls['d_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
@@ -984,7 +984,7 @@ class Stabilityplot(tk.Frame):
         self.elemparam_var = tk.IntVar(self)
         # Var containing visible elements
         self.controls = {}
-        self.controls['c_labelsize'] = tk.Label(self.controlframe, text='Varying parameter:   ', bg='white', bd=0, highlightthickness=0)
+        self.controls['c_labelsize'] = tk.Label(self.controlframe, text='Varying element:   ', bg='white', bd=0, highlightthickness=0)
         self.controls['d_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemparam_var, *range(len(master.physics.element_list)))
         self.controls['d_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
         self.controls['d_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
