@@ -1506,16 +1506,9 @@ class Cavitycomputation(tk.Frame):
         # Create results window, disabling main window
         self.resultswindow = ResultsWindow(master)
         self.resultswindow.grab_set()
-#==============================================================================
-#         try:
-#             master.framebottom.computationtable.destroy()
-#         except:
-#             pass
-#         self.resultswindow2 = master.framebottom.create_computationtable()
-#==============================================================================
-
+        
         root.update_idletasks()
-
+        
         for element in self.computation_elements:
             myDict = {}
             a = float(element['entry_rangestart'].get())
@@ -1545,8 +1538,7 @@ class Cavitycomputation(tk.Frame):
             self.cav_matrix_sag = SIMU.matrix(self.computation_elements, 1)
             stable1 = SIMU.stabilitycalc(self.cav_matrix_tan)
             stable2 = SIMU.stabilitycalc(self.cav_matrix_sag)
-
-
+            
             if master.toolbar.chivato:
                 print('Physics matrix, physics elements')
                 print(master.physics.calc_matrix(master.physics.element_list, 0))
@@ -1570,9 +1562,7 @@ class Cavitycomputation(tk.Frame):
                     print(i['type'], j['type'])
                     #print(float(i['entry1'].get()), float(j['entry1'].get()) )
                     print(i['entry2'].get(), j['entry2'].get())
-
-
-
+                    
             if stable1 and stable2:
                 if master.toolbar.chivato:
                     print('It is stable')
@@ -1593,8 +1583,7 @@ class Cavitycomputation(tk.Frame):
                     #self.resultswindow.inner_frame.create_results()
                     self.solutions_found = True
             # Since this repeats for each different configuration, if it isnt stable nothing is done, y listo!
-
-
+            
         if self.solutions_found:
             master.warningbar.warbar_message('Finished... Solutions found', 'lawn green')
 
@@ -1926,7 +1915,7 @@ if __name__ == "__main__":
         # This is for linux
         myicon = tk.PhotoImage(file=resource_path("Icons/logo-tg3.png"))
         root.tk.call('wm', 'iconphoto', root._w, myicon)
-
+    root.minsize(1100,400)
     # Kill process when click on window close button
     root.protocol("WM_DELETE_WINDOW", killing_root)
     # Create main frame
