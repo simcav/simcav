@@ -99,7 +99,7 @@ class Toolbar(tk.Frame):
                 self.toolbar_buttons[button].bind("<Enter>", self.func_quit_enter)
                 self.toolbar_buttons[button].bind("<Leave>", self.func_quit_leave)
             else:
-                self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white')#, activebackground='aquamarine')
+                self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white')
                 self.toolbar_buttons[button].bind('<Enter>', self.func_color_enter)
                 self.toolbar_buttons[button].bind('<Leave>', self.func_color_leave)
                 self.toolbar_buttons[button].pack(side='left')
@@ -854,17 +854,17 @@ class Beamsizeplot(tk.Frame):
         self.controls['a_labelsize'] = tk.Label(self.controlframe, text='Beam size at element: ', bg='white', bd=0, highlightthickness=0)
         self.controls['b_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemsize_var, *self.size_list)
         self.controls['b_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
-        self.controls['b_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
+        self.controls['b_optionmenu']['menu'].configure(fg ='darkgreen', bg='white')
         self.controls['c_labelsize'] = tk.Label(self.controlframe, text='     Varying element: ', bg='white', bd=0, highlightthickness=0)
         self.controls['d_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemparam_var, *self.param_list)
         self.controls['d_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
-        self.controls['d_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
+        self.controls['d_optionmenu']['menu'].configure(fg ='darkgreen', bg='white')
         self.controls['e_labelsize'] = tk.Label(self.controlframe, text='    Variation from... ', bg='white', bd=0, highlightthickness=0)
         self.controls['f_entry1'] = tk.Entry(self.controlframe, width=5, justify='right')
         self.controls['g_labelsize'] = tk.Label(self.controlframe, text='     to... ', bg='white', bd=0, highlightthickness=0)
         self.controls['h_entry2'] = tk.Entry(self.controlframe, width=5, justify='right')
         self.controls['i_labelsize'] = tk.Label(self.controlframe, text='             ', bg='white', bd=0, highlightthickness=0)
-        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, activebackground='aquamarine', highlightthickness=2)
+        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, highlightthickness=2)
         
         # Adjust entry values
         self.controls['f_entry1'].insert(0, 0)
@@ -986,13 +986,13 @@ class Stabilityplot(tk.Frame):
         self.controls['c_labelsize'] = tk.Label(self.controlframe, text='Varying element:   ', bg='white', bd=0, highlightthickness=0)
         self.controls['d_optionmenu'] = tk.OptionMenu(self.controlframe, self.elemparam_var, *range(len(master.physics.element_list)))
         self.controls['d_optionmenu'].configure(bg='white', activebackground='white', highlightbackground='white')
-        self.controls['d_optionmenu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
+        self.controls['d_optionmenu']['menu'].configure(fg ='darkgreen', bg='white')
         self.controls['e_labelsize'] = tk.Label(self.controlframe, text='    Variation from... ', bg='white', bd=0, highlightthickness=0)
         self.controls['f_entry1'] = tk.Entry(self.controlframe, width=5, justify='right')
         self.controls['g_labelsize'] = tk.Label(self.controlframe, text='     to... ', bg='white', bd=0, highlightthickness=0)
         self.controls['h_entry2'] = tk.Entry(self.controlframe, width=5, justify='right')
         self.controls['i_labelsize'] = tk.Label(self.controlframe, text='             ', bg='white', bd=0, highlightthickness=0)
-        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, activebackground='aquamarine', highlightthickness=2)
+        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, highlightthickness=2)
         
         # Adjust entry values
         self.controls['f_entry1'].insert(0, 0)
@@ -1172,7 +1172,7 @@ class Cavityelements(tk.Frame):
         self.button_delete.grid(row=100, column=0, columnspan=2, pady=10)
 
         for i,button in enumerate(sorted(self.item_button)):
-            self.item_button[button].config(bd=0, bg='white') #, activebackground='aquamarine')
+            self.item_button[button].config(bd=0, bg='white')
             # THIS BINDS ARE TOTALLY NEEDED: they don't do the same as activebackground!
             self.item_button[button].bind('<Enter>', self.func_color_enter)
             self.item_button[button].bind('<Leave>', self.func_color_leave)
@@ -1350,10 +1350,10 @@ class Cavitycomputation(tk.Frame):
         myDict['delete_button'].grid(column=0, row = self.rownumber)
         myDict['condition_menu'].grid(column=1, row=self.rownumber, sticky="ew")
         myDict['condition_menu'].configure(bg='white', activebackground='white', highlightbackground='white', width=12)
-        myDict['condition_menu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
+        myDict['condition_menu']['menu'].configure(fg ='darkgreen', bg='white')
         myDict['element_menu'].grid(column=2, row=self.rownumber, sticky="ew")
         myDict['element_menu'].configure(bg='white', activebackground='white', highlightbackground='white')
-        myDict['element_menu']['menu'].configure(fg ='darkgreen', bg='white', activebackground='aquamarine')
+        myDict['element_menu']['menu'].configure(fg ='darkgreen', bg='white')
         myDict['entry1'].grid(column=3, row=self.rownumber)
         myDict['entry2'].grid(column=4, row=self.rownumber)
 
