@@ -428,19 +428,19 @@ class Elementbox(tk.Frame):
 
         #self.img_calc = tk.PhotoImage(file="black_calc.gif")
         self.label_title = tk.Label(self, text='Cavity', width=30, fg='white', bg='sea green', font=('bold',13))
-        self.button_calc = tk.Button(self, text='CALCULATE', image=self.icon_go, command=self.func_button_calc,
-                                     bg='white', bd=0, activebackground='aquamarine',
-                                     highlightthickness=2)
-        self.label_column0 = tk.Label(self, text='Item', bg='white')
-        self.label_column1 = tk.Label(self, bg='white')
-        self.label_column2 = tk.Label(self, text='Element', bg='white')
+        self.button_calc = tk.Button(self, text='CALCULATE', image=self.icon_go,
+                                     command=self.func_button_calc, bg='white', 
+                                     bd=0, highlightthickness=0, width=38, height=38)
+        self.label_column0 = tk.Label(self, text=' ', bg='white')
+        self.label_column1 = tk.Label(self, text='#', bg='white', width=2)
+        self.label_column2 = tk.Label(self, text='Element', bg='white', width=15)
         self.label_column3 = tk.Label(self, text='(mm)', bg='white')
         self.label_column4 = tk.Label(self, text='n or þ', bg='white')
 
         self.label_title.grid(row=0, columnspan=5, sticky='ew')
-        self.label_column0.grid(row=1, column=0, columnspan=2, sticky='w', pady=5)
-        #self.label_column1.grid(row=1, column=1)
-        self.label_column2.grid(row=1, column=2)
+        self.label_column0.grid(row=1, column=0)
+        self.label_column1.grid(row=1, column=1)
+        self.label_column2.grid(row=1, column=2, sticky='ew')
         self.label_column3.grid(row=1, column=3)
         self.label_column4.grid(row=1, column=4)
 #==============================================================
@@ -452,8 +452,7 @@ class Elementbox(tk.Frame):
         myDict = {}
         myDict['checkbutton_var'] = tk.BooleanVar()
         myDict['checkbutton'] = tk.Checkbutton(self, offvalue=False, onvalue=True,
-                                               variable = myDict['checkbutton_var'], bg='white',
-                                               highlightthickness=0, activebackground='aquamarine')
+                                               variable = myDict['checkbutton_var'], bg='white', highlightthickness=0)
         myDict['label'] = tk.Label(self, text=kind, width=15, anchor='w', bg='white')
         myDict['entry1'] = tk.Entry(self, width=5, justify='right')
         myDict['entry2'] = tk.Entry(self, width=5, justify='right')
@@ -532,8 +531,8 @@ class Elementbox(tk.Frame):
 
     def show_last_element(self,element):
         counter = element['itemnumber']
-        element['itemnumber_label'].grid(column=0, row=counter+2, padx=2)
-        element['checkbutton'].grid(column=1, row=counter+2)
+        element['checkbutton'].grid(column=0, row=counter+2)
+        element['itemnumber_label'].grid(column=1, row=counter+2, padx=2)
         element['label'].grid(column=2, row=counter+2, sticky='w')
         element['entry1'].grid(column=3, row=counter+2, padx=1)
         element['entry2'].grid(column=4, row=counter+2)
@@ -541,7 +540,7 @@ class Elementbox(tk.Frame):
         if len(master.physics.element_list) == 1:
             self.button_calc.bind('<Enter>', master.toolbar.func_color_enter)
             self.button_calc.bind('<Leave>', master.toolbar.func_color_leave)
-            self.button_calc.grid(row=50, column=4)
+            self.button_calc.grid(row=50, column=4, pady=8)
 
     def func_recalculate_itemnumbers(self):
         # Recalculate the itemnumbers
@@ -557,8 +556,8 @@ class Elementbox(tk.Frame):
         self.func_recalculate_itemnumbers()
         # Replace all the elements in the window
         for counter, element in enumerate(master.physics.element_list):
-            element['itemnumber_label'].grid(column=0, row=counter+2, padx=2)
-            element['checkbutton'].grid(column=1, row=counter+2)
+            element['checkbutton'].grid(column=0, row=counter+2)
+            element['itemnumber_label'].grid(column=1, row=counter+2, padx=2)
             element['label'].grid(column=2, row=counter+2, sticky='w')
             element['entry1'].grid(column=3, row=counter+2, padx=1)
             element['entry2'].grid(column=4, row=counter+2)
@@ -668,13 +667,13 @@ class Framecentral(tk.Frame):
         self.buttons = {}
         self.buttons['a_cav'] = tk.Button(self.framebutton, text='Cavity', width=1,
                                    command=self.show_cavityplot, bg='white',
-                                   bd=0, highlightthickness=0, font='bold')
+                                   bd=0, highlightthickness=0, font=('bold',11))
         self.buttons['b_stab'] = tk.Button(self.framebutton, text='Stability', width=1,
                                    command=self.show_stabilityplot, bg='white',
-                                   bd=0, highlightthickness=0, font='bold')
+                                   bd=0, highlightthickness=0, font=('bold',11))
         self.buttons['c_size'] = tk.Button(self.framebutton, text='Beam size', width=1,
                                    command=self.show_beamsizeplot, bg='white',
-                                   bd=0, highlightthickness=0, font='bold')
+                                   bd=0, highlightthickness=0, font=('bold',11))
 
         # Pack the buttons
         for element in sorted(self.buttons):
@@ -1225,18 +1224,17 @@ class Cavitycomputation(tk.Frame):
 
     def build_interface(self):
         self.button_computation = tk.Button(self, text='COMPUTE!', image=self.icon_go,
-                                            command=self.func_computation_gui, bg='white',
-                                            bd=0, activebackground='aquamarine', highlightthickness=2)
+                                            command=self.func_computation_gui, bg='white', bd=0, highlightthickness=0, width=38, height=38)
         self.button_computation.grid(column=4, row=99, columnspan=2, sticky='e', padx=5)
         self.button_computation.bind('<Enter>', master.toolbar.func_color_enter)
         self.button_computation.bind('<Leave>', master.toolbar.func_color_leave)
 
         # Titles row
-        self.label_title = tk.Label(self, text='Design Calculator', fg='white', bg='sea green', font='bold')
+        self.label_title = tk.Label(self, text='Design Calculator', fg='white', bg='sea green', font=('bold',13))
         self.label_title.grid(row=0, column=0, columnspan=5, sticky='ew')
         # Stores the title labels
         self.label_subtitle = []
-        self.label_subtitle.append(tk.Label(self, text='Item', bg='white'))
+        self.label_subtitle.append(tk.Label(self, text='#', bg='white'))
         self.label_subtitle.append(tk.Label(self, text='Element', bg='white'))
         self.label_subtitle.append(tk.Label(self, text='Start', bg='white'))
         self.label_subtitle.append(tk.Label(self, text='Stop', bg='white'))
@@ -1317,9 +1315,9 @@ class Cavitycomputation(tk.Frame):
 #==============================================================================
 
         # Add condition Button
-        self.button_add_condition = tk.Button(self, text='+', image=self.icon_add_cond, bd=0,
-                                              width=20, height=20, command=self.func_add_condition,
-                                              highlightthickness=0, bg='white', activebackground='aquamarine')
+        self.button_add_condition = tk.Button(self, text='+', image=self.icon_add_cond,
+                                              bd=0, width=20, height=20, command=self.func_add_condition,
+                                              highlightthickness=0, bg='white')
         self.button_add_condition.grid(column=0, row = 98, pady=5)
         self.button_add_condition.bind('<Enter>', master.toolbar.func_color_enter)
         self.button_add_condition.bind('<Leave>', master.toolbar.func_color_leave)
@@ -1331,10 +1329,8 @@ class Cavitycomputation(tk.Frame):
     def func_add_condition(self):
         myDict = {}
         myDict['number'] = self.condition_number
-        myDict['delete_button'] = self.button_del_condition = tk.Button(self, text='-', image=self.icon_del_cond, bd=0,
-                                                                width=20, height=21, bg='white', activebackground='aquamarine',
-                                                                command=lambda:self.func_del_condition(myDict),
-                                                                highlightthickness=0)
+        myDict['delete_button'] = self.button_del_condition = tk.Button(self, text='-',
+                                        image=self.icon_del_cond, bd=0, width=20, height=21, bg='white', command=lambda:self.func_del_condition(myDict), highlightthickness=0)
         myDict['delete_button'].bind('<Enter>', master.toolbar.func_color_enter)
         myDict['delete_button'].bind('<Leave>', master.toolbar.func_color_leave)
 
