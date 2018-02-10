@@ -52,7 +52,7 @@ def qx(q0, elementX, E_list, proy):
         return False
     
     M_cav = np.identity(2)
-    for element in E_list[1:elementX-1]:
+    for element in E_list[1:elementX]:
         #print("element type, value :" + element['type'] + "\n " + str(element['matrix']))
         M_cav = np.dot(element['matrix'][proy],M_cav)
     # Calculate q(x)
@@ -232,6 +232,4 @@ def propagation(E_list, q0, wl, proy, chivato):
         else:
             print(element['type'])
             print('Element not available!')
-    
     return z, wz
-

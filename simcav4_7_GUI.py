@@ -900,6 +900,8 @@ class Beamsizeplot(tk.Frame):
         self.xvec = np.linspace(xstart, xend, np.abs(xend-xstart)*100)
         # Element list for this calculation
         beamsize_list = master.physics.element_list
+        elementY = beamsize_list[item1]['itemnumber']
+        print(elementY)
         
         # Creation of Y axis vector
         self.yvec = []
@@ -922,8 +924,10 @@ class Beamsizeplot(tk.Frame):
                 # Maybe need to check stability
                 
                 # Complex beam parameter at desired element (elementY)
-                elementY = beamsize_list[item1]['itemnumber']
-                q = SIMU.qx(q0, elementY, beamsize_list, proy)
+                if elementY == 0:
+                    q = q0
+                else:
+                    q = SIMU.qx(q0, elementY, beamsize_list, proy)
                 
                 # Refractive index
                 if 'refr_index' in beamsize_list[item1].keys():
@@ -934,7 +938,7 @@ class Beamsizeplot(tk.Frame):
                 wl = master.physics.wl_mm
                 # Calculate beamsize
                 R, w = ABCD.r_w(q, wl, refr_index)
-                y.append(w)
+                y.append(w*1E3)
             # Y vectors for each projection
             self.yvec.append(y)
             
