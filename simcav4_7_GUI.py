@@ -805,6 +805,7 @@ class Centralplot(tk.Frame):
         self.figureplot.plot(x0, y0)
         self.figureplot.set_prop_cycle(None)
         self.figureplot.plot(x1, y1)
+        self.figureplot.grid(linestyle='dashed')
         
         # xmin and xmax should be an input to the plot function
         #xmin = float(master.elementbox.stability_entry1.get())
@@ -1080,6 +1081,7 @@ class Cavityplot(tk.Frame):
 
             self.figureplot.set_xlabel('z (mm)')
             self.figureplot.set_ylabel('Saggital            w (µm)            Tangential')
+            self.figureplot.grid(linestyle='dashed')
             self.canvas.show()
 
 #==============================================================================
