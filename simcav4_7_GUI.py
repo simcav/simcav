@@ -427,13 +427,13 @@ class Elementbox(tk.Frame):
         self.icon_go = tk.PhotoImage(file=resource_path("Icons/final_go.gif"))
 
         #self.img_calc = tk.PhotoImage(file="black_calc.gif")
-        self.label_title = tk.Label(self, text='Cavity', width=30, fg='white', bg='sea green', font='bold')
+        self.label_title = tk.Label(self, text='Cavity', width=30, fg='white', bg='sea green', font=('bold',13))
         self.button_calc = tk.Button(self, text='CALCULATE', image=self.icon_go, command=self.func_button_calc,
                                      bg='white', bd=0, activebackground='aquamarine',
                                      highlightthickness=2)
         self.label_column0 = tk.Label(self, text='Item', bg='white')
         self.label_column1 = tk.Label(self, bg='white')
-        self.label_column2 = tk.Label(self, text='Kind', bg='white')
+        self.label_column2 = tk.Label(self, text='Element', bg='white')
         self.label_column3 = tk.Label(self, text='(mm)', bg='white')
         self.label_column4 = tk.Label(self, text='n or þ', bg='white')
 
@@ -668,13 +668,13 @@ class Framecentral(tk.Frame):
         self.buttons = {}
         self.buttons['a_cav'] = tk.Button(self.framebutton, text='Cavity', width=1,
                                    command=self.show_cavityplot, bg='white',
-                                   bd=0, highlightthickness=0)
+                                   bd=0, highlightthickness=0, font='bold')
         self.buttons['b_stab'] = tk.Button(self.framebutton, text='Stability', width=1,
                                    command=self.show_stabilityplot, bg='white',
-                                   bd=0, highlightthickness=0)
+                                   bd=0, highlightthickness=0, font='bold')
         self.buttons['c_size'] = tk.Button(self.framebutton, text='Beam size', width=1,
                                    command=self.show_beamsizeplot, bg='white',
-                                   bd=0, highlightthickness=0)
+                                   bd=0, highlightthickness=0, font='bold')
 
         # Pack the buttons
         for element in sorted(self.buttons):
@@ -1103,7 +1103,7 @@ class Cavityelements(tk.Frame):
         self.img_curvedinter = tk.PhotoImage(file=resource_path("Icons/e_curved_interface.png"))
         self.img_custom = tk.PhotoImage(file=resource_path("Icons/e_custom_element.png"))
 
-        self.label_title = tk.Label(self, text='Modify Cavity', fg='white', bg='sea green', font='bold')
+        self.label_title = tk.Label(self, text='Modify Cavity', fg='white', bg='sea green', font=('bold',13))
 
         #self.separator = ttk.Separator(self, orient=tk.HORIZONTAL)
 
@@ -1237,7 +1237,7 @@ class Cavitycomputation(tk.Frame):
         # Stores the title labels
         self.label_subtitle = []
         self.label_subtitle.append(tk.Label(self, text='Item', bg='white'))
-        self.label_subtitle.append(tk.Label(self, text='Kind', bg='white'))
+        self.label_subtitle.append(tk.Label(self, text='Element', bg='white'))
         self.label_subtitle.append(tk.Label(self, text='Start', bg='white'))
         self.label_subtitle.append(tk.Label(self, text='Stop', bg='white'))
         self.label_subtitle.append(tk.Label(self, text='# points', bg='white'))
