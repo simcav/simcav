@@ -5,10 +5,8 @@ Created on Sat May 23 21:14:11 2015
 @author: julio
 """
 
-import simcav4_7_abcd as abcd
+import simcav_abcd as abcd
 import tkinter.simpledialog as tkdiag
-import imp
-imp.reload(abcd)
 import numpy as np
 
 def assignment(element, entry1, entry2, refr_index):

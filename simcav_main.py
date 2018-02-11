@@ -15,9 +15,9 @@ else:
     import tkinter.messagebox
 
 # Imports for functionality
-import simcav4_7_ElementFeatures as EF
-import simcav4_7_simulator as SIMU
-import simcav4_7_abcd as ABCD
+import simcav_ElementFeatures as EF
+import simcav_simulator as SIMU
+import simcav_abcd as ABCD
 import itertools
 import pickle
 import numpy as np
@@ -633,7 +633,6 @@ class Elementbox(tk.Frame):
             try:
                 e1 = float(element['entry1'].get())
                 if e1 < 0 and kind not in ['Curved mirror','Thin lens','Curved interface']:
-                    print(kind)
                     master.warningbar.warbar_message('Negative value in cavity entry box %d-1' %i, 'firebrick')
                     return 1
             except:
@@ -922,8 +921,7 @@ class Beamsizeplot(tk.Frame):
         # Element list for this calculation
         beamsize_list = master.physics.element_list
         elementY = beamsize_list[item1]['itemnumber']
-        print(elementY)
-        
+            
         # Creation of Y axis vector
         self.yvec = []
         # Done for tangential and sagital
@@ -1573,18 +1571,6 @@ class Cavitycomputation(tk.Frame):
 
                 print('Checking stability')
                 print(stable1, stable2)
-
-            # Element to element comparison
-            if False:
-                print('Im gonna compare every element')
-                #print(master.physics.element_list)
-                #print(self.computation_elements)
-                for i, j in zip(master.physics.element_list, self.computation_elements):
-                    #print(i.keys())
-                    #print(j.keys())
-                    print(i['type'], j['type'])
-                    #print(float(i['entry1'].get()), float(j['entry1'].get()) )
-                    print(i['entry2'].get(), j['entry2'].get())
                     
             if stable1 and stable2:
                 if master.toolbar.chivato:
@@ -1930,7 +1916,7 @@ if __name__ == "__main__":
     except:
         root.attributes('-zoomed', True)
     # Window title
-    root.wm_title("SimCav 4.7")
+    root.wm_title("SimCav 4.8")
     try:
         # This is for windows
         root.wm_iconbitmap(resource_path("Icons/logo-tg3.ico"))#root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))

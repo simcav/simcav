@@ -5,10 +5,10 @@ Created on Thu Jul 30 09:55:00 2015
 @author: mhb13219
 """
 
-import simcav4_7_simulator as SIMU
+import simcav_simulator as SIMU
 
 def conditions(self):
-    import simcav4_7_GUI as GUI
+    #import simcav_GUI as GUI
     
         #%% ------------------ w0 on a range --------------------------        
     def w0_size(self, w0, wmin, wmax):

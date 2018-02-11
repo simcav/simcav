@@ -8,10 +8,7 @@ Created on Tue May  5 15:07:43 2015
 #%% --------------- Importing modules ------------------
 import numpy as np
 #import matplotlib.pyplot as plt
-import simcav4_7_abcd as abcd
-
-import imp
-imp.reload(abcd)
+import simcav_abcd as abcd
 
 n_air = 1.000
 
