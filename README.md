@@ -9,24 +9,13 @@ Simcav is a PC program to simulate laser cavities. It is able to calculate a sta
 
 ## How to launch SimCav
 
-* Windows:
-
-Download the latest release. Simply download and unzip at your preferred location. Then run the SimCav shortcut. 
+Download the latest release. Simply download and unzip at your preferred location. Then run the SimCav file. 
 If you prefer you can run it from the source code.
 
-* GNU/Linux:
-
-There is no compiled version so far, you need to run the source code.
-
-* Mac:
-
-Same as in GNU/Linux... maybe!
-
 ## Running the source code
-The main file is simcav4_7_GUI. Of course the rest of the source files are also needed.
+The main file is simcav_main.py. Of course the rest of the source files are also needed.
 You need Python 3.x installed in your computer.
 Due to changes in the Matplotlib libraries that are not backwards compatible, you need at least version 1.5 of Matplotlib.
-The version of the different modules are described in the Manual.
 
 ## Why SimCav?
 There are a number of different cavity simulators out there, but not so many are [free software](https://www.gnu.org/philosophy/free-sw.en.html). It is also difficult to find one that is cross-platform. Some of the programs are already too old, and not working well in newest Windows machines. SimCav aims to overcome these problems while offering some new features.
