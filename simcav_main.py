@@ -1732,14 +1732,24 @@ class ResultsWindow2(tk.Frame):
 
             # Positioning
             for j,i in enumerate(self.combination_label):
-                i.grid(column=j, row=self.row_counter)
+                i.grid(column=j, row=self.row_counter, sticky='ew')
+                # Alternative background color
+                if self.row_counter%2 == 1:
+                    i.configure(bg='linen')
 
             label_tan.grid(column=self.number_items+1, row=self.row_counter, sticky='ew')
             label_sag.grid(column=self.number_items+2, row=self.row_counter, sticky='ew')
+            # Alternative background color
+            if self.row_counter%2 == 1:
+                label_tan.configure(bg='pale turquoise')
+                label_sag.configure(bg='pale turquoise')
 
             self.results_label = []
             for i in l:
                 label = tk.Label(self, text='%.2f' % i, bg='palegreen')
+                # Alternative background color
+                if self.row_counter%2 == 1:
+                    label.configure(bg='lime green')                    
                 # Binds for mouse enter / leave
                 label.bind('<Enter>', self.func_mouse_enter)
                 label.bind('<Leave>', self.func_mouse_leave)
