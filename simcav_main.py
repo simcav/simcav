@@ -1343,10 +1343,9 @@ class Cavitycomputation(tk.Frame):
         self.button_add_condition = tk.Button(self, text='+', image=self.icon_add_cond,
                                               bd=0, width=20, height=20, command=self.func_add_condition,
                                               highlightthickness=0, bg='white')
-        self.button_add_condition.grid(column=0, row = 98, pady=5)
+        self.button_add_condition.grid(column=0, row = 99, pady=5)
         self.button_add_condition.bind('<Enter>', master.toolbar.func_color_enter)
         self.button_add_condition.bind('<Leave>', master.toolbar.func_color_leave)
-
 
     def pressed_enter(self, event):
         self.func_computation_gui()
@@ -1825,37 +1824,37 @@ class Frameright(tk.Frame):
 #==============================================================================
 #%% Bottom frame
 #       For stability plot, computations results...
-class Framebottom(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
-        tk.Frame.__init__(self, parent, *args, **kwargs)
-
-        self.stabilityplot = Stabilityplot(self, relief='flat', borderwidth=0)
-        self.show_stabilityplot()
-
-#==============================================================================
-#     def create_computationtable(self):
-#         self.computationtable = ResultsWindow3(self, relief='flat', borderwidth=0)
-#         return self.computationtable
-#==============================================================================
-
-    def show_stabilityplot(self):
-#==============================================================================
-#         try:
-#             self.computationtable.destroy()
-#         except:
-#             pass
-#==============================================================================
-        #self.frameright.cavityelements.pack_forget()
-        self.stabilityplot.pack(side='top', fill='both', pady=0)
-
-#==============================================================================
-#     def show_computationtable(self):
-#         try:
-#             self.stabilityplot.destroy()
-#         except:
-#             pass
-#         self.computationtable.pack(side='top', fill='both', pady=0)
-#==============================================================================
+# class Framebottom(tk.Frame):
+#     def __init__(self, parent, *args, **kwargs):
+#         tk.Frame.__init__(self, parent, *args, **kwargs)
+# 
+#         self.stabilityplot = Stabilityplot(self, relief='flat', borderwidth=0)
+#         self.show_stabilityplot()
+# 
+# #==============================================================================
+# #     def create_computationtable(self):
+# #         self.computationtable = ResultsWindow3(self, relief='flat', borderwidth=0)
+# #         return self.computationtable
+# #==============================================================================
+# 
+#     def show_stabilityplot(self):
+# #==============================================================================
+# #         try:
+# #             self.computationtable.destroy()
+# #         except:
+# #             pass
+# #==============================================================================
+#         #self.frameright.cavityelements.pack_forget()
+#         self.stabilityplot.pack(side='top', fill='both', pady=0)
+# 
+# #==============================================================================
+# #     def show_computationtable(self):
+# #         try:
+# #             self.stabilityplot.destroy()
+# #         except:
+# #             pass
+# #         self.computationtable.pack(side='top', fill='both', pady=0)
+# #==============================================================================
 
 class ResizingCanvas(tk.Canvas):
     def __init__(self,parent,**kwargs):
