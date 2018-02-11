@@ -1,2 +1,4 @@
 __pycache__/
 Saves/
+Manual.*
+!manual.tex
