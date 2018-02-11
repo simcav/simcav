@@ -68,6 +68,7 @@ class Toolbar(tk.Frame):
         #self.img_test = tk.PhotoImage(file="test.gif")
 
         # Creating buttons
+        self.toolbar_buttons['a0_separator'] = ttk.Separator(self, orient='vertical')
         self.toolbar_buttons['a_button_new'] = tk.Button(self, text='New',
                                                image=self.img_new, command=self.func_button_new,
                                                highlightthickness=0)
@@ -77,6 +78,7 @@ class Toolbar(tk.Frame):
         self.toolbar_buttons['c_button_save'] = tk.Button(self, text='Save',
                                                 image=self.img_save, command=self.func_button_save,
                                                 highlightthickness=0)
+        self.toolbar_buttons['d0_separator'] = ttk.Separator(self, orient='vertical')
         self.toolbar_buttons['d_button_add'] = tk.Button(self, text='Add',
                                                image=self.img_add, command=self.func_button_add,
                                                highlightthickness=0)
@@ -84,6 +86,7 @@ class Toolbar(tk.Frame):
                                                        image=self.img_compute,
                                                        command=self.func_button_computation,
                                                        highlightthickness=0)
+        self.toolbar_buttons['f0_separator'] = ttk.Separator(self, orient='vertical')
         self.toolbar_buttons['z_button_quit'] = tk.Button(self, text='Quit',
                                                 image=self.img_quit, command=self.func_button_quit,
                                                 highlightthickness=0)
@@ -98,6 +101,8 @@ class Toolbar(tk.Frame):
                 self.toolbar_buttons[button].pack(side='right')
                 self.toolbar_buttons[button].bind("<Enter>", self.func_quit_enter)
                 self.toolbar_buttons[button].bind("<Leave>", self.func_quit_leave)
+            elif 'separator' in button:
+                self.toolbar_buttons[button].pack(side='left', fill='y')
             else:
                 self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white')
                 self.toolbar_buttons[button].bind('<Enter>', self.func_color_enter)
@@ -425,12 +430,19 @@ class Elementbox(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.pack_propagate(0)
         self.icon_go = tk.PhotoImage(file=resource_path("Icons/final_go.gif"))
+        self.img_del1 = tk.PhotoImage(file=resource_path("Icons/e_delete.png"))
+        self.img_del2 = tk.PhotoImage(file=resource_path("Icons/e_delete2.png"))
 
         #self.img_calc = tk.PhotoImage(file="black_calc.gif")
         self.label_title = tk.Label(self, text='Cavity', width=30, fg='white', bg='sea green', font=('bold',13))
         self.button_calc = tk.Button(self, text='CALCULATE', image=self.icon_go,
                                      command=self.func_button_calc, bg='white', 
                                      bd=0, highlightthickness=0, width=38, height=38)
+        self.button_delete = tk.Button(self, text = 'Delete', image=self.img_del1,
+                                        command=lambda: master.elementbox.func_delete_button(),
+                                        highlightthickness=0, width=120, height=30, bd=0, bg='white')
+        self.button_delete.bind('<Enter>', self.button_delete_enter)
+        self.button_delete.bind('<Leave>', self.button_delete_leave)
         self.label_column0 = tk.Label(self, text=' ', bg='white')
         self.label_column1 = tk.Label(self, text='#', bg='white', width=2)
         self.label_column2 = tk.Label(self, text='Element', bg='white', width=15)
@@ -443,6 +455,12 @@ class Elementbox(tk.Frame):
         self.label_column2.grid(row=1, column=2, sticky='ew')
         self.label_column3.grid(row=1, column=3)
         self.label_column4.grid(row=1, column=4)
+        
+    def button_delete_enter(self, event):
+        event.widget.configure(image=self.img_del2)
+
+    def button_delete_leave(self, event):
+        event.widget.configure(image=self.img_del1)
 #==============================================================
 #       Adding ELEMENTS
 #==============================================================
@@ -541,6 +559,7 @@ class Elementbox(tk.Frame):
             self.button_calc.bind('<Enter>', master.toolbar.func_color_enter)
             self.button_calc.bind('<Leave>', master.toolbar.func_color_leave)
             self.button_calc.grid(row=50, column=4, pady=8)
+            self.button_delete.grid(row=50, column=0, columnspan=3, pady=8, sticky='w')
 
     def func_recalculate_itemnumbers(self):
         # Recalculate the itemnumbers
@@ -595,6 +614,7 @@ class Elementbox(tk.Frame):
 
         if len(master.physics.element_list) == 0:
             self.button_calc.grid_forget()
+            self.button_delete.grid_forget()
         try:
             master.framecentral.stabilityplot.update_menus()
         except:
@@ -1175,7 +1195,8 @@ class Cavityelements(tk.Frame):
 
         self.label_title.grid(row=0, column=0, columnspan=2, sticky='ew')
 
-        self.button_delete.grid(row=100, column=0, columnspan=2, pady=10)
+        # DELETE BUTTON MOVED TO ELEMENTBOX - for the moment just won't place it here.
+        #self.button_delete.grid(row=100, column=0, columnspan=2, pady=10)
 
         for i,button in enumerate(sorted(self.item_button)):
             self.item_button[button].config(bd=0, bg='white')
