@@ -119,7 +119,7 @@ class Toolbar(tk.Frame):
         #self.testtip = tt.createToolTip(self.toolbar_buttons['z_button_quit'], "Quit")
 
         # Wavelength labels and entry.
-        self.label_wl = tk.Label(self, text='Wavelength = ', padx=2, pady=4, bd=0, width=25, bg='white', anchor='e')
+        self.label_wl = tk.Label(self, text='Wavelength = ', padx=2, pady=4, bd=0, width=40, bg='white', anchor='e')
         self.label_wlunits = tk.Label(self, text=' nm', pady=1, bd=0, bg='white')
         self.entry_wl = tk.Entry(self, width=7, justify='right')
         # Automatic value, my usual working wavelength.
