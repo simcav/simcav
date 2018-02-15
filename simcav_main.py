@@ -470,7 +470,7 @@ class Elementbox(tk.Frame):
         myDict = {}
         myDict['checkbutton_var'] = tk.BooleanVar()
         myDict['checkbutton'] = tk.Checkbutton(self, offvalue=False, onvalue=True,
-                                               variable = myDict['checkbutton_var'], bg='white', highlightthickness=0)
+                                               variable = myDict['checkbutton_var'], bg='white', highlightthickness=0, takefocus=0)
         myDict['label'] = tk.Label(self, text=kind, width=15, anchor='w', bg='white')
         myDict['entry1'] = tk.Entry(self, width=5, justify='right')
         myDict['entry2'] = tk.Entry(self, width=5, justify='right')
