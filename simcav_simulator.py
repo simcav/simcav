@@ -87,8 +87,10 @@ def propagation(E_list, q0, wl, proy, chivato):
     zmax = 0
     z = []
     wz = []
-    #z.append(0)
-
+    
+    # To draw limiting lines for each element
+    z_limits = []
+    
     # Debugging ----------------------------------------
     show_n = False   
     if chivato:
@@ -127,7 +129,12 @@ def propagation(E_list, q0, wl, proy, chivato):
             # Some debugging
             if chivato:
                 print('Imag(q)',np.imag(q))
-            
+                
+            # Add mirror position
+            try:
+                z_limits.append(z_limits[-1])
+            except:
+                z_limits.append(0)
             #if z:
             #    plt.vlines(z[-1][-1],0,1)
         
@@ -146,6 +153,9 @@ def propagation(E_list, q0, wl, proy, chivato):
             
             if show_n:
                 print(element['type'],refr_index_global)
+                
+            # Add finish position.
+            z_limits.append(zmax)
         
         # ------------------- Block -------------------
         elif element['type']=="Block":
@@ -171,7 +181,10 @@ def propagation(E_list, q0, wl, proy, chivato):
             
             if show_n:
                 print(element['type'],refr_index_global)
-                    
+                
+            # Add finish position.
+            z_limits.append(zmax)
+            
         # ------------------- Brewster Plate -------------------
         elif element['type']=="Brewster plate":
             # Block divided in interface - distance - interface
@@ -200,6 +213,9 @@ def propagation(E_list, q0, wl, proy, chivato):
             
             if show_n:
                 print(element['type'],refr_index_global)
+                
+            # Add finish position.
+            z_limits.append(zmax)
         
         # ------------------- Brewster Crystal -------------------
         elif element['type']=="Brewster crystal":
@@ -225,8 +241,11 @@ def propagation(E_list, q0, wl, proy, chivato):
             
             if show_n:
                 print(element['type'],refr_index_global)
+                
+            # Add finish position.
+            z_limits.append(zmax)
             
         else:
             print(element['type'])
             print('Element not available!')
-    return z, wz
+    return z, wz, z_limits
