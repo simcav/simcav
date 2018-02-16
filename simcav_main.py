@@ -1096,11 +1096,14 @@ class Cavityplot(tk.Frame):
 
                 for zrow, wrow in zip(x2,y2):
                     self.figureplot.plot(zrow,-wrow)
-
+                    
             self.figureplot.set_xlabel('z (mm)')
             self.figureplot.set_ylabel('Saggital            w (µm)            Tangential')
             self.figureplot.grid(linestyle='dashed')
             self.canvas.show()
+            toolbar = self.figure.canvas.toolbar
+            toolbar.update()       
+            toolbar.push_current()
 
 #==============================================================================
 
