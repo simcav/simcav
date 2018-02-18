@@ -90,6 +90,7 @@ def propagation(E_list, q0, wl, proy, chivato):
     
     # To draw limiting lines for each element
     z_limits = []
+    z_names = []
     
     # Debugging ----------------------------------------
     show_n = False   
@@ -133,8 +134,10 @@ def propagation(E_list, q0, wl, proy, chivato):
             # Add mirror position
             try:
                 z_limits.append(z_limits[-1])
+                z_names.append(element['type'])
             except:
                 z_limits.append(0)
+                z_names.append(element['type'])
             #if z:
             #    plt.vlines(z[-1][-1],0,1)
         
@@ -156,6 +159,7 @@ def propagation(E_list, q0, wl, proy, chivato):
                 
             # Add finish position.
             z_limits.append(zmax)
+            z_names.append('')
         
         # ------------------- Block -------------------
         elif element['type']=="Block":
@@ -184,6 +188,7 @@ def propagation(E_list, q0, wl, proy, chivato):
                 
             # Add finish position.
             z_limits.append(zmax)
+            z_names.append(element['type'])
             
         # ------------------- Brewster Plate -------------------
         elif element['type']=="Brewster plate":
@@ -216,6 +221,7 @@ def propagation(E_list, q0, wl, proy, chivato):
                 
             # Add finish position.
             z_limits.append(zmax)
+            z_names.append(element['type'])
         
         # ------------------- Brewster Crystal -------------------
         elif element['type']=="Brewster crystal":
@@ -244,8 +250,9 @@ def propagation(E_list, q0, wl, proy, chivato):
                 
             # Add finish position.
             z_limits.append(zmax)
+            z_names.append(element['type'])
             
         else:
             print(element['type'])
             print('Element not available!')
-    return z, wz, z_limits
+    return z, wz, z_limits, z_names

@@ -377,9 +377,9 @@ class Physics():
             master.warningbar.warbar_message('Cavity stable!', 'lawn green')
             self.q0 = SIMU.q0(self.matrix)
             if proy == 0:
-                self.z_tan, self.wz_tan, self.z_limits_tan = SIMU.propagation(self.element_list, self.q0, self.wl_mm, proy, master.toolbar.chivato)
+                self.z_tan, self.wz_tan, self.z_limits_tan, self.z_names_tan = SIMU.propagation(self.element_list, self.q0, self.wl_mm, proy, master.toolbar.chivato)
             elif proy == 1:
-                self.z_sag, self.wz_sag, self.z_limits_sag = SIMU.propagation(self.element_list, self.q0, self.wl_mm, proy, master.toolbar.chivato)
+                self.z_sag, self.wz_sag, self.z_limits_sag, self.z_names_sag = SIMU.propagation(self.element_list, self.q0, self.wl_mm, proy, master.toolbar.chivato)
             # z_limits tan and sag are the same:
             # optical elements are in the same position.
             return True
@@ -663,7 +663,7 @@ class Elementbox(tk.Frame):
 
         if calc_cav:
             master.framecentral.cavityplot.plot(master.physics.z_tan, master.physics.wz_tan, master.physics.z_sag, master.physics.wz_sag)
-            master.framecentral.cavityplot.plotverticals(master.physics.z_limits_tan)
+            master.framecentral.cavityplot.plotverticals(master.physics.z_limits_tan, master.physics.z_names_tan)
         
         master.framecentral.disablebuttons('a_cav')
         master.framecentral.show_cavityplot()
@@ -1078,26 +1078,17 @@ class Cavityplot(tk.Frame):
             if len(x1) > 1:
                 for zrow, wrow in zip(x1,y1):
                     self.figureplot.plot(zrow,wrow*1000,'g')
-
-                #self.figureplot.set_color_cycle(None)   # Deprecated
-                #self.figureplot.set_prop_cycle(None)
-
                 for zrow, wrow in zip(x2,y2):
                     self.figureplot.plot(zrow,wrow*1000,'b')
-
             else:
                 x1.append(0)
                 y1.append(0)
                 x2.append(0)
                 y2.append(0)
                 for zrow, wrow in zip(x1,y1):
-                    self.figureplot.plot(zrow,wrow)
-
-                #self.figureplot.set_color_cycle(None)   # Deprecated
-                self.figureplot.set_prop_cycle(None)
-
+                    self.figureplot.plot(zrow,wrow*1000,'g')
                 for zrow, wrow in zip(x2,y2):
-                    self.figureplot.plot(zrow,wrow)
+                    self.figureplot.plot(zrow,wrow*1000,'b')
 
             self.figureplot.set_xlabel('z (mm)')
             self.figureplot.set_ylabel('Saggital            w (µm)            Tangential')
@@ -1107,11 +1098,12 @@ class Cavityplot(tk.Frame):
             toolbar.update()       
             toolbar.push_current()
             
-    def plotverticals(self, x):
-        for xi in x:
-            self.figureplot.axvline(x=xi, color='k')
-            self.canvas.show()
-
+    def plotverticals(self, xpoints, xnames):
+        y0, y1 = self.figureplot.get_ylim()
+        for xi, element in zip(xpoints,xnames):
+            self.figureplot.axvline(x=xi, color='orange', alpha=0.7, linewidth=0.7)
+            self.figureplot.text(xi,y1,element,rotation=90, horizontalalignment='right', verticalalignment='top')
+        self.canvas.show()
 #==============================================================================
 
 
@@ -1471,7 +1463,7 @@ class Cavitycomputation(tk.Frame):
 
     def cond_waist(self, condition):
         q0 = SIMU.q0(SIMU.matrix(self.computation_elements, 0))
-        z, wz, z_limits = SIMU.propagation(self.computation_elements, q0, master.physics.wl_mm, 0,master.toolbar.chivato)
+        z, wz, z_limits, z_names = SIMU.propagation(self.computation_elements, q0, master.physics.wl_mm, 0,master.toolbar.chivato)
         array_number = self.vectorial_elements.index(condition['element_var'].get())
 
         if master.toolbar.chivato:
