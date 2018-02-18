@@ -1077,21 +1077,23 @@ class Cavityplot(tk.Frame):
         if (master.physics.stable and master.physics.closed and master.physics.nozeros):
             if len(x1) > 1:
                 for zrow, wrow in zip(x1,y1):
-                    self.figureplot.plot(zrow,wrow*1000,'g')
+                    tan, = self.figureplot.plot(zrow,wrow*1000,'g',label='Tangential')
                 for zrow, wrow in zip(x2,y2):
-                    self.figureplot.plot(zrow,wrow*1000,'b')
+                    sag, = self.figureplot.plot(zrow,wrow*1000,'b',label='Saggital')
             else:
                 x1.append(0)
                 y1.append(0)
                 x2.append(0)
                 y2.append(0)
                 for zrow, wrow in zip(x1,y1):
-                    self.figureplot.plot(zrow,wrow*1000,'g')
+                    tan, = self.figureplot.plot(zrow,wrow*1000,'g')
                 for zrow, wrow in zip(x2,y2):
-                    self.figureplot.plot(zrow,wrow*1000,'b')
+                    sag, = self.figureplot.plot(zrow,wrow*1000,'b')
 
             self.figureplot.set_xlabel('z (mm)')
-            self.figureplot.set_ylabel('Saggital            w (µm)            Tangential')
+            self.figureplot.set_ylabel('w (µm)')
+            self.figureplot.set_ylim(ymin=0) # Adjust the vertical min
+            self.figureplot.legend(handles=[tan,sag],loc='upper left')
             self.figureplot.grid(linestyle='dashed')
             self.canvas.show()
             toolbar = self.figure.canvas.toolbar
@@ -1102,7 +1104,15 @@ class Cavityplot(tk.Frame):
         y0, y1 = self.figureplot.get_ylim()
         for xi, element in zip(xpoints,xnames):
             self.figureplot.axvline(x=xi, color='orange', alpha=0.7, linewidth=0.7)
-            self.figureplot.text(xi,y1,element,rotation=90, horizontalalignment='right', verticalalignment='top')
+            if 'mirror' in element:
+                self.figureplot.text(xi,y0+5,element,rotation=90, horizontalalignment='right', verticalalignment='bottom')
+            elif 'Block' in element:
+                self.figureplot.text((xi+xold)/2,y1-5,element,rotation=0, horizontalalignment='center', verticalalignment='top',backgroundcolor='k',color='w')
+            elif 'lens' in element:
+                self.figureplot.text(xi,y0+5,element,rotation=90, horizontalalignment='right', verticalalignment='bottom')
+            else:
+                self.figureplot.text(xi,y1-5,element,rotation=90, horizontalalignment='right', verticalalignment='top', backgroundcolor='w', bbox=dict(facecolor='w', edgecolor='k', boxstyle='round',linewidth=0.5))
+            xold = xi
         self.canvas.show()
 #==============================================================================
 
