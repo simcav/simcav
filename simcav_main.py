@@ -831,12 +831,14 @@ class Centralplot(tk.Frame):
         # xmin and xmax should be an input to the plot function
         #xmin = float(master.elementbox.stability_entry1.get())
         #xmax = float(master.elementbox.stability_entry2.get())
-        plt.xlim((xmin,xmax))
+        self.figureplot.set_xlim([xmin,xmax])
         if ymin and ymax:
-            plt.ylim((ymin,ymax))
+            self.figureplot.set_ylim([ymin,ymax])
 
         self.figureplot.set_xlabel(xaxis)
         self.figureplot.set_ylabel(yaxis)
+        # Make negative part also positive
+        #self.figureplot.set_yticklabels([str(abs(x)) for x in self.figureplot.get_yticks()])
         self.canvas.show()
 #==============================================================================
 
@@ -1105,13 +1107,13 @@ class Cavityplot(tk.Frame):
         for xi, element in zip(xpoints,xnames):
             self.figureplot.axvline(x=xi, color='orange', alpha=0.7, linewidth=0.7)
             if 'mirror' in element:
-                self.figureplot.text(xi,y0+5,element,rotation=90, horizontalalignment='right', verticalalignment='bottom')
-            elif 'Block' in element:
-                self.figureplot.text((xi+xold)/2,y1-5,element,rotation=0, horizontalalignment='center', verticalalignment='top',backgroundcolor='k',color='w')
+                self.figureplot.text(xi,y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
             elif 'lens' in element:
-                self.figureplot.text(xi,y0+5,element,rotation=90, horizontalalignment='right', verticalalignment='bottom')
+                self.figureplot.text(xi, y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
+            elif 'Block' in element:
+                self.figureplot.text((xi+xold)/2, y1-5, element,rotation=0, horizontalalignment='center', verticalalignment='top', color='w', bbox=dict(facecolor='k', edgecolor='k', boxstyle='round', linewidth=0, alpha=0.65))
             else:
-                self.figureplot.text(xi,y1-5,element,rotation=90, horizontalalignment='right', verticalalignment='top', backgroundcolor='w', bbox=dict(facecolor='w', edgecolor='k', boxstyle='round',linewidth=0.5))
+                self.figureplot.text((xi+xold)/2,y1-5,element,rotation=90, horizontalalignment='center', verticalalignment='top', backgroundcolor='w', bbox=dict(facecolor='w', edgecolor='k', boxstyle='round',linewidth=0.5, alpha=0.65))
             xold = xi
         self.canvas.show()
 #==============================================================================
