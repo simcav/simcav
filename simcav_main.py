@@ -258,7 +258,7 @@ class Toolbar(tk.Frame):
         try:
             wl = float(wl)
             master.physics.calc_wl(wl)
-            master.warningbar.warbar_message('Wavelength changed to %.2f nm -- Please update the calculations' %wl, 'lawn green')
+            master.warningbar.warbar_message('Wavelength changed to %.2f nm.' %wl, 'lawn green')
             return wl
         except ValueError:
             master.warningbar.warbar_message('Error: Wavelength NaN', 'firebrick')
@@ -415,14 +415,14 @@ class Physics():
                     stab_list[item] = newdict
 
                 stab_matrix = self.calc_matrix(stab_list, proy)
-                stab_val = (-1)**proy * SIMU.stabilitycalc(stab_matrix)
+                stab_val = SIMU.stabilitycalc(stab_matrix)
                 y.append(stab_val)
                 
             self.yvec.append(y)
             
         xname = 'Element '+str(item)+' variation (mm)'
-        yname = 'Saggital         Stability (norm.)       Tangential'
-        master.framecentral.stabilityplot.plotframe.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]), xstart, xend, xname, yname, ymin=-1, ymax=1)
+        yname = 'Stability (norm.)'
+        master.framecentral.stabilityplot.plotframe.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]), xstart, xend, xname, yname, ymin=0, ymax=1)
 #==============================================================================
 
 
@@ -824,23 +824,22 @@ class Centralplot(tk.Frame):
     def plot(self, x0, y0, x1, y1, xmin, xmax, xaxis, yaxis, ymin=None, ymax=None):
         self.figureplot.clear()
 
-        self.figureplot.plot(x0, y0)
-        self.figureplot.set_prop_cycle(None)
-        self.figureplot.plot(x1, y1)
+        tan, = self.figureplot.plot(x0, y0, 'g', label='Tangential')
+        sag, = self.figureplot.plot(x1, y1, 'b', label='Saggital')
         self.figureplot.grid(linestyle='dashed')
+        self.figureplot.legend(handles=[tan,sag],loc='upper left')
         
         # xmin and xmax should be an input to the plot function
-        #xmin = float(master.elementbox.stability_entry1.get())
-        #xmax = float(master.elementbox.stability_entry2.get())
         self.figureplot.set_xlim([xmin,xmax])
         if ymin and ymax:
             self.figureplot.set_ylim([ymin,ymax])
 
         self.figureplot.set_xlabel(xaxis)
         self.figureplot.set_ylabel(yaxis)
-        # Make negative part also positive
-        #self.figureplot.set_yticklabels([str(abs(x)) for x in self.figureplot.get_yticks()])
         self.canvas.show()
+        toolbar = self.figure.canvas.toolbar
+        toolbar.update()       
+        toolbar.push_current()
 #==============================================================================
 
 #==============================================================================
@@ -972,8 +971,8 @@ class Beamsizeplot(tk.Frame):
             
         # Plot axis labels
         xname = 'Element '+str(elementX)+' variation (mm)'
-        yname = 'Saggital         Beam size at element '+str(elementY)+' (µm)       Tangential'
-        self.plotframe.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1])*(-1), xstart, xend, xname, yname)
+        yname = 'Beam size at element '+str(elementY)+' (µm)'
+        self.plotframe.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]), xstart, xend, xname, yname)
         
         master.warningbar.warbar_message('Calculation finished!', 'lawngreen')
         return 0
@@ -1000,7 +999,7 @@ class Stabilityplot(tk.Frame):
         self.plotframe.pack(side='top', fill='both', expand=True)
         
         self.controlexists = False
-        self.plotframe.plot(0, 0, 0, 0, 0, 1, 'Varying parameter (mm)', 'Stability (norm.)', ymin=-1, ymax=1)
+        self.plotframe.plot(0, 0, 0, 0, 0, 1, 'Varying parameter (mm)', 'Stability (norm.)', ymin=0, ymax=1)
         
     def createcontrol(self):
         self.controlexists = True
