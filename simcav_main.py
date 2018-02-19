@@ -258,7 +258,7 @@ class Toolbar(tk.Frame):
         try:
             wl = float(wl)
             master.physics.calc_wl(wl)
-            master.warningbar.warbar_message('Wavelength changed to %.2f nm.' %wl, 'lawn green')
+            master.warningbar.warbar_message('Wavelength changed to %.2f nm -- please UPDATE the cavity plot.' %wl, 'dark orange')
             return wl
         except ValueError:
             master.warningbar.warbar_message('Error: Wavelength NaN', 'firebrick')
