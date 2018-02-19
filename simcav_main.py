@@ -398,27 +398,28 @@ class Physics():
 
     def stability_plot(self, item, xstart, xend):
         self.xvec = np.linspace(xstart, xend, np.abs(xend-xstart)*100)
-        stab_list = self.element_list
-
+        stab_list = list(self.element_list)
+        
         self.yvec = []
         for proy in [0,1]:
             y = []
             for number in self.xvec:
                 # Now modify ONLY the first entry of the chosen item, and the associated matrix:
                 e1 = number
-                e2 = float(stab_list[item]['entry2'].get())
-                kind = stab_list[item]['type']
+                e2 = float(self.element_list[item]['entry2'].get())
+                kind = self.element_list[item]['type']
                 if kind == 'Custom element':
                     pass
                 else:
-                    stab_list[item].update(EF.assignment(kind, e1, e2, master.physics.refr_index))
+                    newdict = EF.assignment(kind, e1, e2, master.physics.refr_index)
+                    stab_list[item] = newdict
 
                 stab_matrix = self.calc_matrix(stab_list, proy)
                 stab_val = (-1)**proy * SIMU.stabilitycalc(stab_matrix)
                 y.append(stab_val)
-
+                
             self.yvec.append(y)
-        
+            
         xname = 'Element '+str(item)+' variation (mm)'
         yname = 'Saggital         Stability (norm.)       Tangential'
         master.framecentral.stabilityplot.plotframe.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1]), xstart, xend, xname, yname, ymin=-1, ymax=1)
@@ -923,8 +924,9 @@ class Beamsizeplot(tk.Frame):
         # X axis vector for plotting
         self.xvec = np.linspace(xstart, xend, np.abs(xend-xstart)*100)
         # Element list for this calculation
-        beamsize_list = master.physics.element_list
-        elementY = beamsize_list[item1]['itemnumber']
+        beamsize_list = list(master.physics.element_list)
+        elementX = master.physics.element_list[item2]['itemnumber']
+        elementY = master.physics.element_list[item1]['itemnumber']
             
         # Creation of Y axis vector
         self.yvec = []
@@ -935,12 +937,15 @@ class Beamsizeplot(tk.Frame):
             for number in self.xvec:
                 # Now modify ONLY the first entry of the chosen item, and the associated matrix:
                 e1 = number
-                e2 = float(beamsize_list[item2]['entry2'].get())
-                kind = beamsize_list[item2]['type']
+                e2 = float(master.physics.element_list[item2]['entry2'].get())
+                kind = master.physics.element_list[item2]['type']
                 if kind == 'Custom element':
                     pass
                 else:
-                    beamsize_list[item2].update(EF.assignment(kind, e1, e2, master.physics.refr_index))
+                    newdict = EF.assignment(kind, e1, e2, master.physics.refr_index)
+                    newdict['isvector'] = master.physics.element_list[item2]['isvector']
+                    beamsize_list[item2] = newdict
+                    
                 beamsize_matrix = SIMU.matrix(beamsize_list, proy)
                 q0 = SIMU.q0(beamsize_matrix)
                 
@@ -953,8 +958,8 @@ class Beamsizeplot(tk.Frame):
                     q = SIMU.qx(q0, elementY, beamsize_list, proy)
                 
                 # Refractive index
-                if 'refr_index' in beamsize_list[item1].keys():
-                    refr_index = beamsize_list[item1]['refr_index']
+                if 'refr_index' in master.physics.element_list[item1].keys():
+                    refr_index = master.physics.element_list[item1]['refr_index']
                 else:
                     refr_index = 1.0
                 # Wavelength (micrometres)
@@ -966,7 +971,7 @@ class Beamsizeplot(tk.Frame):
             self.yvec.append(y)
             
         # Plot axis labels
-        xname = 'Element '+str(beamsize_list[item2]['itemnumber'])+' variation (mm)'
+        xname = 'Element '+str(elementX)+' variation (mm)'
         yname = 'Saggital         Beam size at element '+str(elementY)+' (µm)       Tangential'
         self.plotframe.plot(self.xvec, np.array(self.yvec[0]), self.xvec, np.array(self.yvec[1])*(-1), xstart, xend, xname, yname)
         
@@ -1048,7 +1053,7 @@ class Stabilityplot(tk.Frame):
         # Call calculation
         master.physics.stability_plot(item1, se1, se2)
 
-        master.warningbar.warbar_message('Calculation finished!', 'lawngreen')
+        master.warningbar.warbar_message('Stability calculation finished!', 'lawngreen')
         return 0
 #==============================================================================
 
