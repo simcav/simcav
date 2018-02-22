@@ -1,6 +1,7 @@
 \documentclass[11pt,a4paper,article,oneside]{memoir}
 
 \usepackage[utf8]{inputenc}
+\usepackage{lmodern}
 \counterwithout{section}{chapter}
 
 	% Memoir modifications
@@ -42,10 +43,14 @@
 
 \begin{document}
 	\graphicspath{{./Figures/}}
-	
+
 	\maketitle
-	
+
 	\mainmatter
+	\begin{KeepFromToc}
+		\tableofcontents
+	\end{KeepFromToc}
+
 	\section{Introduction}
 	Simcav is a tool for advanced design and analysis of laser cavities. 
 	
@@ -89,7 +94,6 @@
 		Respecting your freedom and without charge: no tracking, no ads, \SI{100}{\percent} science.
 	\end{itemize}
 	
-	\newpage
 	\section{Layout}
 	The interface is built around a central frame used for plotting various diagrams. A toolbar on top provides access to general functions while a status bar at the bottom provides information to the user. The left frame shows the current cavity elements, while the right frame contains SimCav's tools.
 	
@@ -240,6 +244,9 @@
 	The \textit{matplotlib} library did a non-backwards-compatible change in the version 1.5, so if using any older version SimCav will not work. Please always ensure to update your system!
 	
 	The releases are digitally signed with the SimCav key (public key available on the website). Once extracted, it is possible to use GPG or similar to verify the download (\say{gpg --verify SimCav.asc}).
+	
+	\section{Updating SimCav}
+	SimCav will check if an update is available on start. If the version on use is not the last version, a message will appear in the status bar, notifying the user. Since SimCav is not installed, the user should download the new version manually. It is possible to click on the update message to open the website.
 		
 	
 \end{document}
