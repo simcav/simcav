@@ -163,7 +163,14 @@ class Toolbar(tk.Frame):
         master.elementbox.func_delete_button()
         # New fresh element list
         master.physics.element_list = []
-        # Ready to add elements
+        # Delete plots
+        master.framecentral.cavityplot.figureplot.clear()
+        master.framecentral.cavityplot.canvas.show()
+        for i in master.framecentral.__dict__:
+            if i in ['stabilityplot', 'beamsizeplot']:
+                master.framecentral.__dict__[i].plotframe.figureplot.clear()
+                master.framecentral.__dict__[i].plotframe.canvas.show()
+        # Call modify frame
         master.toolbar.func_button_add()
         master.warningbar.warbar_message('New cavity  --  Adding elements...', 'lawn green')
 
@@ -712,9 +719,6 @@ class Framecentral(tk.Frame):
             # Binds for color change (I think they aren't needed in linux)
             self.buttons[element].bind('<Enter>', self.func_color_enter)
             self.buttons[element].bind('<Leave>', self.func_color_leave)
-            
-        # Disable cavity button (cause it is the one active at start)
-        #self.buttons['a_cav'].config(state='disable', bg='lawngreen')
         
         self.cavityplot = Cavityplot(self, relief='flat', borderwidth=0, bg='white')
         self.cavityplot.pack(side='top', fill='both', expand=True)
@@ -1982,7 +1986,7 @@ if __name__ == "__main__":
     except:
         root.attributes('-zoomed', True)
     # Program version
-    versionnumber = '4.8.1'
+    versionnumber = '4.8.2'
     # Window title (version cap to first two numbers)
     root.wm_title("SimCav %.3s" %versionnumber)
     try:
