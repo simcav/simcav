@@ -286,12 +286,19 @@ class Toolbar(tk.Frame):
 class Warningbar(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
-
+        
+        self.clickable = False
         self.label_warning = tk.Label(self, text=' ', pady=4)
         self.label_warning.pack(fill='x')
         self.warbar_nomessage()
+        
 
     def warbar_message(self, newtext, newcolor):
+        # Remove hyperlink, clickability if needed
+        if self.clickable == True:
+            self.label_warning.unbind("<Button-1>")
+            self.label_warning.config(cursor="")
+            self.clickable = False
         # Call this function to display a new message in the warningbar.
         self.label_warning.configure(text=newtext, bg=newcolor, font='bold')
 
@@ -1945,11 +1952,19 @@ class MainApplication(tk.Frame):
         if versionnum == s1:
             self.warningbar.warbar_message('SimCav is up-to-date (v%s)' %versionnum, 'lawn green')
         else:
+            # Make warninbar clickable to launch web browser
             if s2:
                 self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
             else:
                 self.warningbar.warbar_message('A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
+            self.warningbar.label_warning.bind("<Button-1>", self.labelclick)
+            self.warningbar.label_warning.config(cursor="hand2")
+            self.warningbar.clickable = True
         return 0
+    
+    def labelclick(self, event):
+        import webbrowser
+        webbrowser.open_new(r"http://simcav.github.io")
 #==============================================================================
 
 
@@ -1967,7 +1982,7 @@ if __name__ == "__main__":
     except:
         root.attributes('-zoomed', True)
     # Program version
-    versionnumber = '4.8.2'
+    versionnumber = '4.8.1'
     # Window title (version cap to first two numbers)
     root.wm_title("SimCav %.3s" %versionnumber)
     try:
