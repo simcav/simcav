@@ -681,6 +681,8 @@ class Elementbox(tk.Frame):
             master.framecentral.cavityplot.plot(master.physics.z_tan, master.physics.wz_tan, master.physics.z_sag, master.physics.wz_sag)
             master.framecentral.cavityplot.plotverticals(master.physics.z_limits_tan, master.physics.z_names_tan)
         
+        # Take focus off from entry.
+        self.button_calc.focus()
         master.framecentral.disablebuttons('a_cav')
         master.framecentral.show_cavityplot()
 
@@ -900,7 +902,7 @@ class Beamsizeplot(tk.Frame):
         self.controls['g_labelsize'] = tk.Label(self.controlframe, text='     to... ', bg='white', bd=0, highlightthickness=0)
         self.controls['h_entry2'] = tk.Entry(self.controlframe, width=5, justify='right')
         self.controls['i_labelsize'] = tk.Label(self.controlframe, text='             ', bg='white', bd=0, highlightthickness=0)
-        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, highlightthickness=2)
+        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, highlightthickness=0)
         
         # Adjust entry values
         self.controls['f_entry1'].insert(0, 0)
@@ -921,6 +923,8 @@ class Beamsizeplot(tk.Frame):
         self.pressed_go()
         
     def pressed_go(self):
+        # Take focus away from entries
+        self.controls['j_button'].focus()
         master.warningbar.warbar_message('Calculating beam size variation', 'lawngreen')
         # Optionmenus variables
         item1 = self.elemsize_var.get()
@@ -1035,7 +1039,7 @@ class Stabilityplot(tk.Frame):
         self.controls['g_labelsize'] = tk.Label(self.controlframe, text='     to... ', bg='white', bd=0, highlightthickness=0)
         self.controls['h_entry2'] = tk.Entry(self.controlframe, width=5, justify='right')
         self.controls['i_labelsize'] = tk.Label(self.controlframe, text='             ', bg='white', bd=0, highlightthickness=0)
-        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, highlightthickness=2)
+        self.controls['j_button'] = tk.Button(self.controlframe, text='CALCULATE', image=master.elementbox.icon_go, command=self.pressed_go, bg='white', bd=0, highlightthickness=0)
         
         # Adjust entry values
         self.controls['f_entry1'].insert(0, 0)
@@ -1056,6 +1060,8 @@ class Stabilityplot(tk.Frame):
         self.pressed_go()
         
     def pressed_go(self):
+        # Take focus away from entries
+        self.controls['j_button'].focus()
         # Optionmenus variables
         item1 = self.elemparam_var.get()
         # Entry variables
@@ -1418,6 +1424,12 @@ class Cavitycomputation(tk.Frame):
         self.conditions_list.append(myDict)
         self.rownumber += 1
         self.condition_number += 1
+        
+        try:
+            # Take focus away from entries
+            self.button_add_condition.focus()
+        except:
+            pass
 
         master.warningbar.warbar_message('Condition added', 'lawn green')
 
@@ -1542,8 +1554,8 @@ class Cavitycomputation(tk.Frame):
         if not self.cond_error('entry_eval'):
             return False
 
-        # Make button take focus (so condition entries dont)
-        self.button_computation.focus_set()
+        # Take focus off from entry.
+        self.button_computation.focus()
 
         self.solutions_found = False
         self.combination_final = []
