@@ -1795,6 +1795,8 @@ class ResultsWindow2(tk.Frame):
                 # Binds for mouse enter / leave
                 label.bind('<Enter>', self.func_mouse_enter)
                 label.bind('<Leave>', self.func_mouse_leave)
+                #Change cursor
+                label.config(cursor="hand2")
                 # Bind for clicking
                 label.bind("<Button-1>", self.label_clicked)
                 self.results_label.append(label)
