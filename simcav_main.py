@@ -835,7 +835,7 @@ class Centralplot(tk.Frame):
         tan, = self.figureplot.plot(x0, y0, 'g', label='Tangential')
         sag, = self.figureplot.plot(x1, y1, 'b', label='Saggital')
         self.figureplot.grid(linestyle='dashed')
-        self.figureplot.legend(handles=[tan,sag],loc='upper left')
+        self.figureplot.legend(handles=[tan,sag], loc='upper left')
         
         # xmin and xmax should be an input to the plot function
         self.figureplot.set_xlim([xmin,xmax])
@@ -1100,14 +1100,14 @@ class Cavityplot(tk.Frame):
                 x2.append(0)
                 y2.append(0)
                 for zrow, wrow in zip(x1,y1):
-                    tan, = self.figureplot.plot(zrow,wrow*1000,'g')
+                    tan, = self.figureplot.plot(zrow,wrow*1000,'g',label='Tangential')
                 for zrow, wrow in zip(x2,y2):
-                    sag, = self.figureplot.plot(zrow,wrow*1000,'b')
+                    sag, = self.figureplot.plot(zrow,wrow*1000,'b',label='Saggital')
 
             self.figureplot.set_xlabel('z (mm)')
             self.figureplot.set_ylabel('w (µm)')
             self.figureplot.set_ylim(ymin=0) # Adjust the vertical min
-            self.figureplot.legend(handles=[tan,sag],loc='upper left')
+            self.figureplot.legend(handles=[tan,sag], loc='upper left')
             self.figureplot.grid(linestyle='dashed')
             self.canvas.show()
             toolbar = self.figure.canvas.toolbar
