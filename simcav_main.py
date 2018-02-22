@@ -845,7 +845,7 @@ class Centralplot(tk.Frame):
         
         # xmin and xmax should be an input to the plot function
         self.figureplot.set_xlim([xmin,xmax])
-        if ymin and ymax:
+        if ymin != None and ymax != None:
             self.figureplot.set_ylim([ymin,ymax])
 
         self.figureplot.set_xlabel(xaxis)
