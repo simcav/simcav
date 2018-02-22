@@ -22,6 +22,7 @@ import itertools
 import pickle
 import numpy as np
 import os
+import urllib.request
 
 # Imports for plotting
 import matplotlib
@@ -1905,7 +1906,7 @@ class ResizingCanvas(tk.Canvas):
 #==============================================================================
 #%% Main frame
 class MainApplication(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, versionnum, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
         self.newcavplot = True
@@ -1916,16 +1917,39 @@ class MainApplication(tk.Frame):
         self.warningbar = Warningbar(self, relief='solid', bd=0)
         self.elementbox = Elementbox(self, relief='solid', borderwidth=3, width=300, bg='white')
         self.frameright = Frameright(self, relief='solid', borderwidth=3, width=360, height=300, bg='white')
-
         self.physics = Physics()
         self.framecentral = Framecentral(self, relief='solid', borderwidth=3, bg='white')
-
+        #---------------------- Constructing GUI -------------------------------
         self.toolbar.pack(side="top", fill="x", padx=3, pady=3, ipadx=5, ipady=2)
         self.warningbar.pack(side="bottom", fill="x")
         self.elementbox.pack(side='left', fill='y', ipady=3, padx=3, pady=3)
         self.frameright.pack(side='right', fill='y', ipady=3, padx=3, pady=3)
         self.framecentral.pack(side='top', fill='both', anchor='s', expand=True,
                                pady=3, ipady=0, ipadx=0)
+        #---------------------- Dealing with updates ---------------------------
+        self.warningbar.warbar_message('Checking updates, please wait','grey')
+        # Update GUI in case checking updates takes long.
+        self.after(0, self.checkupdates, versionnum)
+    
+    def checkupdates(self, versionnum):
+        # Read version from simcav.github.io website (program's own website).
+        try:
+            with urllib.request.urlopen("http://simcav.github.io/version") as versiondata:
+                s = versiondata.read()
+        except:
+            self.warningbar.warbar_message('Could not fetch software version, please check your internet connection', 'goldenrod')
+            return 1
+        # Read as text, remove newline character.
+        s1 = str(s,'utf-8')[:5]
+        s2 = str(s,'utf-8')[6:]
+        if versionnum == s1:
+            self.warningbar.warbar_message('SimCav is up-to-date (v%s)' %versionnum, 'lawn green')
+        else:
+            if s2:
+                self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
+            else:
+                self.warningbar.warbar_message('A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
+        return 0
 #==============================================================================
 
 
@@ -1942,8 +1966,10 @@ if __name__ == "__main__":
         root.wm_state('zoomed')
     except:
         root.attributes('-zoomed', True)
-    # Window title
-    root.wm_title("SimCav 4.8")
+    # Program version
+    versionnumber = '4.8.2'
+    # Window title (version cap to first two numbers)
+    root.wm_title("SimCav %.3s" %versionnumber)
     try:
         # This is for windows
         root.wm_iconbitmap(resource_path("Icons/logo-tg3.ico"))#root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))
@@ -1955,7 +1981,7 @@ if __name__ == "__main__":
     # Kill process when click on window close button
     root.protocol("WM_DELETE_WINDOW", killing_root)
     # Create main frame
-    master = MainApplication(root, bg='white')
+    master = MainApplication(root, versionnumber, bg='white')
     master.pack(side="top", fill="both", expand=True)
 
     root.mainloop()
