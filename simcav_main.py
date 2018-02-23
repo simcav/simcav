@@ -1961,8 +1961,28 @@ class MainApplication(tk.Frame):
         try:
             with urllib.request.urlopen("http://simcav.github.io/version") as versiondata:
                 s = versiondata.read()
-        except:
-            self.warningbar.warbar_message('Could not fetch software version, please check your internet connection', 'goldenrod')
+        # except HTTPError:
+        
+        #     self.warningbar.warbar_message('HTTPError (version file not found?)', 'firebrick')
+        # except:
+        #     print(sys.exc_info()[0])
+        #     self.warningbar.warbar_message('Could not fetch software version, please check your internet connection', 'goldenrod')
+        except urllib.error.HTTPError:
+            # HTTPError is an exception class that is also a valid HTTP responses
+            # instance.  It behaves this way because HTTP protocol errors are valid
+            # responses, with a status code, headers, and a body.  In some contexts,
+            # an application may want to handle an exception like a regular response.
+            self.warningbar.warbar_message('Error fetching updates: Error 404 - Not found', 'firebrick')
+            return 1
+        except urllib.error.URLError:
+            self.warningbar.warbar_message('Error fetching updates: Name or service not known (maybe no internet?)', 'firebrick')
+            return 1
+        except Exception as inst:
+            print(type(inst))    # the exception instance
+            print(inst.args)     # arguments stored in .args
+            print(inst)          # __str__ allows args to be printed directly,
+                                 # but may be overridden in exception subclasses
+            self.warningbar.warbar_message(type(inst)+' -- '+inst, 'firebrick')
             return 1
         # Read as text, remove newline character.
         s1 = str(s,'utf-8')[:5]
