@@ -22,7 +22,8 @@ import itertools
 import pickle
 import numpy as np
 import os
-import urllib.request
+import urllib.request   # To fetch version status
+import webbrowser       # To open webbrowser
 
 # Imports for plotting
 import matplotlib
@@ -33,7 +34,6 @@ import matplotlib.pyplot as plt
 # import for scrolled window
 import scrolledframe as scrollf
 import tooltips as tt
-
 
 # File path function for deployment in single file with PyInstaller
 def resource_path(relative_path):
@@ -1961,28 +1961,22 @@ class MainApplication(tk.Frame):
         try:
             with urllib.request.urlopen("http://simcav.github.io/version") as versiondata:
                 s = versiondata.read()
-        # except HTTPError:
-        
-        #     self.warningbar.warbar_message('HTTPError (version file not found?)', 'firebrick')
-        # except:
-        #     print(sys.exc_info()[0])
-        #     self.warningbar.warbar_message('Could not fetch software version, please check your internet connection', 'goldenrod')
         except urllib.error.HTTPError:
             # HTTPError is an exception class that is also a valid HTTP responses
             # instance.  It behaves this way because HTTP protocol errors are valid
             # responses, with a status code, headers, and a body.  In some contexts,
             # an application may want to handle an exception like a regular response.
-            self.warningbar.warbar_message('Error fetching updates: Error 404 - Not found', 'firebrick')
+            self.warningbar.warbar_message('Updates Error 404: %s' %e.resaon, 'firebrick')
             return 1
-        except urllib.error.URLError:
-            self.warningbar.warbar_message('Error fetching updates: Name or service not known (maybe no internet?)', 'firebrick')
+        except urllib.error.URLError as e:
+            self.warningbar.warbar_message('Updates Error Service not known: %s' %e.reason, 'firebrick')
             return 1
-        except Exception as inst:
-            print(type(inst))    # the exception instance
-            print(inst.args)     # arguments stored in .args
-            print(inst)          # __str__ allows args to be printed directly,
+        except Exception as e:
+            print(type(e))    # the exception instance
+            print(e.args)     # arguments stored in .args
+            print(e)          # __str__ allows args to be printed directly,
                                  # but may be overridden in exception subclasses
-            self.warningbar.warbar_message(type(inst)+' -- '+inst, 'firebrick')
+            self.warningbar.warbar_message(type(inst)+' -- '+inst+' -- '+e.reason, 'firebrick')
             return 1
         # Read as text, remove newline character.
         s1 = str(s,'utf-8')[:5]
@@ -2001,7 +1995,6 @@ class MainApplication(tk.Frame):
         return 0
     
     def labelclick(self, event):
-        import webbrowser
         webbrowser.open_new(r"http://simcav.github.io")
 #==============================================================================
 
