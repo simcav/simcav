@@ -22,7 +22,7 @@ import itertools
 import pickle
 import numpy as np
 import os
-import urllib.request   # To fetch version status
+import requests         # To fetch version status
 import webbrowser       # To open webbrowser
 
 # Imports for plotting
@@ -1952,48 +1952,63 @@ class MainApplication(tk.Frame):
         self.framecentral.pack(side='top', fill='both', anchor='s', expand=True,
                                pady=3, ipady=0, ipadx=0)
         #---------------------- Dealing with updates ---------------------------
-        self.warningbar.warbar_message('Checking updates, please wait','grey')
-        # Update GUI in case checking updates takes long.
+        self.warningbar.warbar_message('Checking version, please wait','grey')
         self.after(0, self.checkupdates, versionnum)
-    
+        
+    # Read version from simcav.github.io website (program's own website).
     def checkupdates(self, versionnum):
-        # Read version from simcav.github.io website (program's own website).
+        # Update GUI in case checking updates takes long.
+        root.update_idletasks()
         try:
-            with urllib.request.urlopen("http://simcav.github.io/version") as versiondata:
-                s = versiondata.read()
-        except urllib.error.HTTPError:
-            # HTTPError is an exception class that is also a valid HTTP responses
-            # instance.  It behaves this way because HTTP protocol errors are valid
-            # responses, with a status code, headers, and a body.  In some contexts,
-            # an application may want to handle an exception like a regular response.
-            self.warningbar.warbar_message('Updates Error 404: %s' %e.resaon, 'firebrick')
-            return 1
-        except urllib.error.URLError as e:
-            self.warningbar.warbar_message('Updates Error Service not known: %s' %e.reason, 'firebrick')
-            return 1
-        except Exception as e:
+            versiondata = requests.get("http://simcav.github.io/version", timeout=5)
+        except requests.exceptions.ConnectTimeout as e:
             print(type(e))    # the exception instance
+            self.warningbar.warbar_message('Error fetching version information: Timeout error', 'firebrick')
+            error = 1
+        except requests.exceptions.ConnectionError as e:
+            print(type(e))    # the exception instance
+            self.warningbar.warbar_message('Error fetching version information: Connection error (no internet?)', 'firebrick')
+            error = 1
+        except requests.exceptions.HTTPError as e:
+            print(type(e))    # the exception instance
+            self.warningbar.warbar_message('Error fetching version information: HTTP error (rare invalid HTTP response)', 'firebrick')
+            error = 1
+        except Exception as e:
+            print('type----------------------------\n')
+            print(type(e))    # the exception instance
+            print('args----------------------------\n')            
             print(e.args)     # arguments stored in .args
-            print(e)          # __str__ allows args to be printed directly,
-                                 # but may be overridden in exception subclasses
-            self.warningbar.warbar_message(type(inst)+' -- '+inst+' -- '+e.reason, 'firebrick')
-            return 1
-        # Read as text, remove newline character.
-        s1 = str(s,'utf-8')[:5]
-        s2 = str(s,'utf-8')[6:]
-        if versionnum == s1:
-            self.warningbar.warbar_message('SimCav is up-to-date (v%s)' %versionnum, 'lawn green')
+            print('e-------------------------------\n')            
+            print(e)
+            self.warningbar.warbar_message('Unknown error while fetching version information', 'firebrick')
+            error = 1
         else:
-            # Make warninbar clickable to launch web browser
-            if s2:
-                self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
+            if versiondata.status_code == requests.codes.ok:
+                s = versiondata.text
+                # Separate lines (version & important)
+                s1 = s[:5]
+                s2 = s[6:]
+                if versionnum == s1:
+                    self.warningbar.warbar_message('SimCav is up-to-date (v%s)' %versionnum, 'lawn green')
+                else:
+                    # Make warninbar clickable to launch web browser
+                    if 'important' in s2:
+                        self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
+                    else:
+                        self.warningbar.warbar_message('A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
+                error = 0
+            elif versiondata.status_code == requests.codes.not_found:
+                self.warningbar.warbar_message('Unable to retrieve online information about version, please try again later.', 'firebrick')
+                error = 1
             else:
-                self.warningbar.warbar_message('A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
+                self.warningbar.warbar_message('Error fetching online version information: error %s (%s)' %(versiondata.status_code, requests.status_codes._codes[versiondata.status_code][0]) , 'firebrick')
+                error = 1
+        finally:
             self.warningbar.label_warning.bind("<Button-1>", self.labelclick)
             self.warningbar.label_warning.config(cursor="hand2")
             self.warningbar.clickable = True
-        return 0
-    
+        return error
+        
     def labelclick(self, event):
         webbrowser.open_new(r"http://simcav.github.io")
 #==============================================================================
