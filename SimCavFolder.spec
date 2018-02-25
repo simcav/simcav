@@ -3,8 +3,8 @@
 block_cipher = None
 
 
-a = Analysis(['simcav4_7_GUI.py'],
-             pathex=['/home/julio/Projects/simcav'],
+a = Analysis(['simcav_main.py'],
+             pathex=[],
              binaries=[],
              datas=[('Icons/', './')],
              hiddenimports=[],
@@ -23,7 +23,7 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=False )
+          console=True )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
