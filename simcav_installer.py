@@ -41,9 +41,10 @@ def askuser(message):
 		else:
 			print("Your response ('') was not one of the expected responses: (y/n)")
 
-def download_file(url, folder):
+def download_file(url, folderfile):
 	#print('Downloading ' + url.split('/')[-1])
-	wget.download(url, folder)
+	#wget.download(url, folder)
+	request.urlretrieve(url, folderfile)
 
 def writepath(user_site):
 	with open("user_path.txt") as f:
@@ -76,7 +77,9 @@ try:
 		from pip import main as pipmain
 
 	# List of modules required by SimCav
-	simcav_modules = ['tkinter', 'itertools', 'pickle', 'numpy', 'os', 'requests', 'webbrowser', 'matplotlib']
+	simcav_modules = ['tkinter',  'numpy', 'requests', 'matplotlib']#, 'itertools', 'os', 'pickle', 'webbrowser'] 
+	# The last ones, commented, are part of the standard python distribution.
+	
 	# List of modules required by the installer
 	installation_modules = ['wget', 'winshell']
 	installed_modules = []
@@ -127,7 +130,7 @@ try:
 		print(simcav_home + 'already exist. Overwrite? (y/n)')
 		
 	# Downloading files
-	import requests, wget
+	import requests#, wget
 	#simcav_url = 'https://zenodo.org/record/1184130/files/simcav/simcav-v4.8.2.zip'
 	#simcav_url = 'https://gitlab.com/simcav/simcav'
 	#simcav_url = 'https://gitlab.com/simcav/simcav/-/archive/master/simcav-master.zip'
@@ -175,20 +178,20 @@ try:
 	print('\n Downloading modules...')
 	for i in simcav_files:
 		if not i in os.listdir(simcav_home):
-			download_file(simcav_url + i, simcav_home)
+			download_file(simcav_url + i, os.path.join(simcav_home,i))
 	
 	print('\n Downloading icons...')
 	for i in simcav_icons:
 		if not i in os.listdir(icons_folder):
-			download_file(simcav_url + 'Icons/' + i, icons_folder)
+			download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder,i))
 	
 	print('\n Downloading readmes...')
 	for i in simcav_misc:
 		if not i in os.listdir(simcav_home):
-			download_file(simcav_url+i, simcav_home)
+			download_file(simcav_url+i, os.path.join(simcav_home,i))
 	print('\n Downloading manual...')
 	if not 'manual.pdf' in os.listdir(simcav_home):
-		download_file(simcav_url+'Manual/manual.pdf', simcav_home)
+		download_file(simcav_url+'Manual/manual.pdf', os.path.join(simcav_home,'manual.pdf')
 	print('\n Files downloaded')	
 	#=================================================================
 	# Create system links
@@ -214,12 +217,9 @@ try:
 		shortcut_path = os.path.join(winshell.desktop(), 'SimCav.lnk')
 		create_shortcut(shortcut_path, simcav_home)
 		
-		# Create StartMenu folder
-		startmenu_path = os.path.join(winshell.start_menu(),'Programs','SimCav')
-		startmenu_file = os.path.join(startmenu_path, 'SimCav.lnk')
-		if not os.path.exists(startmenu_path):
-			os.mkdir(startmenu_path)
-		create_shortcut(startmenu_file, simcav_home)
+		# Create StartMenu access
+		startmenu_path = os.path.join(winshell.start_menu(),'Programs','SimCav.lnk')
+		create_shortcut(startmenu_path, simcav_home)
 			
 	elif guestOS == 'linux':
 		desktop_path = os.path.join(os.path.join(user_home, 'Desktop'), 'SimCav2.desktop')
