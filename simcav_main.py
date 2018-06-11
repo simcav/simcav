@@ -2033,10 +2033,10 @@ if __name__ == "__main__":
     root.wm_title("SimCav %.3s" %versionnumber)
     try:
         # This is for windows
-        root.wm_iconbitmap(resource_path("Icons/logo-tg3.ico"))#root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))
+        root.wm_iconbitmap(resource_path(os.path.join("Icons","logo-tg3.ico")))
     except:
         # This is for linux
-        myicon = tk.PhotoImage(file=resource_path("Icons/logo-tg3.png"))
+        myicon = tk.PhotoImage(file=resource_path(os.path.join("Icons","logo-tg3.png")))
         root.tk.call('wm', 'iconphoto', root._w, myicon)
     root.minsize(1100,400)
     # Kill process when click on window close button
