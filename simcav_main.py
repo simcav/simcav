@@ -95,8 +95,7 @@ class Toolbar(tk.Frame):
         self.toolbar_buttons['f0_separator'] = ttk.Separator(self, orient='vertical')
         self.toolbar_buttons['f_button_update'] = tk.Button(self, text='Update',
                                                         image=self.img_update,
-                                                        command=self.func_button_update,
-                                                        highlightthickness=0)
+                                                        command=self.func_button_update, highlightthickness=0, state='disabled')
         self.toolbar_buttons['z_button_quit'] = tk.Button(self, text='Quit',
                                                 image=self.img_quit, command=self.func_button_quit,
                                                 highlightthickness=0)
@@ -115,8 +114,8 @@ class Toolbar(tk.Frame):
                 self.toolbar_buttons[button].pack(side='left', fill='y')
             else:
                 self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white')
-                self.toolbar_buttons[button].bind('<Enter>', self.func_color_enter)
-                self.toolbar_buttons[button].bind('<Leave>', self.func_color_leave)
+                #self.toolbar_buttons[button].bind('<Enter>', self.func_color_enter)
+                #self.toolbar_buttons[button].bind('<Leave>', self.func_color_leave)
                 self.toolbar_buttons[button].pack(side='left')
 
         # Tooltips
@@ -125,6 +124,7 @@ class Toolbar(tk.Frame):
         self.testtip = tt.createToolTip(self.toolbar_buttons['c_button_save'], "Save cavity")
         self.testtip = tt.createToolTip(self.toolbar_buttons['d_button_add'], "Modify cavity")
         self.testtip = tt.createToolTip(self.toolbar_buttons['e_button_computation'], "Design calculator")
+        self.testtip = tt.createToolTip(self.toolbar_buttons['f_button_update'], "Update SimCav")
         # Quit tooltip removed because it interferes with icon change.
         #self.testtip = tt.createToolTip(self.toolbar_buttons['z_button_quit'], "Quit")
 
@@ -188,7 +188,9 @@ class Toolbar(tk.Frame):
         killing_root()
         
     def func_button_update(self):
-        pass
+        import subprocess
+        subprocess.Popen([sys.executable, 'simcav_updater.py'])
+        killing_root()
 
     def func_button_add(self):
         # Shows tab for add/delete cavity elements
@@ -1972,7 +1974,7 @@ class MainApplication(tk.Frame):
         # Update GUI in case checking updates takes long.
         root.update_idletasks()
         try:
-            versiondata = requests.get("http://simcav.github.io/version", timeout=5)
+            versiondata = requests.get("http://simcav.gitlab.io/version", timeout=5)
         except requests.exceptions.ConnectTimeout as e:
             print(type(e))    # the exception instance
             self.warningbar.warbar_message('Error fetching version information: Timeout error', 'firebrick')
@@ -2010,6 +2012,7 @@ class MainApplication(tk.Frame):
                         self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
                     else:
                         self.warningbar.warbar_message('A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
+                    self.toolbar.toolbar_buttons['f_button_update'].config(state="normal")
                 error = 0
             elif versiondata.status_code == requests.codes.not_found:
                 self.warningbar.warbar_message('Unable to retrieve online information about version, please try again later.', 'firebrick')
@@ -2046,7 +2049,7 @@ def mainfunc():
     except:
         root.attributes('-zoomed', True)
     # Program version
-    versionnumber = '4.8.3'
+    versionnumber = '4.5.0'
     # Window title (version cap to first two numbers)
     root.wm_title("SimCav %.3s" %versionnumber)
     try:
