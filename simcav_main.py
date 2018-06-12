@@ -1990,6 +1990,8 @@ class MainApplication(tk.Frame):
                 s2 = s[6:]
                 if versionnum == s1:
                     self.warningbar.warbar_message('SimCav is up-to-date (v%s)' %versionnum, 'lawn green')
+                elif versionnum > s1:
+                    self.warningbar.warbar_message('You are using a future version, please report any bugs :)', 'lawn green')
                 else:
                     # Make warninbar clickable to launch web browser
                     if 'important' in s2:
@@ -2016,6 +2018,12 @@ class MainApplication(tk.Frame):
 
 #%%
 if __name__ == "__main__":
+    script_path = os.path.dirname(os.path.abspath( __file__ ))
+    os.chdir(script_path)
+    #May not woth with PyInstaller
+    #The solution for the executables I created with py2exe was this one:
+    #os.path.abspath(os.path.dirname(sys.argv[0]))
+    # source: https://www.blog.pythonlibrary.org/2013/10/29/python-101-how-to-find-the-path-of-a-running-script/
 
     def killing_root():
         root.quit()
@@ -2028,7 +2036,7 @@ if __name__ == "__main__":
     except:
         root.attributes('-zoomed', True)
     # Program version
-    versionnumber = '4.8.2'
+    versionnumber = '4.8.3'
     # Window title (version cap to first two numbers)
     root.wm_title("SimCav %.3s" %versionnumber)
     try:
