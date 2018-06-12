@@ -155,6 +155,7 @@ try:
 	# Required files
 	simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py']
 	simcav_icons = []
+	simcav_saves = []
 	simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md']
 	
 	# Get icons list from repo
@@ -163,10 +164,9 @@ try:
 		if not '.svg' in i['name']:
 			simcav_icons.append(i['name'])
 	# Get saves list from repo
-	r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
-	for i in r.json():
-		if not '.svg' in i['name']:
-			simcav_icons.append(i['name'])	
+	# r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Saves/'})
+	# for i in r.json():
+	# 	simcav_saves.append(i['name'])	
 	#=================================
 	print('\n Creating subfolders...')
 	# Icons folder
@@ -195,7 +195,7 @@ try:
 		download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder, i))
 		
 	# print('\n Downloading examples...')
-	# for i in simcav_icons:
+	# for i in simcav_saves:
 	# 	download_file(simcav_url + 'Saves/' + i, os.path.join(icons_folder, i))
 	# 
 	print('\n Downloading readmes...')
