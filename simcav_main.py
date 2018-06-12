@@ -68,12 +68,13 @@ class Toolbar(tk.Frame):
         self.img_save = tk.PhotoImage(file=resource_path("Icons/t_save.png"))
         self.img_load = tk.PhotoImage(file=resource_path("Icons/t_load.png"))
         self.img_compute = tk.PhotoImage(file=resource_path("Icons/t_calcu.png"))
+        self.img_update = tk.PhotoImage(file=resource_path("Icons/t_update.png"))
         self.img_quit = tk.PhotoImage(file=resource_path("Icons/t_quit.png"))
         self.img_quit2 = tk.PhotoImage(file=resource_path("Icons/t_quit2.png"))
         #self.img_test = tk.PhotoImage(file="test.gif")
 
         # Creating buttons
-        self.toolbar_buttons['a0_separator'] = ttk.Separator(self, orient='vertical')
+        #self.toolbar_buttons['a0_separator'] = ttk.Separator(self, orient='vertical')
         self.toolbar_buttons['a_button_new'] = tk.Button(self, text='New',
                                                image=self.img_new, command=self.func_button_new,
                                                highlightthickness=0)
@@ -92,6 +93,10 @@ class Toolbar(tk.Frame):
                                                        command=self.func_button_computation,
                                                        highlightthickness=0)
         self.toolbar_buttons['f0_separator'] = ttk.Separator(self, orient='vertical')
+        self.toolbar_buttons['f_button_update'] = tk.Button(self, text='Update',
+                                                        image=self.img_update,
+                                                        command=self.func_button_update,
+                                                        highlightthickness=0)
         self.toolbar_buttons['z_button_quit'] = tk.Button(self, text='Quit',
                                                 image=self.img_quit, command=self.func_button_quit,
                                                 highlightthickness=0)
@@ -181,6 +186,9 @@ class Toolbar(tk.Frame):
     def func_button_quit(self):
         # Close program
         killing_root()
+        
+    def func_button_update(self):
+        pass
 
     def func_button_add(self):
         # Shows tab for add/delete cavity elements
