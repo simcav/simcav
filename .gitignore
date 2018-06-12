@@ -1,4 +1,5 @@
 __pycache__/
-Saves/
+Saves/*
+!Saves/Example_3mirror-cavity.sc
 Manual/manual.*
-Manual/!manual.tex
+!Manual/manual.tex
