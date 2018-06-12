@@ -26,7 +26,7 @@ def pipimport():
 
 # SimCav
 def list_simcav_modules():
-    simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py']#, 'simcav_updater.py', 'misc.py']
+    simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py', 'simcav_updater.py', 'misc.py']
     return simcav_files
 
 def list_simcav_misc():
@@ -69,8 +69,6 @@ def get_api():
 def get_repo():
     repo_url = 'https://gitlab.com/simcav/simcav/raw/master/'
     return repo_url
-
-
 
 
 # DOWNLOADS
@@ -119,9 +117,9 @@ def download_simcav(simcav_home):
     simcav_icons = list_simcav_icons()
     download_group(simcav_icons, os.path.join(simcav_home,'Icons'))
         
-    # print('\n Downloading examples...')
-    # simcav_saves = list_simcav_saves()
-    # download_group(simcav_saves, os.path.join(simcav_home,'Saves'))
+    print('\n Downloading examples...')
+    simcav_saves = list_simcav_saves()
+    download_group(simcav_saves, os.path.join(simcav_home,'Saves'))
     
     print('\n Downloading other files...')
     simcav_misc = list_simcav_misc()

@@ -92,7 +92,9 @@ try:
 	# The last ones, commented, are part of the standard python distribution.
 	
 	# List of modules required by the installer
-	installation_modules = ['winshell']
+	installation_modules = []
+	if guestOS == 'win32':
+		installation_modules.append('winshell')
 	installed_modules = []
 	# Check that modules exist / can be imported
 	print("\nChecking required modules:")
@@ -164,9 +166,9 @@ try:
 		if not '.svg' in i['name']:
 			simcav_icons.append(i['name'])
 	# Get saves list from repo
-	# r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Saves/'})
-	# for i in r.json():
-	# 	simcav_saves.append(i['name'])	
+	r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Saves/'})
+	for i in r.json():
+		simcav_saves.append(i['name'])	
 	#=================================
 	print('\n Creating subfolders...')
 	# Icons folder
@@ -194,10 +196,10 @@ try:
 	for i in simcav_icons:
 		download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder, i))
 		
-	# print('\n Downloading examples...')
-	# for i in simcav_saves:
-	# 	download_file(simcav_url + 'Saves/' + i, os.path.join(icons_folder, i))
-	# 
+	print('\n Downloading examples...')
+	for i in simcav_saves:
+		download_file(simcav_url + 'Saves/' + i, os.path.join(icons_folder, i))
+	
 	print('\n Downloading readmes...')
 	for i in simcav_misc:
 		download_file(simcav_url+i, os.path.join(simcav_home, i))
