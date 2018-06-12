@@ -11,3 +11,4 @@ Fully backwards compatible.
 ## Bugs
 ### Minor
 - Proper path definition for icon.
+- Plotting from computation results was plot-looping several times.
