@@ -153,7 +153,7 @@ try:
 	simcav_url = 'https://gitlab.com/simcav/simcav/raw/master/'
 	
 	# Required files
-	simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py']
+	simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py']
 	simcav_icons = []
 	simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md']
 	
