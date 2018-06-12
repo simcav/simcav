@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, requests
 
 # Python version
 def pythoncheck():
@@ -26,7 +26,7 @@ def pipimport():
 
 # SimCav
 def list_simcav_modules():
-    simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py', 'simcav_updater.py', 'misc.py']
+    simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py']#, 'simcav_updater.py', 'misc.py']
     return simcav_files
 
 def list_simcav_misc():
@@ -200,6 +200,3 @@ if guestOS() == 'win32':
             import winshell
         else:
             raise
-
-# MUST DO A TRY/EXCEPT AND INSTALL IF NEEDED
-import requests

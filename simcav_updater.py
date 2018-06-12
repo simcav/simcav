@@ -12,4 +12,6 @@ simcav_url = misc.get_repo()
 
 simcav_home = misc.gethomepath(misc.guestOS())
 
-download_error = misc.download_file('Disclaimer.txt', simcav_home)
+misc.download_simcav(simcav_home)
+
+print('Done!')
