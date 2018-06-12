@@ -1825,8 +1825,8 @@ class ResultsWindow2(tk.Frame):
             master.physics.element_list[i]['entry1'].delete(0, tk.END)
             # Writes new (computed) value
             master.physics.element_list[i]['entry1'].insert(0, round(combination*100)/100)
-            master.elementbox.func_button_calc()
-            master.warningbar.warbar_message('Solution ported to cavity','lawngreen')
+        master.elementbox.func_button_calc()
+        master.warningbar.warbar_message('Solution ported to cavity','lawngreen')
 
 #==============================================================================
 #%% Frame on the right
