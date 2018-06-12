@@ -1,0 +1,13 @@
+# 4.8.3
+Fully backwards compatible.
+
+## Features
+- Installer  
+    Installs SimCav in a system that has Python 3 and pip already installed. Works for Linux and Windows.
+- Uninstall  
+    Uninstalls SimCav deleting all the files the intaller creates.
+- Updater?  
+
+## Bugs
+### Minor
+- Proper path definition for icon.
