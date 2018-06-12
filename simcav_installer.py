@@ -153,10 +153,10 @@ try:
 	simcav_url = 'https://gitlab.com/simcav/simcav/raw/master/'
 	
 	# Required files
-	simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py']
+	simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py', 'simcav_updater.py', 'misc.py']
 	simcav_icons = []
 	simcav_saves = []
-	simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md']
+	simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md', 'CHANGELOG']
 	
 	# Get icons list from repo
 	r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
