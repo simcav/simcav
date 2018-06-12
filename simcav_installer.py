@@ -3,19 +3,27 @@
 # Defining exceptions
 class PythonVersionError(Exception):
 	def __init__(self):
-		self.expression = "\nError: Incompatible Python version."
 		self.message = "  SimCav only works with Python 3, but an older version was detected.\n  Please update to Python 3.\n"
-class PipmainError(Exception):
+class PipInstallError(Exception):
 	def __init__(self, package):
-		self.expression = "\nError: Couldn't install from pip."
-		self.message = "  Install the package " + package + "yourself and try again."
+		self.message = "Install the package '" + package + "' manually and try again."
+class NotModuleError(Exception):
+	def __init__(self, package):
+		self.message = "Please install '" + package + "' before installing SimCav."
+class UserCancel(Exception):
+	def __init__(self):
+		self.expression = "\nError: Cancelled by user."
+		self.message = ""
 
 # Install with pip
 def install(package):
 	print("\n ---------------------\n Installing " + package)
 	try:
-		pipmain(['install', package, '--user', '--disable-pip-version-check'])
-		return True
+		pipcode = pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
+		if not pipcode:
+			return True
+		else:
+			return False
 	except Exception as inst:
 		print(inst)
 		print("Error")
@@ -39,12 +47,15 @@ def askuser(message):
 		elif useranswer.lower() == 'n' or useranswer.lower() == 'no':
 			return False
 		else:
-			print("Your response ('') was not one of the expected responses: (y/n)")
+			print("Your response was not one of the expected responses: (y/n)")
 
 def download_file(url, folderfile):
-	#print('Downloading ' + url.split('/')[-1])
-	#wget.download(url, folder)
-	request.urlretrieve(url, folderfile)
+	import urllib.request
+	try:
+		urllib.request.urlretrieve(url, folderfile)
+		print("     Downloading " + os.path.basename(folderfile))
+	except:
+		raise
 
 def writepath(user_site):
 	with open("user_path.txt") as f:
@@ -81,10 +92,11 @@ try:
 	# The last ones, commented, are part of the standard python distribution.
 	
 	# List of modules required by the installer
-	installation_modules = ['wget', 'winshell']
+	installation_modules = ['winshell']
 	installed_modules = []
 	# Check that modules exist / can be imported
 	print("\nChecking required modules:")
+	haveIinstalled = False
 	for i in simcav_modules+installation_modules:
 		try:
 			__import__(i)
@@ -96,15 +108,14 @@ try:
 			useranswer = askuser(' Should I try to install it? (y/n): ')
 			if useranswer:
 				haveIinstalled = install(i)
-				if haveIinstalled and  i in installation_modules:
-					installed_modules.append(i)
+				if haveIinstalled:
+					if  i in installation_modules:
+						installed_modules.append(i)
 				else:
-					raise PipmainError
+					raise PipInstallError(i)
 			else:
-				print('\n Please install ' + i + ' before installing SimCav.')
-				raise ModuleNotFoundError
-	if haveIinstalled:
-		print('All dependencies satisfied! Continuing installation...\n')
+				raise NotModuleError(i)
+	print('\nAll dependencies satisfied! Continuing installation...\n')
 					
 	#===============================================
 	# SIMCAV INSTALLATION
@@ -126,11 +137,15 @@ try:
 	# Checking / creating SimCav folder
 	if not os.path.exists(simcav_home):
 		os.makedirs(simcav_home)
+		user_proceed = True
 	else:
-		print(simcav_home + 'already exist. Overwrite? (y/n)')
+		user_proceed = askuser('The install directory already exist. Overwrite? (y/n) ')
+		
+	if not user_proceed:
+		raise UserCancel
 		
 	# Downloading files
-	import requests#, wget
+	import requests
 	#simcav_url = 'https://zenodo.org/record/1184130/files/simcav/simcav-v4.8.2.zip'
 	#simcav_url = 'https://gitlab.com/simcav/simcav'
 	#simcav_url = 'https://gitlab.com/simcav/simcav/-/archive/master/simcav-master.zip'
@@ -142,20 +157,16 @@ try:
 	simcav_icons = []
 	simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md']
 	
-	# Download zip and extract in simcav home
+	# Get icons list from repo
 	r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
 	for i in r.json():
 		if not '.svg' in i['name']:
 			simcav_icons.append(i['name'])
-	#z = zipfile.ZipFile(io.BytesIO(r.content))
-	#z.extractall(simcav_home)
-	# Rename simcav folder
-	#os.rename(os.path.join(user_home, 'simcav-master'), simcav_home)
-	# for i in simcav_files:
-	# 	r = requests.get(simcav_url+i)
-	# 	with open(os.path.join(user_home, i), "wb") as myfile:
-	# 		myfile.write(r.content)
-	
+	# Get saves list from repo
+	r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
+	for i in r.json():
+		if not '.svg' in i['name']:
+			simcav_icons.append(i['name'])	
 	#=================================
 	print('\n Creating subfolders...')
 	# Icons folder
@@ -164,35 +175,37 @@ try:
 		if not os.path.exists(icons_folder):
 			os.makedirs(icons_folder)
 	except:
-		print('Error creating Icons folder')
+		print("Error creating 'Icons' folder")
 	# Saves folder
 	try:
 		saves_folder = os.path.join(simcav_home,'Saves')
 		if not os.path.exists(saves_folder):
 			os.makedirs(saves_folder)
 	except:
-		print('Error creating Saves folder')
+		print("Error creating 'Saves' folder")
 	
 	#=================================
 	#Downloading SimCav files
 	print('\n Downloading modules...')
 	for i in simcav_files:
-		if not i in os.listdir(simcav_home):
-			download_file(simcav_url + i, os.path.join(simcav_home,i))
+		download_file(simcav_url + i, os.path.join(simcav_home, i))
 	
 	print('\n Downloading icons...')
 	for i in simcav_icons:
-		if not i in os.listdir(icons_folder):
-			download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder,i))
-	
+		download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder, i))
+		
+	# print('\n Downloading examples...')
+	# for i in simcav_icons:
+	# 	download_file(simcav_url + 'Saves/' + i, os.path.join(icons_folder, i))
+	# 
 	print('\n Downloading readmes...')
 	for i in simcav_misc:
-		if not i in os.listdir(simcav_home):
-			download_file(simcav_url+i, os.path.join(simcav_home,i))
+		download_file(simcav_url+i, os.path.join(simcav_home, i))
+		
 	print('\n Downloading manual...')
 	if not 'manual.pdf' in os.listdir(simcav_home):
-		download_file(simcav_url+'Manual/manual.pdf', os.path.join(simcav_home,'manual.pdf')
-	print('\n Files downloaded')	
+		download_file(simcav_url + 'Manual/manual.pdf', os.path.join(simcav_home, 'manual.pdf'))
+	print('\n Files downloaded')
 	#=================================================================
 	# Create system links
 	
@@ -222,23 +235,29 @@ try:
 		create_shortcut(startmenu_path, simcav_home)
 			
 	elif guestOS == 'linux':
-		desktop_path = os.path.join(os.path.join(user_home, 'Desktop'), 'SimCav2.desktop')
+		desktop_path = os.path.join(os.path.join(user_home, 'Desktop'), 'SimCav.desktop')
 		desktop_content = "[Desktop Entry]\nType=Application\nName=SimCav\nGenericName=Laser cavity simulator\nComment=Application for design and simulation of laser resonators\nExec=python " + os.path.join(simcav_home, 'simcav_main.py') + "\nIcon=" + os.path.join(icons_folder, 'logo-tg3.png') + "\nPath=" + simcav_home + "\nTerminal=false\nStartupNotify=false\nCategories=Education;Science"
 		
 		with open(desktop_path, 'w') as desktop_file:
 			desktop_file.write(desktop_content)
 		with open(os.path.join(user_home,'.local','share','applications','SimCav.desktop'), 'w') as desktop_file:
 			desktop_file.write(desktop_content)
+	
+	print('\nInstallation finished!')
 		
-		
-except PythonVersionError as inst:
-	print(inst.expression)
-	print(inst.message)	
 except Exception as inst:
-	print(inst)
+	print('\nError: ' + type(inst).__name__)
+	if type(inst).__name__ in ['PythonVersionError', 
+								'NotModuleError',
+								'PipInstallError',
+								'UserCancel']:
+		print(inst.message)
+	else:
+		raise
+		
 finally:
 	print('\nCleaning installation files...')
 	for i in installed_modules:
 		uninstall(i)
 	#os.remove(os.path.join(simcav_home,tar_file))
-	input("Quitting. Press any key...")
+	input("\nQuitting. Press enter...")
