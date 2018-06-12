@@ -82,7 +82,7 @@ try:
 		import winshell
 		user_home = winshell.folder("profile")
 		desktop_path = os.path.join(winshell.desktop(), 'SimCav.lnk')
-		startmenu_path = os.path.join(winshell.start_menu(), 'SimCav.lnk')
+		startmenu_path = os.path.join(winshell.start_menu(), 'Programs', 'SimCav.lnk')
 	else:
 		user_home = os.path.expanduser('~')
 		desktop_path = os.path.join(user_home, 'Desktop', 'SimCav.desktop')
@@ -109,9 +109,9 @@ try:
 			print("    Removing folder '" + i + "'")
 			print(os.path.realpath(todelete))
 			shutil.rmtree(todelete)
+	# Can't delete main folder while using it!
 	#shutil.rmtree(simcav_home)
-	shutil.rmtree(simcav_home)
-	
+		
 	# Removing shortcuts
 	print('Deleting shortcuts')
 	print(    'Removing ' + desktop_path)

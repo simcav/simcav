@@ -198,7 +198,7 @@ try:
 		
 	print('\n Downloading examples...')
 	for i in simcav_saves:
-		download_file(simcav_url + 'Saves/' + i, os.path.join(icons_folder, i))
+		download_file(simcav_url + 'Saves/' + i, os.path.join(saves_folder, i))
 	
 	print('\n Downloading readmes...')
 	for i in simcav_misc:
@@ -233,7 +233,7 @@ try:
 		create_shortcut(shortcut_path, simcav_home)
 		
 		# Create StartMenu access
-		startmenu_path = os.path.join(winshell.start_menu(),'Programs','SimCav.lnk')
+		startmenu_path = os.path.join(winshell.start_menu(),'Programs', 'SimCav.lnk')
 		create_shortcut(startmenu_path, simcav_home)
 			
 	elif guestOS == 'linux':
