@@ -31,6 +31,10 @@ matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 import matplotlib.pyplot as plt
 
+# Hide matplotlib deprecation warnings
+import warnings
+warnings.simplefilter("ignore")
+
 # import for scrolled window
 import scrolledframe as scrollf
 import tooltips as tt
