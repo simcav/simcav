@@ -198,7 +198,7 @@ try:
 		
 	print('\n Downloading examples...')
 	for i in simcav_saves:
-		download_file(simcav_url + 'Saves/' + i, os.path.join(icons_folder, i))
+		download_file(simcav_url + 'Saves/' + i, os.path.join(saves_folder, i))
 	
 	print('\n Downloading readmes...')
 	for i in simcav_misc:

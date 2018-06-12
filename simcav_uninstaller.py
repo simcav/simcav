@@ -109,9 +109,9 @@ try:
 			print("    Removing folder '" + i + "'")
 			print(os.path.realpath(todelete))
 			shutil.rmtree(todelete)
+	# Can't delete main folder while using it!
 	#shutil.rmtree(simcav_home)
-	shutil.rmtree(simcav_home)
-	
+		
 	# Removing shortcuts
 	print('Deleting shortcuts')
 	print(    'Removing ' + desktop_path)
