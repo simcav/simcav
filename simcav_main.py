@@ -2018,10 +2018,10 @@ class MainApplication(tk.Frame):
     def labelclick(self, event):
         webbrowser.open_new(r"http://simcav.github.io")
 #==============================================================================
+def killing_root():
+    root.quit()
 
-
-#%%
-if __name__ == "__main__":
+def mainfunc():
     script_path = os.path.dirname(os.path.abspath( __file__ ))
     os.chdir(script_path)
     #May not woth with PyInstaller
@@ -2029,9 +2029,7 @@ if __name__ == "__main__":
     #os.path.abspath(os.path.dirname(sys.argv[0]))
     # source: https://www.blog.pythonlibrary.org/2013/10/29/python-101-how-to-find-the-path-of-a-running-script/
 
-    def killing_root():
-        root.quit()
-
+    global root, master
     root = tk.Tk()
     # Start maximized
     try:
@@ -2058,3 +2056,7 @@ if __name__ == "__main__":
     master.pack(side="top", fill="both", expand=True)
 
     root.mainloop()
+
+#%%
+if __name__ == "__main__":
+    mainfunc()
