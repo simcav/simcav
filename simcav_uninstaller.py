@@ -26,10 +26,8 @@ class TheCode():
 			guestOS = sys.platform
 			
 			# Windows uninstall will require Winshell
-			winshell_error = 1
 			if guestOS == 'win32':
 				winshell_error = gui_app.install_winshell()
-			gui_app.printcmd(winshell_error)
 			# Get paths
 			if guestOS == 'win32':
 				user_home = winshell.folder("profile")
@@ -85,8 +83,6 @@ class TheCode():
 				gui_app.printcmd(inst)
 		    
 		finally:
-			if not winshell_error:
-				uninstall(winshell)
 			gui_app.printcmd('You may close this window.')
 
 if __name__ == '__main__':
