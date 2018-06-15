@@ -44,7 +44,7 @@ class TheCode():
 			# Removing SimCav folder
 			gui_app.printcmd("This will completely remove SimCav, including 'Saves' folder.")
 			gui_app.printcmd("Path to delete: " + simcav_home)
-			user_asnwer = gui_app.askuserbox('Continue? (y/n) ')
+			user_asnwer = gui_app.askuserbox('Continue?')
 			
 			if not user_asnwer:
 				raise misc.UserCancel

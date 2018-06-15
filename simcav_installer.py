@@ -259,11 +259,11 @@ class TheCode():
 				
 		finally:
 			#gui_app.printcmd('\nCleaning installation files...')
-			#for i in installed_modules:
-			#	uninstall(i)
+			for i in installed_modules:
+				uninstall(i)
 			#os.remove(os.path.join(simcav_home,tar_file))
 			#gui_app.call_close()
-			pass
+			gui_app.printcmd('\nYou may close this window.')
 
 class Display(tk.Frame):
 	def __init__(self, parent):
