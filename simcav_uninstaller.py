@@ -19,20 +19,10 @@ class TheCode():
 
 	def func_main(self, gui_app):
 		try:
-			# Require Python 3 to work
-			pythonOK = self.gui_app.pythoncheck()
-				
-			# Check operating system
-			guestOS = sys.platform
-			
-			# Windows uninstall will require Winshell
-			if guestOS == 'win32':
-				winshell_error = gui_app.install_winshell()
-			# Get paths
-			if guestOS == 'win32':
-				user_home = winshell.folder("profile")
-				desktop_path = os.path.join(winshell.desktop(), 'SimCav.lnk')
-				startmenu_path = os.path.join(winshell.start_menu(), 'Programs', 'SimCav.lnk')
+			if 'win' in gui_app.guestOS():
+				user_home = gui_app.winshell.folder("profile")
+				desktop_path = os.path.join(gui_app.winshell.desktop(), 'SimCav.lnk')
+				startmenu_path = os.path.join(gui_app.winshell.start_menu(), 'Programs', 'SimCav.lnk')
 			else:
 				user_home = os.path.expanduser('~')
 				desktop_path = os.path.join(user_home, 'Desktop', 'SimCav.desktop')
@@ -81,6 +71,8 @@ class TheCode():
 				gui_app.printcmd(inst.message)
 			else:
 				gui_app.printcmd(inst)
+				import traceback
+				gui_app.printcmd(traceback(inst))
 		    
 		finally:
 			gui_app.printcmd('You may close this window.')

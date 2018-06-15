@@ -64,9 +64,6 @@ class TheCode():
 			
 			guestOS = sys.platform
 			
-			# Var to control if pip has installed anything
-			haveIinstalled = False
-
 			# Require Python 3 to work
 			if sys.version_info.major < 3:
 				raise PythonVersionError
@@ -94,7 +91,7 @@ class TheCode():
 			installation_modules = []
 			if guestOS == 'win32':
 				installation_modules.append('winshell')
-			installed_modules = ['cesar']
+			installed_modules = []
 			# Check that modules exist / can be imported
 			gui_app.printcmd("\nChecking required modules:")
 			haveIinstalled = False
@@ -122,7 +119,6 @@ class TheCode():
 			# SIMCAV INSTALLATION
 						
 			# Locations
-			#user_home = piploc.user_dir
 			if guestOS == 'win32':
 				import winshell
 				user_home = winshell.folder("profile")
@@ -136,7 +132,7 @@ class TheCode():
 			# Checking / creating SimCav folder
 			if not os.path.exists(simcav_home):
 				os.makedirs(simcav_home)
-				user_proceed = True
+				user_proceed = gui_app.askuserbox("This will install SimCav in your system.\nContinue?")
 			else:
 				user_proceed = gui_app.askuserbox("The install directory already exist \n(" + simcav_home + ")\nOverwrite?")	
 			if not user_proceed:
@@ -144,9 +140,6 @@ class TheCode():
 			install_window.update_idletasks()	
 			# Downloading files
 			import requests
-			#simcav_url = 'https://zenodo.org/record/1184130/files/simcav/simcav-v4.8.2.zip'
-			#simcav_url = 'https://gitlab.com/simcav/simcav'
-			#simcav_url = 'https://gitlab.com/simcav/simcav/-/archive/master/simcav-master.zip'
 			simcav_api = 'https://gitlab.com/api/v4/projects/6789132/repository/'
 			simcav_url = 'https://gitlab.com/simcav/simcav/raw/master/'
 			
@@ -258,11 +251,8 @@ class TheCode():
 				raise
 				
 		finally:
-			#gui_app.printcmd('\nCleaning installation files...')
 			for i in installed_modules:
-				uninstall(i)
-			#os.remove(os.path.join(simcav_home,tar_file))
-			#gui_app.call_close()
+				self.uninstall(i)
 			gui_app.printcmd('\nYou may close this window.')
 
 class Display(tk.Frame):
@@ -281,24 +271,19 @@ class Display(tk.Frame):
 		self.count = 1
 		self.configure(background='black')
 		self.pack(fill='both', expand=1)
-		#self.wait_window()
+		
 		self.thecode = TheCode(self)
-		#self.thecode.func_install(self)
 		
 	def printcmd(self, txt):
 		self.output.insert(tk.END,str(txt))
 		self.output.insert(tk.END,'\n')
 		self.output.see(tk.END)
 		self.update_idletasks()
+		install_window.update_idletasks()
 	
 	def askuserbox(self, message):
 		askbox = messagebox.askyesno('Question', message)
 		return askbox
-			
-	def func_yes(self):
-		pass
-	def func_no(self):
-		pass
 			
 	def call_close(self):
 		messagebox.showinfo('quit', "Quitting.")

@@ -15,6 +15,11 @@ class Display(tk.Frame):
         self.scrollbar.pack(side=tk.RIGHT, fill="y")
 
         self.output['yscrollcommand'] = self.scrollbar.set
+        
+        self.pythoncheck()
+        self.pipimport()
+        if 'win' in self.guestOS():
+            self.install_winshell()
 
         self.count = 1
         self.configure(background='black')
@@ -199,6 +204,7 @@ class Display(tk.Frame):
         try:
             import winshell
         except:
+            self.printcmd("x: Winshell    --    Installing")
             self.pipimport()
             haveIinstalled = self.pipinstall('winshell')
             if haveIinstalled:
@@ -209,7 +215,7 @@ class Display(tk.Frame):
                 return 1
         else:
             self.winshell = winshell
-            self.printcmd("OK: Winshell")
+            self.printcmd("OK:     Winshell")
             return 0
 
 # Defining exceptions
