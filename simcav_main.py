@@ -1969,7 +1969,7 @@ class MainApplication(tk.Frame):
         self.warningbar.warbar_message('Checking version, please wait','grey')
         self.after(0, self.checkupdates, versionnum)
         
-    # Read version from simcav.github.io website (program's own website).
+    # Read version from simcav.gitlab.io website (program's own website).
     def checkupdates(self, versionnum):
         # Update GUI in case checking updates takes long.
         root.update_idletasks()
@@ -2009,9 +2009,9 @@ class MainApplication(tk.Frame):
                 else:
                     # Make warninbar clickable to launch web browser
                     if 'important' in s2:
-                        self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
+                        self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.gitlab.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
                     else:
-                        self.warningbar.warbar_message('A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
+                        self.warningbar.warbar_message('A new version is available at https://simcav.gitlab.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
                     self.toolbar.toolbar_buttons['f_button_update'].config(state="normal")
                 error = 0
             elif versiondata.status_code == requests.codes.not_found:
@@ -2027,7 +2027,7 @@ class MainApplication(tk.Frame):
         return error
         
     def labelclick(self, event):
-        webbrowser.open_new(r"http://simcav.github.io")
+        webbrowser.open_new(r"http://simcav.gitlab.io")
 #==============================================================================
 def killing_root():
     root.quit()
