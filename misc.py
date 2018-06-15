@@ -92,7 +92,7 @@ class Display(tk.Frame):
     def gethomepath(self, theguestOS):
         # Get paths
         if theguestOS == 'win32':
-            user_home = winshell.folder("profile")
+            user_home = self.winshell.folder("profile")
         else:
             user_home = os.path.expanduser('~')
         simcav_home = os.path.join(user_home, 'SimCav')
@@ -198,20 +198,19 @@ class Display(tk.Frame):
     def install_winshell(self):
         try:
             import winshell
-            self.printcmd("OK: Winshell")
-            return 0
         except:
             self.pipimport()
             haveIinstalled = self.pipinstall('winshell')
             if haveIinstalled:
                 import winshell
-                self.printcmd("OK: Winshell")
-                return 0
             else:
                 self.printcmd("Error: Couldn't install Winshell")
                 raise
                 return 1
-        
+        else:
+            self.winshell = winshell
+            self.printcmd("OK: Winshell")
+            return 0
 
 # Defining exceptions
 class PythonVersionError(Exception):
