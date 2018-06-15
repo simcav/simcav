@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import sys, os
+import tkinter as tk
+from tkinter import messagebox
 
 # Defining exceptions
 class PythonVersionError(Exception):
@@ -15,251 +18,302 @@ class UserCancel(Exception):
 		self.expression = "\nError: Cancelled by user."
 		self.message = ""
 
-# Install with pip
-def install(package):
-	print("\n ---------------------\n Installing " + package)
-	try:
-		pipcode = pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
-		if not pipcode:
-			return True
-		else:
-			return False
-	except Exception as inst:
-		print(inst)
-		print("Error")
-		return False
-# Uninstall with pip
-def uninstall(package):
-	try:
-		pipmain(['uninstall', package, '-y', '--disable-pip-version-check'])
-		return True
-	except Exception as inst:
-		print(inst)
-		print("Error")
-		return False
-		
-# Ask user input
-def askuser(message):
-	while True:
-		useranswer = input(message)
-		if useranswer.lower() == 'y' or useranswer.lower() == 'yes':
-			return True
-		elif useranswer.lower() == 'n' or useranswer.lower() == 'no':
-			return False
-		else:
-			print("Your response was not one of the expected responses: (y/n)")
-
-def download_file(url, folderfile):
-	import urllib.request
-	try:
-		urllib.request.urlretrieve(url, folderfile)
-		print("     Downloading " + os.path.basename(folderfile))
-	except:
-		raise
-
-def writepath(user_site):
-	with open("user_path.txt") as f:
-		f.write(user_site)
-
-try:	
-	import sys
+class TheCode():
+	def __init__(self, gui_app):
+		self.gui_app = gui_app
+		self.func_install(self.gui_app)
 	
-	guestOS = sys.platform
-	
-	# Var to control if pip has installed anything
-	haveIinstalled = False
-
-	# Require Python 3 to work
-	if sys.version_info.major < 3:
-		raise PythonVersionError
-	else:
-		print("OK:	Python version.")
-	
-	try:
-		pip = __import__('pip')
-		print("OK:	Pip")
-	except ModuleNotFoundError:
-		print("Warning: Pip module not found.")
-		print("         Required dependencies won't be automatically installed.")
-		
-	try:
-		from pip._internal import main as pipmain
-	except:
-		from pip import main as pipmain
-
-	# List of modules required by SimCav
-	simcav_modules = ['tkinter',  'numpy', 'requests', 'matplotlib']#, 'itertools', 'os', 'pickle', 'webbrowser'] 
-	# The last ones, commented, are part of the standard python distribution.
-	
-	# List of modules required by the installer
-	installation_modules = []
-	if guestOS == 'win32':
-		installation_modules.append('winshell')
-	installed_modules = []
-	# Check that modules exist / can be imported
-	print("\nChecking required modules:")
-	haveIinstalled = False
-	for i in simcav_modules+installation_modules:
+	# Install with pip
+	def install(self, package):
+		self.gui_app.printcmd("\n ---------------------\n Installing " + package)
 		try:
-			__import__(i)
-			print("OK:	" + i)
-		except ModuleNotFoundError:
-			print('x:	' + i)
-			print('\n Module ' + i + ' not found, but is required for SimCav to work')
-
-			useranswer = askuser(' Should I try to install it? (y/n): ')
-			if useranswer:
-				haveIinstalled = install(i)
-				if haveIinstalled:
-					if  i in installation_modules:
-						installed_modules.append(i)
-				else:
-					raise PipInstallError(i)
+			pipcode = self.pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
+			if not pipcode:
+				return True
 			else:
-				raise NotModuleError(i)
-	print('\nAll dependencies satisfied! Continuing installation...\n')
-					
-	#===============================================
-	# SIMCAV INSTALLATION
-	import os
-	#from pip._internal import locations as piploc
-	
-	# Locations
-	#user_home = piploc.user_dir
-	if guestOS == 'win32':
-		import winshell
-		user_home = winshell.folder("profile")
-	else:
-		user_home = os.path.expanduser('~')
-		
-	simcav_home = os.path.join(user_home, 'SimCav')
-	
-	print('Install location: ' + simcav_home)
-	
-	# Checking / creating SimCav folder
-	if not os.path.exists(simcav_home):
-		os.makedirs(simcav_home)
-		user_proceed = True
-	else:
-		user_proceed = askuser('The install directory already exist. Overwrite? (y/n) ')
-		
-	if not user_proceed:
-		raise UserCancel
-		
-	# Downloading files
-	import requests
-	#simcav_url = 'https://zenodo.org/record/1184130/files/simcav/simcav-v4.8.2.zip'
-	#simcav_url = 'https://gitlab.com/simcav/simcav'
-	#simcav_url = 'https://gitlab.com/simcav/simcav/-/archive/master/simcav-master.zip'
-	simcav_api = 'https://gitlab.com/api/v4/projects/6789132/repository/'
-	simcav_url = 'https://gitlab.com/simcav/simcav/raw/master/'
-	
-	# Required files
-	simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py', 'simcav_updater.py', 'misc.py']
-	simcav_icons = []
-	simcav_saves = []
-	simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md', 'CHANGELOG']
-	
-	# Get icons list from repo
-	r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
-	for i in r.json():
-		if not '.svg' in i['name']:
-			simcav_icons.append(i['name'])
-	# Get saves list from repo
-	r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Saves/'})
-	for i in r.json():
-		simcav_saves.append(i['name'])	
-	#=================================
-	print('\n Creating subfolders...')
-	# Icons folder
-	try:
-		icons_folder = os.path.join(simcav_home,'Icons')
-		if not os.path.exists(icons_folder):
-			os.makedirs(icons_folder)
-	except:
-		print("Error creating 'Icons' folder")
-	# Saves folder
-	try:
-		saves_folder = os.path.join(simcav_home,'Saves')
-		if not os.path.exists(saves_folder):
-			os.makedirs(saves_folder)
-	except:
-		print("Error creating 'Saves' folder")
-	
-	#=================================
-	#Downloading SimCav files
-	print('\n Downloading modules...')
-	for i in simcav_files:
-		download_file(simcav_url + i, os.path.join(simcav_home, i))
-	
-	print('\n Downloading icons...')
-	for i in simcav_icons:
-		download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder, i))
-		
-	print('\n Downloading examples...')
-	for i in simcav_saves:
-		download_file(simcav_url + 'Saves/' + i, os.path.join(saves_folder, i))
-	
-	print('\n Downloading readmes...')
-	for i in simcav_misc:
-		download_file(simcav_url+i, os.path.join(simcav_home, i))
-		
-	print('\n Downloading manual...')
-	if not 'manual.pdf' in os.listdir(simcav_home):
-		download_file(simcav_url + 'Manual/manual.pdf', os.path.join(simcav_home, 'manual.pdf'))
-	print('\n Files downloaded')
-	#=================================================================
-	# Create system links
-	
-	# Create desktop shortcut
-	if guestOS == 'win32':
-		# NOT WORKING YET
-		
-		def create_shortcut(thepath, thehome):
-			print('\n Creating shortcut in ' + thepath)
-			python_path = os.path.join(os.path.dirname(sys.executable),'pythonw.exe')
-			mainfile_path = os.path.join(thehome, 'simcav_main.py')
-			icons_folder = os.path.join(thehome,'Icons')
-			with winshell.shortcut(thepath) as thelink:
-				thelink.path = python_path
-				thelink.arguments = '"'+mainfile_path+'"'
-				thelink.working_directory = thehome
-				thelink.description = "Shortcut to SimCav"
-				thelink.icon_location = (os.path.join(icons_folder,'logo-tg3.ico'),0)
-		
-		# Create icon in Desktop
-		#python_path = os.path.dirname(sys.executable)
-		shortcut_path = os.path.join(winshell.desktop(), 'SimCav.lnk')
-		create_shortcut(shortcut_path, simcav_home)
-		
-		# Create StartMenu access
-		startmenu_path = os.path.join(winshell.start_menu(),'Programs', 'SimCav.lnk')
-		create_shortcut(startmenu_path, simcav_home)
+				self.gui_app.printcmd(" Error: could not find'" + package + "'")
+				return False
+		except Exception as inst:
+			self.gui_app.printcmd(inst)
+			self.gui_app.printcmd("Error")
+			return False
+	# Uninstall with pip
+	def uninstall(self, package):
+		try:
+			self.pipmain(['uninstall', package, '-y', '--disable-pip-version-check'])
+			return True
+		except Exception as inst:
+			self.gui_app.printcmd(inst)
+			self.gui_app.printcmd("Error")
+			return False
+
+	def download_file(self, url, folderfile):
+		import urllib.request
+		try:
+			urllib.request.urlretrieve(url, folderfile)
+		except:
+			raise
+
+	def writepath(self, user_site):
+		with open("user_path.txt") as f:
+			f.write(user_site)
+
+	def func_install(self, gui_app):
+		try:	
+			import sys
 			
-	elif guestOS == 'linux':
-		desktop_path = os.path.join(os.path.join(user_home, 'Desktop'), 'SimCav.desktop')
-		desktop_content = "[Desktop Entry]\nType=Application\nName=SimCav\nGenericName=Laser cavity simulator\nComment=Application for design and simulation of laser resonators\nExec=python " + os.path.join(simcav_home, 'simcav_main.py') + "\nIcon=" + os.path.join(icons_folder, 'logo-tg3.png') + "\nPath=" + simcav_home + "\nTerminal=false\nStartupNotify=false\nCategories=Education;Science"
+			guestOS = sys.platform
+			
+			# Var to control if pip has installed anything
+			haveIinstalled = False
+
+			# Require Python 3 to work
+			if sys.version_info.major < 3:
+				raise PythonVersionError
+			else:
+				gui_app.printcmd("OK:	Python 3")
+			
+			try:
+				pip = __import__('pip')
+				gui_app.printcmd("OK:	Pip")
+			except ModuleNotFoundError:
+				gui_app.printcmd("Warning: Pip module not found.")
+				gui_app.printcmd("         Required dependencies won't be automatically installed.")
+				
+			try:
+				from pip._internal import main as pipmain
+			except:
+				from pip import main as pipmain
+			self.pipmain = pipmain
+
+			# List of modules required by SimCav
+			simcav_modules = ['tkinter',  'numpy', 'requests', 'matplotlib']#, 'itertools', 'os', 'pickle', 'webbrowser'] 
+			# The last ones, commented, are part of the standard python distribution.
+			
+			# List of modules required by the installer
+			installation_modules = []
+			if guestOS == 'win32':
+				installation_modules.append('winshell')
+			installed_modules = ['cesar']
+			# Check that modules exist / can be imported
+			gui_app.printcmd("\nChecking required modules:")
+			haveIinstalled = False
+			for i in simcav_modules+installation_modules:
+				try:
+					__import__(i)
+					gui_app.printcmd("OK:	" + i)
+				except ModuleNotFoundError:
+					gui_app.printcmd('x:	' + i)
+					gui_app.printcmd('\n Module ' + i + ' not found, but is required for SimCav to work')
+
+					useranswer = gui_app.askuserbox("Should I try to install '" +i+"'?")
+					if useranswer:
+						haveIinstalled = self.install(i)
+						if haveIinstalled:
+							if  i in installation_modules:
+								installed_modules.append(i)
+						else:
+							raise PipInstallError(i)
+					else:
+						raise NotModuleError(i)
+			gui_app.printcmd('\nAll dependencies satisfied! Continuing installation...\n')
+							
+			#===============================================
+			# SIMCAV INSTALLATION
+						
+			# Locations
+			#user_home = piploc.user_dir
+			if guestOS == 'win32':
+				import winshell
+				user_home = winshell.folder("profile")
+			else:
+				user_home = os.path.expanduser('~')
+				
+			simcav_home = os.path.join(user_home, 'SimCav')
+			
+			gui_app.printcmd('Install location: ' + simcav_home)
+			
+			# Checking / creating SimCav folder
+			if not os.path.exists(simcav_home):
+				os.makedirs(simcav_home)
+				user_proceed = True
+			else:
+				user_proceed = gui_app.askuserbox("The install directory already exist \n(" + simcav_home + ")\nOverwrite?")	
+			if not user_proceed:
+				raise UserCancel
+			install_window.update_idletasks()	
+			# Downloading files
+			import requests
+			#simcav_url = 'https://zenodo.org/record/1184130/files/simcav/simcav-v4.8.2.zip'
+			#simcav_url = 'https://gitlab.com/simcav/simcav'
+			#simcav_url = 'https://gitlab.com/simcav/simcav/-/archive/master/simcav-master.zip'
+			simcav_api = 'https://gitlab.com/api/v4/projects/6789132/repository/'
+			simcav_url = 'https://gitlab.com/simcav/simcav/raw/master/'
+			
+			# Required files
+			simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py', 'simcav_updater.py', 'misc.py']
+			simcav_icons = []
+			simcav_saves = []
+			simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md', 'CHANGELOG']
+			
+			# Get icons list from repo
+			r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
+			for i in r.json():
+				if not '.svg' in i['name']:
+					simcav_icons.append(i['name'])
+			# Get saves list from repo
+			r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Saves/'})
+			for i in r.json():
+				simcav_saves.append(i['name'])	
+			#=================================
+			gui_app.printcmd('\n Creating subfolders...')
+			# Icons folder
+			try:
+				icons_folder = os.path.join(simcav_home,'Icons')
+				if not os.path.exists(icons_folder):
+					os.makedirs(icons_folder)
+			except:
+				gui_app.printcmd("Error creating 'Icons' folder")
+			# Saves folder
+			try:
+				saves_folder = os.path.join(simcav_home,'Saves')
+				if not os.path.exists(saves_folder):
+					os.makedirs(saves_folder)
+			except:
+				gui_app.printcmd("Error creating 'Saves' folder")
+			
+			#=================================
+			#Downloading SimCav files
+			gui_app.printcmd('\n Downloading modules...')
+			for i in simcav_files:
+				gui_app.printcmd("     Downloading " + i)
+				self.download_file(simcav_url + i, os.path.join(simcav_home, i))
+			
+			gui_app.printcmd('\n Downloading icons...')
+			for i in simcav_icons:
+				gui_app.printcmd("     Downloading " + i)
+				self.download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder, i))
+				
+			gui_app.printcmd('\n Downloading examples...')
+			for i in simcav_saves:
+				gui_app.printcmd("     Downloading " + i)
+				self.download_file(simcav_url + 'Saves/' + i, os.path.join(saves_folder, i))
+			
+			gui_app.printcmd('\n Downloading readmes...')
+			for i in simcav_misc:
+				gui_app.printcmd("     Downloading " + i)
+				self.download_file(simcav_url+i, os.path.join(simcav_home, i))
+				
+			gui_app.printcmd('\n Downloading manual...')
+			if not 'manual.pdf' in os.listdir(simcav_home):
+				self.download_file(simcav_url + 'Manual/manual.pdf', os.path.join(simcav_home, 'manual.pdf'))
+			#gui_app.printcmd('\n Files downloaded')
+			#=================================================================
+			# Create system links
+			gui_app.printcmd('\n Creating shortcuts...')
+			# Create desktop shortcut
+			if guestOS == 'win32':
+				# NOT WORKING YET
+				
+				def create_shortcut(thepath, thehome):
+					gui_app.printcmd('\n Creating shortcut in ' + thepath)
+					python_path = os.path.join(os.path.dirname(sys.executable),'pythonw.exe')
+					mainfile_path = os.path.join(thehome, 'simcav_main.py')
+					icons_folder = os.path.join(thehome,'Icons')
+					with winshell.shortcut(thepath) as thelink:
+						thelink.path = python_path
+						thelink.arguments = '"'+mainfile_path+'"'
+						thelink.working_directory = thehome
+						thelink.description = "Shortcut to SimCav"
+						thelink.icon_location = (os.path.join(icons_folder,'logo-tg3.ico'),0)
+				
+				# Create icon in Desktop
+				#python_path = os.path.dirname(sys.executable)
+				shortcut_path = os.path.join(winshell.desktop(), 'SimCav.lnk')
+				create_shortcut(shortcut_path, simcav_home)
+				
+				# Create StartMenu access
+				startmenu_path = os.path.join(winshell.start_menu(),'Programs', 'SimCav.lnk')
+				create_shortcut(startmenu_path, simcav_home)
+					
+			elif guestOS == 'linux':
+				desktop_path = os.path.join(os.path.join(user_home, 'Desktop'), 'SimCav.desktop')
+				desktop_content = "[Desktop Entry]\nType=Application\nName=SimCav\nGenericName=Laser cavity simulator\nComment=Application for design and simulation of laser resonators\nExec=python " + os.path.join(simcav_home, 'simcav_main.py') + "\nIcon=" + os.path.join(icons_folder, 'logo-tg3.png') + "\nPath=" + simcav_home + "\nTerminal=false\nStartupNotify=false\nCategories=Education;Science"
+				
+				with open(desktop_path, 'w') as desktop_file:
+					desktop_file.write(desktop_content)
+				with open(os.path.join(user_home,'.local','share','applications','SimCav.desktop'), 'w') as desktop_file:
+					desktop_file.write(desktop_content)
+			
+			gui_app.printcmd('\nInstallation finished!')
+				
+		except Exception as inst:
+			gui_app.printcmd('\nError: ' + type(inst).__name__)
+			if type(inst).__name__ in ['PythonVersionError', 
+										'NotModuleError',
+										'PipInstallError',
+										'UserCancel']:
+				gui_app.printcmd(inst.message)
+			else:
+				raise
+				
+		finally:
+			#gui_app.printcmd('\nCleaning installation files...')
+			#for i in installed_modules:
+			#	uninstall(i)
+			#os.remove(os.path.join(simcav_home,tar_file))
+			#gui_app.call_close()
+			pass
+
+class Display(tk.Frame):
+	def __init__(self, parent):
+		tk.Frame.__init__(self, parent)		
+		self.parent = parent
+
+		self.output = tk.Text(self, width=100, height=15, background = 'black', fg='white')
+		self.output.pack(side=tk.LEFT, fill='both', expand=1)
+
+		self.scrollbar = tk.Scrollbar(self, orient="vertical", command = self.output.yview)
+		self.scrollbar.pack(side=tk.RIGHT, fill="y")
+
+		self.output['yscrollcommand'] = self.scrollbar.set
+
+		self.count = 1
+		self.configure(background='black')
+		self.pack(fill='both', expand=1)
+		#self.wait_window()
+		self.thecode = TheCode(self)
+		#self.thecode.func_install(self)
 		
-		with open(desktop_path, 'w') as desktop_file:
-			desktop_file.write(desktop_content)
-		with open(os.path.join(user_home,'.local','share','applications','SimCav.desktop'), 'w') as desktop_file:
-			desktop_file.write(desktop_content)
+	def printcmd(self, txt):
+		self.output.insert(tk.END,str(txt))
+		self.output.insert(tk.END,'\n')
+		self.output.see(tk.END)
+		self.update_idletasks()
 	
-	print('\nInstallation finished!')
-		
-except Exception as inst:
-	print('\nError: ' + type(inst).__name__)
-	if type(inst).__name__ in ['PythonVersionError', 
-								'NotModuleError',
-								'PipInstallError',
-								'UserCancel']:
-		print(inst.message)
-	else:
-		raise
-		
-finally:
-	print('\nCleaning installation files...')
-	for i in installed_modules:
-		uninstall(i)
-	#os.remove(os.path.join(simcav_home,tar_file))
-	input("\nQuitting. Press enter...")
+	def askuserbox(self, message):
+		askbox = messagebox.askyesno('Question', message)
+		return askbox
+			
+	def func_yes(self):
+		pass
+	def func_no(self):
+		pass
+			
+	def call_close(self):
+		messagebox.showinfo('quit', "Quitting.")
+		killing_root()
+
+
+def killing_root():
+	install_window.destroy()
+
+if __name__ == '__main__':
+	global install_window
+	install_window = tk.Tk()
+	install_window.title("SimCav installer")
+	# Kill process when click on window close button
+	install_window.protocol("WM_DELETE_WINDOW", killing_root)
+	
+	cmd_frame = Display(install_window)
+	install_window.mainloop()

@@ -1,140 +1,93 @@
 #!/usr/bin/env python3
+import sys, os, misc
+import tkinter as tk
 
-# Defining exceptions
-class PythonVersionError(Exception):
-	def __init__(self):
-		self.expression = "\nError: Incompatible Python version."
-		self.message = "  SimCav only works with Python 3, but an older version was detected.\n  Please update to Python 3.\n"
-class UserCancel(Exception):
-	def __init__(self):
-		self.expression = "\nError: Cancelled by user."
-		self.message = ""
-		
-# Install with pip
-def install(package):
-	print("\n ---------------------\n Installing " + package)
-	try:
-		pipcode = pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
-		if not pipcode:
-			return True
-		else:
-			return False
-	except Exception as inst:
-		print(inst)
-		print("Error")
-		return False
-# Uninstall with pip
-def uninstall(package):
-	try:
-		pipmain(['uninstall', package, '-y', '--disable-pip-version-check'])
-		return True
-	except Exception as inst:
-		print(inst)
-		print("Error")
-		return False
+class TheCode():
+	def __init__(self, title=None):
+		self.Tk = tk.Tk()
+		self.Tk.title(title)
+		# Kill process when click on window close button
+		self.Tk.protocol("WM_DELETE_WINDOW", self.killing_root)
 
-# Ask user input
-def askuser(message):
-	while True:
-		useranswer = input(message)
-		if useranswer.lower() == 'y' or useranswer.lower() == 'yes':
-			return True
-		elif useranswer.lower() == 'n' or useranswer.lower() == 'no':
-			return False
-		else:
-			print("Your response was not one of the expected responses: (y/n)")
+		gui_app = misc.Display(self.Tk)
+		self.gui_app = gui_app
+		self.func_main(self.gui_app)
+		self.Tk.mainloop()
 
-try:
-	import sys, os
-	
-	# Require Python 3 to work
-	if sys.version_info.major < 3:
-		raise PythonVersionError
-	else:
-		print("OK:	Python version.")
-		
-	# Check operating system
-	guestOS = sys.platform
-	
-	# Windows uninstall will require Winshell
-	haveIinstalled = False
-	if guestOS == 'win32':
+	def killing_root(self):
+		self.Tk.destroy()
+
+	def func_main(self, gui_app):
 		try:
-			import winshell
-		except:
-			# Require Pip
-			try:
-				pip = __import__('pip')
-				print("OK:	Pip")
-			except ModuleNotFoundError:
-				print("Warning: Pip module not found.")
-				print("         Pip is required to proceed with the uninstall.")
-			# Import pip installer
-			try:
-				from pip._internal import main as pipmain
-			except:
-				from pip import main as pipmain
-			haveIinstalled = install(winshell)
-			import winshell
-	
-	# Get paths
-	if guestOS == 'win32':
-		import winshell
-		user_home = winshell.folder("profile")
-		desktop_path = os.path.join(winshell.desktop(), 'SimCav.lnk')
-		startmenu_path = os.path.join(winshell.start_menu(), 'Programs', 'SimCav.lnk')
-	else:
-		user_home = os.path.expanduser('~')
-		desktop_path = os.path.join(user_home, 'Desktop', 'SimCav.desktop')
-		startmenu_path = os.path.join(user_home,'.local','share','applications','SimCav.desktop')
-	simcav_home = os.path.join(user_home, 'SimCav')
-	
-	# Removing SimCav folder
-	print("This will completely remove SimCav, including 'Saves' folder.")
-	print("Path to delete: " + simcav_home)
-	user_asnwer = askuser('Continue? (y/n) ')
-	
-	if not user_asnwer:
-		raise UserCancel
-		
-	import shutil
-	print('Deleting files...')
-	for i in os.listdir(simcav_home):
-		todelete = os.path.join(simcav_home, i)
-		if os.path.isfile(todelete):
-			print('    Removing ' + i)
-			print(os.path.realpath(todelete))
-			os.remove(todelete)
-		elif os.path.isdir(todelete):
-			print("    Removing folder '" + i + "'")
-			print(os.path.realpath(todelete))
-			shutil.rmtree(todelete)
-	# Can't delete main folder while using it!
-	#shutil.rmtree(simcav_home)
-		
-	# Removing shortcuts
-	print('Deleting shortcuts')
-	print(    'Removing ' + desktop_path)
-	os.remove(desktop_path)
-	print(    'Removing ' + startmenu_path)
-	os.remove(startmenu_path)
-	
-	print('\nUninstall finished!')
-		
+			# Require Python 3 to work
+			pythonOK = self.gui_app.pythoncheck()
+				
+			# Check operating system
+			guestOS = sys.platform
+			
+			# Windows uninstall will require Winshell
+			winshell_error = 1
+			if guestOS == 'win32':
+				winshell_error = gui_app.install_winshell()
+			gui_app.printcmd(winshell_error)
+			# Get paths
+			if guestOS == 'win32':
+				user_home = winshell.folder("profile")
+				desktop_path = os.path.join(winshell.desktop(), 'SimCav.lnk')
+				startmenu_path = os.path.join(winshell.start_menu(), 'Programs', 'SimCav.lnk')
+			else:
+				user_home = os.path.expanduser('~')
+				desktop_path = os.path.join(user_home, 'Desktop', 'SimCav.desktop')
+				startmenu_path = os.path.join(user_home,'.local','share','applications','SimCav.desktop')
+			simcav_home = os.path.join(user_home, 'SimCav')
+			
+			# Removing SimCav folder
+			gui_app.printcmd("This will completely remove SimCav, including 'Saves' folder.")
+			gui_app.printcmd("Path to delete: " + simcav_home)
+			user_asnwer = gui_app.askuserbox('Continue? (y/n) ')
+			
+			if not user_asnwer:
+				raise misc.UserCancel
+				
+			import shutil
+			gui_app.printcmd('Deleting files...')
+			for i in os.listdir(simcav_home):
+				todelete = os.path.join(simcav_home, i)
+				if os.path.isfile(todelete):
+					gui_app.printcmd('    Removing ' + i)
+					gui_app.printcmd(os.path.realpath(todelete))
+					os.remove(todelete)
+				elif os.path.isdir(todelete):
+					gui_app.printcmd("    Removing folder '" + i + "'")
+					gui_app.printcmd(os.path.realpath(todelete))
+					shutil.rmtree(todelete)
+			# Can't delete main folder while using it!
+			#shutil.rmtree(simcav_home)
+				
+			# Removing shortcuts
+			gui_app.printcmd('Deleting shortcuts')
+			gui_app.printcmd(    'Removing ' + desktop_path)
+			os.remove(desktop_path)
+			gui_app.printcmd(    'Removing ' + startmenu_path)
+			os.remove(startmenu_path)
+			
+			gui_app.printcmd('\nUninstall finished!')
+				
 
-except Exception as inst:
-	print('\nError: ' + type(inst).__name__)
-	if type(inst).__name__ in ['PythonVersionError', 
-								'NotModuleError',
-								'PipInstallError',
-								'UserCancel']:
-		print(inst.message)
-	else:
-		print(inst)
-    
-finally:
-    if haveIinstalled:
-        uninstall(winshell)
-    
-    input("\nQuitting. Press enter...")
-    
+		except Exception as inst:
+			gui_app.printcmd('\nError: ' + type(inst).__name__)
+			if type(inst).__name__ in ['PythonVersionError', 
+										'NotModuleError',
+										'PipInstallError',
+										'UserCancel']:
+				gui_app.printcmd(inst.message)
+			else:
+				gui_app.printcmd(inst)
+		    
+		finally:
+			if not winshell_error:
+				uninstall(winshell)
+			gui_app.printcmd('You may close this window.')
+
+if __name__ == '__main__':
+	uninstall_window = TheCode('Uninstalling SimCav')
