@@ -23,8 +23,8 @@ class TheCode():
             simcav_api = gui_app.get_api()
             simcav_url = gui_app.get_repo()
 
-            simcav_home = gui_app.gethomepath(gui_app.guestOS())
-            gui_app.printcmd("Updating SimCav")
+            simcav_home = os.path.dirname(os.path.realpath(__file__))
+            gui_app.printcmd("Updating SimCav in " + simcav_home)
             gui_app.download_simcav(simcav_home)
             gui_app.printcmd("Done!")
         except:

@@ -1,4 +1,4 @@
-import sys, os, requests
+import sys, os, requests, hashlib, urllib.request
 import tkinter as tk
 from tkinter import messagebox
 
@@ -119,21 +119,58 @@ class Display(tk.Frame):
         simcav_url = self.get_repo()
         url = simcav_url + 'Manual/manual.pdf'
         folderfile = os.path.join(simcav_home, 'manual.pdf')
+        
+        if self.compare_hash(folderfile, url):
+            self.printcmd("     Up-to-date: manual.pdf")
+            return 0
+
         try:
             urllib.request.urlretrieve(url, folderfile)
             return 0
         except:
             raise
             return 1
-
+            
+    def compare_hash(self, local_file, remote_file):
+        # Compares hashes of two files
+        #   Returns 1 if hashes are equal.
+        #   Returns 0 if hashes are different or cant compare.
+        
+        # Local file hash
+        if os.path.isfile(local_file):
+            hash1 = self.get_hash(local_file)
+        else:
+            return 0
+        
+        # Web file hash
+        r = requests.get(remote_file)
+        hash2 = hashlib.md5(r._content).hexdigest()
+        # Equal hash -> 1
+        if hash1 == hash2:
+            return 1
+        else:
+            return 0
+        
     def download_file(self, thefile, thefolder):
-        import urllib.request
+        #import urllib.request
         simcav_url = self.get_repo()
         if os.path.basename(thefolder) in ['Icons', 'Saves']:
             url = simcav_url + os.path.basename(thefolder) + '/' + thefile
         else:
             url = simcav_url + thefile
         folderfile = os.path.join(thefolder, thefile)
+        
+        # Compare hash, if different, download
+        try:
+            local_file = os.path.join(thefolder,thefile)
+            remote_file = url
+
+            if self.compare_hash(local_file, remote_file):
+                self.printcmd("     Up-to-date: " + thefile)
+                return 0
+        except:
+            raise HashError()
+            
         try:
             self.printcmd("     Downloading " + thefile)
             urllib.request.urlretrieve(url, folderfile)
@@ -173,6 +210,13 @@ class Display(tk.Frame):
         self.printcmd('\n Downloading manual...')
         download_error = self.download_manual(simcav_home)
         self.printcmd('\n Files downloaded')
+        
+    def get_hash(self, thefile):
+        hasher = hashlib.md5()
+        with open(thefile, 'rb') as afile:
+            buf = afile.read()
+            hasher.update(buf)
+        return hasher.hexdigest()
 
     # Installing functions
     def guestOS(self):
@@ -232,6 +276,9 @@ class NotModuleError(Exception):
 class WebFileError(Exception):
 	def __init__(self, thefile):
 		self.message = "Error: '" + thefile + "' not found'"
+class HashError(Exception):
+	def __init__(self):
+		self.message = "Error hashing"
 class UserCancel(Exception):
 	def __init__(self):
 		self.expression = "\nError: Cancelled by user."
