@@ -1,7 +1,13 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
-import button_functions as BT
+# Matplotlib stuff
+from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.figure import Figure
+
+# Other modules
+import numpy as np
+
 import load_icons as LI
 import simcav_physics as SP
 
@@ -9,6 +15,33 @@ import simcav_physics as SP
 # Creating the GUI
 qtCreatorFile = "gui.ui" # Enter file here.
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
+
+#===============================================================================
+# Canvas plot
+class PlotCanvas(FigureCanvas):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+ 
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+ 
+        #FigureCanvas.setSizePolicy(self,
+        #        QSizePolicy.Expanding,
+        #        QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+        self.plot_init()
+ 
+
+    def plot_init(self):
+        data = [i**2 for i in range(25)]
+        ax = self.figure.add_subplot(111)
+        ax.plot(data, 'r-')
+        ax.set_title('Plot init')
+        self.draw()
+
+
+#===============================================================================
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
@@ -29,6 +62,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_moveUp.clicked.connect(self.handle_button_moveUp)
         self.button_moveDown.clicked.connect(self.handle_button_moveDown)
         self.button_delete.clicked.connect(self.handle_button_delete)
+        self.button_calcCavity.clicked.connect(self.handle_button_calcCavity)
         
         # "Add element" functions
         self.button_flatMirror.clicked.connect(self.handle_button_addElement)
@@ -46,7 +80,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.numberOfElements = 0
     
     def initUI(self):
-        pass
+        cavityPlot = PlotCanvas()
+        self.tab_cavity.layout = QtWidgets.QVBoxLayout()
+        self.tab_cavity.layout.addWidget(cavityPlot)
+        self.tab_cavity.setLayout(self.tab_cavity.layout)
     
     def element_list_setup(self):
         # Layout for scroll area.
@@ -77,6 +114,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             elementID = self.elementFocus
             element = window.cavity.findElement(elementID)
             element['Widget'].moveDown()
+            
     def handle_button_delete(self):
         if self.elementFocus != None:
             elementID = self.elementFocus
@@ -86,7 +124,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             window.cavity.elementList.pop()
             window.cavity.numberOfElements = window.cavity.numberOfElements - 1
             window.updateElementList()
-        
+            
+    def handle_button_calcCavity(self):
+        # Calculate element matrixes
+        calcCavity = self.cavity.calcElementData()
+        # If not valid values, end calculations
+        if calcCavity == False:
+            return False
     
     # Add element
     def handle_button_addElement(self):
@@ -142,11 +186,31 @@ class ElementWidget(QtWidgets.QWidget):
         # Config ---------------------------------------------------------------
         # Set minimum width so all labels are equal whatever the element name
         self.columns['label_name'].setMinimumWidth(110)
+        self.validator = QtGui.QDoubleValidator()
+        self.validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        self.columns['entry1'].setValidator(self.validator)
+        self.columns['entry2'].setValidator(self.validator)
         # Config End -----------------------------------------------------------
         
         # Add the columns to the widget
         for i in self.columns:
             layout.addWidget(self.columns[i])
+            
+    # Read entries
+    def readEntry(self, entry):
+        state = self.validator.validate(self.columns[entry].text(), 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            #color = '#c4df9b' # green
+            color = ''
+            value = float(self.columns[entry].text().replace(",","."))
+        elif state == QtGui.QValidator.Intermediate:
+            color = '#fff79a' # yellow
+            value = False
+        else:
+            color = '#f6989d' # red
+            value = False
+        self.columns[entry].setStyleSheet('QLineEdit { background-color: %s }' % color)
+        return value
 
     # Mouse click events
     def mousePressEvent(self, QMouseEvent):
