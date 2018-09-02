@@ -100,11 +100,11 @@ class ElementWidget(QtWidgets.QWidget):
 
 
         self.columns = {
-            'label_number' : QtWidgets.QLabel(text=str(eOrder)),
-            'label_name' : QtWidgets.QLabel(text=etype),
-            'entry1' : QtWidgets.QLineEdit(placeholderText="mm"),
-            'entry2' : QtWidgets.QLineEdit(),
-            'delete' : QtWidgets.QPushButton()
+            'label_number': QtWidgets.QLabel(text=str(eOrder)),
+            'label_name': QtWidgets.QLabel(text=etype),
+            'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
+            'entry2': QtWidgets.QLineEdit(),
+            'delete': QtWidgets.QPushButton()
         }
 
         # Config ---------------------------------------------------------------

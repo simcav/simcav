@@ -18,6 +18,10 @@ class cavity():
             if element['ID'] == elementID:
                 element[fieldToUpdate] = Value
                 
+                # Update also widget number if applicable
+                if fieldToUpdate == 'Order':
+                    element['Widget'].columns['label_number'].setText(str(Value))
+                
     def reorderList(self):
         oldList = self.elementList
         newList = sorted(oldList, key=lambda k: k['Order'])
