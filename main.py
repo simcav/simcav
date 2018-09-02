@@ -21,8 +21,16 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.element_list_setup()
         
         self.cavity = SP.cavity()
-                
-        # Add element functions
+        self.elementFocus = None
+        
+        
+        # BUTTON FUNCTIONS =====================================================
+        # Cavity buttons
+        self.button_moveUp.clicked.connect(self.handle_button_moveUp)
+        self.button_moveDown.clicked.connect(self.handle_button_moveDown)
+        self.button_delete.clicked.connect(self.handle_button_delete)
+        
+        # "Add element" functions
         self.button_flatMirror.clicked.connect(self.handle_button_addElement)
         self.button_curvedMirror.clicked.connect(self.handle_button_addElement)
         self.button_distance.clicked.connect(self.handle_button_addElement)
@@ -33,7 +41,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_curvedInterface.clicked.connect(self.handle_button_addElement)
         self.button_thinLens.clicked.connect(self.handle_button_addElement)
         self.button_customElement.clicked.connect(self.handle_button_addElement)
-        
+        #=======================================================================
         
         self.numberOfElements = 0
     
@@ -57,6 +65,30 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
     ################################################    
     # Button functions Start
+    
+    # Move Up
+    def handle_button_moveUp(self):
+        if self.elementFocus != None:
+            elementID = self.elementFocus
+            element = window.cavity.findElement(elementID)
+            element['Widget'].moveUp()
+    def handle_button_moveDown(self):
+        if self.elementFocus != None:
+            elementID = self.elementFocus
+            element = window.cavity.findElement(elementID)
+            element['Widget'].moveDown()
+    def handle_button_delete(self):
+        if self.elementFocus != None:
+            elementID = self.elementFocus
+            element = window.cavity.findElement(elementID)
+            element['Widget'].moveBottom()
+            element['Widget'].deleteLater()
+            window.cavity.elementList.pop()
+            window.cavity.numberOfElements = window.cavity.numberOfElements - 1
+            window.updateElementList()
+        
+    
+    # Add element
     def handle_button_addElement(self):
         buttonName = self.sender().objectName()
         
@@ -73,6 +105,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cavity.addElement(newElement)
         
         window.cavity.numberOfElements = window.cavity.numberOfElements + 1
+        
     # Button functions End 
     ################################################  
 #===============================================================================
@@ -103,13 +136,10 @@ class ElementWidget(QtWidgets.QWidget):
             'label_number': QtWidgets.QLabel(text=str(eOrder)),
             'label_name': QtWidgets.QLabel(text=etype),
             'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
-            'entry2': QtWidgets.QLineEdit(),
-            'delete': QtWidgets.QPushButton()
+            'entry2': QtWidgets.QLineEdit()
         }
 
         # Config ---------------------------------------------------------------
-        # Add icon for element deletion
-        self.columns['delete'].setIcon(LI.small_del())
         # Set minimum width so all labels are equal whatever the element name
         self.columns['label_name'].setMinimumWidth(110)
         # Config End -----------------------------------------------------------
@@ -122,6 +152,15 @@ class ElementWidget(QtWidgets.QWidget):
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == QtCore.Qt.LeftButton:
             self.setFocus()
+            window.elementFocus = self.elementID
+            for element in window.cavity.elementList:
+                if element['ID'] == window.elementFocus:
+                    element['Widget'].setAutoFillBackground(True)
+                    element['Widget'].setBackgroundRole(QtGui.QPalette.AlternateBase)
+                else:
+                    element['Widget'].setAutoFillBackground(False)
+                    element['Widget'].setBackgroundRole(QtGui.QPalette.Base)
+                    
             #print("Left Button Clicked")
         elif QMouseEvent.button() == QtCore.Qt.RightButton:
             #do what you want here
@@ -129,40 +168,31 @@ class ElementWidget(QtWidgets.QWidget):
             #print("Right Button Clicked")
 
     # Filter events
-    def eventFilter(self, object, event):
-        if event.type() == QtCore.QEvent.FocusIn:
-            self.setAutoFillBackground(True)
-            self.setBackgroundRole(QtGui.QPalette.AlternateBase)
-            #print("widget has gained keyboard focus")
-        elif event.type() == QtCore.QEvent.FocusOut:
-            self.setAutoFillBackground(False)
-            self.setBackgroundRole(QtGui.QPalette.Base)
-            #print("widget has lost keyboard focus")
-        #else:
-        #    print(event.name())
-        return False
+    # def eventFilter(self, object, event):
+    #     if event.type() == QtCore.QEvent.FocusIn:
+    #         self.setAutoFillBackground(True)
+    #         self.setBackgroundRole(QtGui.QPalette.AlternateBase)
+    #         #print("widget has gained keyboard focus")
+    #     elif event.type() == QtCore.QEvent.FocusOut:
+    #         self.setAutoFillBackground(False)
+    #         self.setBackgroundRole(QtGui.QPalette.Base)
+    #         #print("widget has lost keyboard focus")
+    #     #else:
+    #     #    print(event.name())
+    #     return False
 
     # Right click menu
     def openMenu(self, position):
         menu = QtWidgets.QMenu()
-        topAction = menu.addAction("Move top")
         upAction = menu.addAction("Move up")
         downAction = menu.addAction("Move down")
-        bottomAction = menu.addAction("Move bottom")
         action = menu.exec_(self.mapToGlobal(position))
-        if action == topAction:
-            self.moveTop()
-        elif action == upAction:
+        if action == upAction:
             self.moveUp()
         elif action == downAction:
             self.moveDown()
-        elif action == bottomAction:
-            self.moveBottom()
     
     # Right click functions
-    def moveTop(self):
-        self.itemNumber = 0
-        
     def moveUp(self):
         element = window.cavity.findElement(self.elementID)
         valueOld = element['Order']
@@ -200,11 +230,18 @@ class ElementWidget(QtWidgets.QWidget):
             window.updateElementList()
             
     def moveBottom(self):
-        # Need numberTotalItems in parent
-        pass
+        element = window.cavity.findElement(self.elementID)
+        # Change the other elements
+        for i in window.cavity.elementList:
+            if i['Order'] > element['Order']:
+                window.cavity.updateValue(i['ID'], 'Order', i['Order'] - 1)
+        # Change THE element
+        window.cavity.updateValue(element['ID'], 'Order', window.cavity.numberOfElements-1)
+        # Reorder the element list
+        window.cavity.reorderList()
+        # Update GUI
+        window.updateElementList()
 
-    def printDummy(self):
-        print("I'm dumb!")
 #===============================================================================
 # Launching the program
 if __name__ == "__main__":
