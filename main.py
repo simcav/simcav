@@ -52,6 +52,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.initUI()
         
         self.element_list_setup()
+        self.cavity_icons_setup()
         
         self.cavity = SP.cavity()
         self.elementFocus = None
@@ -85,6 +86,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tab_cavity.layout.addWidget(cavityPlot)
         self.tab_cavity.setLayout(self.tab_cavity.layout)
     
+    def cavity_icons_setup(self):
+        # Layout for scroll area.
+        # Widgets (cavity elements) have to be added to this layout
+        self.cavityIconsLayout = QtWidgets.QHBoxLayout(self.scroll_cavityIcons)
+        self.cavityIconsLayout.setAlignment(QtCore.Qt.AlignCenter)
+        self.cavityIconsLayout.setContentsMargins(0,0,0,0)
+        self.cavityIconsLayout.setSpacing(0)
+        
     def element_list_setup(self):
         # Layout for scroll area.
         # Widgets (cavity elements) have to be added to this layout
@@ -148,6 +157,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Add element to cavity-class
         self.cavity.addElement(newElement)
         
+        # Add icon to cavity representation
+        newIcon = IconWidget(elementName)
+        self.cavityIconsLayout.addWidget(newIcon)
+        
+        
         window.cavity.numberOfElements = window.cavity.numberOfElements + 1
         
     # Button functions End 
@@ -157,6 +171,18 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
 #===============================================================================
 # Extra GUI elements
+class IconWidget(QtWidgets.QWidget):
+    def __init__(self, eType, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        
+        self.elementType = eType
+        self.iconImage = LI.elementIcon(eType)
+        self.icon = QtWidgets.QPushButton()
+        self.icon.setIcon(self.iconImage)
+        
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.addWidget(self.icon)
+
 # Element label
 class ElementWidget(QtWidgets.QWidget):
     def __init__(self, eOrder, etype, parent=None):
@@ -202,7 +228,13 @@ class ElementWidget(QtWidgets.QWidget):
         if state == QtGui.QValidator.Acceptable:
             #color = '#c4df9b' # green
             color = ''
-            value = float(self.columns[entry].text().replace(",","."))
+            try:
+                value = float(self.columns[entry].text().replace(",","."))
+            except:
+                # MAYBE PUT A MESSAGE HERE SAYING INVALID FLOAT
+                # TO THE MESSAGE BAR
+                self.columns[entry].setText("")
+                value = False
         elif state == QtGui.QValidator.Intermediate:
             color = '#fff79a' # yellow
             value = False
