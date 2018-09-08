@@ -6,12 +6,13 @@ class cavity():
         self.refractiveIndex = 1.0
         self.numberOfElements = 0
         
-    def addElement(self, widget):
+    def addElement(self, widget, icon):
         elementDict = {
             'ID': widget.elementID,
             'Type': widget.elementType,
             'Order': widget.originalOrder,
-            'Widget': widget
+            'Widget': widget,
+            'Icon': icon
         }
         
         self.elementList.append(elementDict)

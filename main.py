@@ -89,7 +89,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def cavity_icons_setup(self):
         # Layout for scroll area.
         # Widgets (cavity elements) have to be added to this layout
-        self.cavityIconsLayout = QtWidgets.QHBoxLayout(self.scroll_cavityIcons)
+        self.cavityIconsLayout = QtWidgets.QHBoxLayout(self.scroll_cavityIconsArea)
         self.cavityIconsLayout.setAlignment(QtCore.Qt.AlignCenter)
         self.cavityIconsLayout.setContentsMargins(0,0,0,0)
         self.cavityIconsLayout.setSpacing(0)
@@ -105,8 +105,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def updateElementList(self):
         for element in self.cavity.elementList:
             element['Widget'].setParent(None)
+            element['Icon'].setParent(None)
         for element in self.cavity.elementList:
             self.elementListLayout.addWidget(element['Widget'])
+            self.cavityIconsLayout.addWidget(element['Icon'])
             
             
     ################################################    
@@ -130,6 +132,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             element = window.cavity.findElement(elementID)
             element['Widget'].moveBottom()
             element['Widget'].deleteLater()
+            element['Icon'].deleteLater()
             window.cavity.elementList.pop()
             window.cavity.numberOfElements = window.cavity.numberOfElements - 1
             window.updateElementList()
@@ -154,13 +157,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         newElement = ElementWidget(window.cavity.numberOfElements, elementName)
         # Add widget to element box
         self.elementListLayout.addWidget(newElement)
-        # Add element to cavity-class
-        self.cavity.addElement(newElement)
-        
         # Add icon to cavity representation
         newIcon = IconWidget(elementName)
         self.cavityIconsLayout.addWidget(newIcon)
         
+        # Add element to cavity-class
+        self.cavity.addElement(newElement, newIcon)  
         
         window.cavity.numberOfElements = window.cavity.numberOfElements + 1
         
@@ -176,13 +178,18 @@ class IconWidget(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self, parent)
         
         self.elementType = eType
-        self.iconImage = LI.elementIcon(eType)
         self.icon = QtWidgets.QPushButton()
-        self.icon.setIcon(self.iconImage)
+        self.icon.setIcon(LI.elementIcon(eType))
+        self.icon.setMinimumWidth(40)
+        self.icon.setMinimumHeight(40)
+        self.icon.setFlat(True)
         
         layout = QtWidgets.QHBoxLayout(self)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
         layout.addWidget(self.icon)
-
+        
 # Element label
 class ElementWidget(QtWidgets.QWidget):
     def __init__(self, eOrder, etype, parent=None):
