@@ -1128,9 +1128,9 @@ class Cavityplot(tk.Frame):
         y0, y1 = self.figureplot.get_ylim()
         for xi, element in zip(xpoints,xnames):
             self.figureplot.axvline(x=xi, color='orange', alpha=0.7, linewidth=0.7)
-            if 'mirror' in element:
+            if 'Mirror' in element:
                 self.figureplot.text(xi,y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
-            elif 'lens' in element:
+            elif 'Lens' in element:
                 self.figureplot.text(xi, y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
             elif 'Block' in element:
                 self.figureplot.text((xi+xold)/2, y1-5, element,rotation=0, horizontalalignment='center', verticalalignment='top', color='w', bbox=dict(facecolor='k', edgecolor='k', boxstyle='round', linewidth=0, alpha=0.65))

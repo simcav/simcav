@@ -17,31 +17,6 @@ qtCreatorFile = "gui.ui" # Enter file here.
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
 #===============================================================================
-# Canvas plot
-class PlotCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
- 
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
- 
-        #FigureCanvas.setSizePolicy(self,
-        #        QSizePolicy.Expanding,
-        #        QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-        self.plot_init()
- 
-
-    def plot_init(self):
-        data = [i**2 for i in range(25)]
-        ax = self.figure.add_subplot(111)
-        ax.plot(data, 'r-')
-        ax.set_title('Plot init')
-        self.draw()
-
-
-#===============================================================================
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
@@ -81,9 +56,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.numberOfElements = 0
     
     def initUI(self):
-        cavityPlot = PlotCanvas()
+        self.cavityPlot = PlotCanvas()
         self.tab_cavity.layout = QtWidgets.QVBoxLayout()
-        self.tab_cavity.layout.addWidget(cavityPlot)
+        self.tab_cavity.layout.addWidget(self.cavityPlot)
         self.tab_cavity.setLayout(self.tab_cavity.layout)
     
     def cavity_icons_setup(self):
@@ -117,33 +92,40 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     # Move Up
     def handle_button_moveUp(self):
         if self.elementFocus != None:
-            elementID = self.elementFocus
-            element = window.cavity.findElement(elementID)
-            element['Widget'].moveUp()
+            for elementID in self.elementFocus:
+                element = window.cavity.findElement(elementID)
+                element['Widget'].moveUp()
     def handle_button_moveDown(self):
         if self.elementFocus != None:
-            elementID = self.elementFocus
-            element = window.cavity.findElement(elementID)
-            element['Widget'].moveDown()
+            for elementID in reversed(self.elementFocus):
+                element = window.cavity.findElement(elementID)
+                element['Widget'].moveDown()
             
     def handle_button_delete(self):
         if self.elementFocus != None:
-            elementID = self.elementFocus
-            element = window.cavity.findElement(elementID)
-            element['Widget'].moveBottom()
-            element['Widget'].deleteLater()
-            element['Icon'].deleteLater()
-            window.cavity.elementList.pop()
-            window.cavity.numberOfElements = window.cavity.numberOfElements - 1
-            window.updateElementList()
+            for elementID in reversed(self.elementFocus):
+                element = window.cavity.findElement(elementID)
+                element['Widget'].moveBottom()
+                element['Widget'].deleteLater()
+                element['Icon'].deleteLater()
+                window.cavity.elementList.pop()
+                window.cavity.numberOfElements = window.cavity.numberOfElements - 1
+                window.updateElementList()
             
     def handle_button_calcCavity(self):
         # Calculate element matrixes
-        calcCavity = self.cavity.calcElementData()
+        calcCavity = self.cavity.calcCavity()
         # If not valid values, end calculations
-        if calcCavity == False:
+        if not calcCavity:
+            print('Error happened')
             return False
-    
+            
+        # Plot cavity    
+        self.cavityPlot.plot(self.cavity.z_tan, self.cavity.wz_tan, self.cavity.z_sag, self.cavity.wz_sag)
+        
+        # Plot vertical marks
+        self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
+        
     # Add element
     def handle_button_addElement(self):
         buttonName = self.sender().objectName()
@@ -170,6 +152,76 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     ################################################  
 #===============================================================================
 
+#===============================================================================
+# Canvas plot
+class PlotCanvas(FigureCanvas):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+ 
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+ 
+        #FigureCanvas.setSizePolicy(self,
+        #        QSizePolicy.Expanding,
+        #        QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+        self.plot_init()
+ 
+
+    def plot_init(self):
+        data = [i**2 for i in range(25)]
+        self.axes.plot(data, 'r-')
+        self.axes.set_title('Plot init')
+        self.draw()
+    
+    def plot(self, x1, y1, x2, y2):
+        # Clear figure
+        self.axes.clear()
+        
+        if len(x1) > 1:
+            for zrow, wrow in zip(x1,y1):
+                tan, = self.axes.plot(zrow,wrow*1000,'g',label='Tangential')
+            for zrow, wrow in zip(x2,y2):
+                sag, = self.axes.plot(zrow,wrow*1000,'b',label='Saggital')
+        else:
+            x1.append(0)
+            y1.append(0)
+            x2.append(0)
+            y2.append(0)
+            for zrow, wrow in zip(x1,y1):
+                tan, = self.axes.plot(zrow,wrow*1000,'g',label='Tangential')
+            for zrow, wrow in zip(x2,y2):
+                sag, = self.axes.plot(zrow,wrow*1000,'b',label='Saggital')
+                
+        self.axes.set_xlabel('z (mm)')
+        self.axes.set_ylabel('w (µm)')
+        self.axes.set_ylim(ymin=0) # Adjust the vertical min
+        self.axes.legend(handles=[tan,sag], loc='upper left')
+        self.axes.grid(linestyle='dashed')
+        #self.canvas.show()
+        self.draw()
+        #toolbar = self.figure.canvas.toolbar
+        #toolbar.update()       
+        #toolbar.push_current()
+        
+    def plotVerticals(self, xpoints, xnames):
+        y0, y1 = self.axes.get_ylim()
+        for xi, element in zip(xpoints,xnames):
+            print(element)
+            self.axes.axvline(x=xi, color='orange', alpha=0.7, linewidth=0.7)
+            if 'Mirror' in element:
+                self.axes.text(xi,y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
+            elif 'Lens' in element:
+                self.axes.text(xi, y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
+            elif 'Block' in element:
+                self.axes.text((xi+xold)/2, y1-5, element,rotation=0, horizontalalignment='center', verticalalignment='top', color='w', bbox=dict(facecolor='k', edgecolor='k', boxstyle='round', linewidth=0, alpha=0.65))
+            else:
+                self.axes.text((xi+xold)/2,y1-5,element,rotation=90, horizontalalignment='center', verticalalignment='top', backgroundcolor='w', bbox=dict(facecolor='w', edgecolor='k', boxstyle='round',linewidth=0.5, alpha=0.65))
+            xold = xi
+        #self.canvas.show()
+        self.draw()
+#===============================================================================
 
 #===============================================================================
 # Extra GUI elements
@@ -216,18 +268,48 @@ class ElementWidget(QtWidgets.QWidget):
             'entry2': QtWidgets.QLineEdit()
         }
 
-        # Config ---------------------------------------------------------------
+        # CONFIG ---------------------------------------------------------------
         # Set minimum width so all labels are equal whatever the element name
         self.columns['label_name'].setMinimumWidth(110)
+        
+        # Validate entry boxes values
         self.validator = QtGui.QDoubleValidator()
         self.validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.columns['entry1'].setValidator(self.validator)
         self.columns['entry2'].setValidator(self.validator)
-        # Config End -----------------------------------------------------------
+        
+        # Default values
+        self.assignDefaults(etype)
+        
+        # Disable entry boxes for Flat mirrors
+        if etype == 'Flat Mirror':
+            self.columns['entry1'].setDisabled(True)
+            self.columns['entry2'].setDisabled(True)
+        # CONFIG End -----------------------------------------------------------
         
         # Add the columns to the widget
         for i in self.columns:
             layout.addWidget(self.columns[i])
+            
+    def assignDefaults(self, eType):
+        # Default values for the entries
+        if eType in ['Distance','Block','Brewster Plate','Brewster Crystal']:
+            self.columns['entry2'].setText(str(1))
+        elif eType in ['Curved Mirror','Thin lens']:
+            self.columns['entry2'].setText(str(0))
+        elif eType == 'Curved Interface':
+            self.columns['entry2'].setText(str(1))
+        elif eType == 'Flat Mirror':
+            self.columns['entry1'].setText(str(0))
+            self.columns['entry2'].setText(str(0))
+            self.columns['entry1'].setDisabled(True)
+            self.columns['entry2'].setDisabled(True)
+        elif eType == 'Flat Interface':
+            self.columns['entry2'].setText(str(0))
+            self.columns['entry2'].setText(str(1))
+            self.columns['entry1'].setDisabled(True)
+        else:
+            self.columns['entry2'].setText(str(0))
             
     # Read entries
     def readEntry(self, entry):
@@ -236,7 +318,7 @@ class ElementWidget(QtWidgets.QWidget):
             #color = '#c4df9b' # green
             color = ''
             try:
-                value = float(self.columns[entry].text().replace(",","."))
+                value = float(self.columns[entry].text().replace(",", "."))
             except:
                 # MAYBE PUT A MESSAGE HERE SAYING INVALID FLOAT
                 # TO THE MESSAGE BAR
@@ -253,11 +335,34 @@ class ElementWidget(QtWidgets.QWidget):
 
     # Mouse click events
     def mousePressEvent(self, QMouseEvent):
+        # If shift is pressed...
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
         if QMouseEvent.button() == QtCore.Qt.LeftButton:
             self.setFocus()
-            window.elementFocus = self.elementID
+            # Save element as focused, add if mayus is pressed.
+            if modifiers == QtCore.Qt.ShiftModifier and self.elementID is not None:
+                window.elementFocus.append(self.elementID)
+            elif modifiers == QtCore.Qt.ControlModifier:
+                # Remove focus
+                window.elementFocus.remove(self.elementID)
+            else:
+                window.elementFocus = self.elementID
+                
+            # Change focus into list if is an integer
+            if type(window.elementFocus) == int:
+                focusList = [window.elementFocus]
+            else:
+                focusList = window.elementFocus
+                
+            # Order list
+            window.elementFocus = []
             for element in window.cavity.elementList:
-                if element['ID'] == window.elementFocus:
+                if element['ID'] in focusList:
+                    window.elementFocus.append(element['ID'])
+                    
+            # Change background
+            for element in window.cavity.elementList:
+                if element['ID'] in window.elementFocus:
                     element['Widget'].setAutoFillBackground(True)
                     element['Widget'].setBackgroundRole(QtGui.QPalette.AlternateBase)
                 else:

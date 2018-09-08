@@ -9,5 +9,4 @@ def elementIcon(elementName):
     filename = "Icons/icon_" + elementName.lower().replace(" ", "_") + ".png"
     icon = QtGui.QIcon()
     icon.addFile(filename)
-    print(filename)
     return icon
