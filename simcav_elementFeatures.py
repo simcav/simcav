@@ -2,8 +2,11 @@ import simcav_ABCD as abcd
 import tkinter.simpledialog as tkdiag
 import numpy as np
 
-def assign(elementType, entry1, entry2, refr_index):
-    myDict = {}    
+def assign(elementType, entry1, entry2, refr_index=1.0):
+    myDict = {}
+    
+    myDict['entry1'] = entry1
+    myDict['entry2'] = entry2
     
     # Flat mirror
     if elementType == 'Flat Mirror':

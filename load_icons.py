@@ -10,3 +10,8 @@ def elementIcon(elementName):
     icon = QtGui.QIcon()
     icon.addFile(filename)
     return icon
+    
+def elementPixmap(elementName):
+    filename = "Icons/icon_" + elementName.lower().replace(" ", "_") + ".png"
+    pixmap = QtGui.QPixmap(filename)
+    return pixmap

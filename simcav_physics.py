@@ -9,16 +9,18 @@ class cavity():
         self.numberOfElements = 0
         self.wl_mm = 675E-6
         
-    def addElement(self, widget, icon):
+    def addElement(self, widget, icon, vector):
         elementDict = {
             'ID': widget.elementID,
             'Type': widget.elementType,
             'Order': widget.originalOrder,
             'Widget': widget,
-            'Icon': icon
+            'Icon': icon,
+            'isVector': vector
         }
         
         self.elementList.append(elementDict)
+        self.optionMenuLists()
         
     def updateValue(self, elementID, fieldToUpdate, Value):
         for element in self.elementList:
@@ -28,6 +30,20 @@ class cavity():
                 # Update also widget number if applicable
                 if fieldToUpdate == 'Order':
                     element['Widget'].columns['label_number'].setText(str(Value))
+        # Update option menus
+        self.optionMenuLists()
+        
+    def updateOtherList(self, elementID, myList, fieldToUpdate, Value):
+        for element in myList:
+            if element['ID'] == elementID:
+                element[fieldToUpdate] = Value
+                try:
+                    refr_index = element['refr_index']
+                except:
+                    refr_index = 1.0
+                newdict = EF.assign(element['Type'], element['entry1'], element['entry2'], refr_index)
+                myList[element['Order']].update(newdict)
+        return myList
                 
     def reorderList(self):
         oldList = self.elementList
@@ -39,8 +55,34 @@ class cavity():
             if element['ID'] == elementID:
                 return element
         return None
-                
-    def calcCavity(self):
+        
+    def findElement_byNumber(self, elementOrder):
+        for element in self.elementList:
+            if element['Order'] == elementOrder:
+                return element
+        return None
+        
+    def optionMenuLists(self):
+        elementList = []
+        vectorList = []
+        notVectorList = []
+        
+        for element in self.elementList:
+            entry = str(element['Order']) + ' ' + element['Type']
+            elementList.append(entry)
+            if element['isVector']:
+                vectorList.append(entry)
+            else:
+                notVectorList.append(entry)
+        return elementList, vectorList, notVectorList
+        
+    ############################################################################
+    # Function to initiate cavity calculations
+    def basicSetup(self):
+        if not self.minimumElements():
+            print('Error, not enough elements')
+            return False
+        
         # Assign matrix to elements
         if not self.calcElementData():
             print('Error happened with calcElementData')
@@ -59,6 +101,13 @@ class cavity():
             return False
         else:
             print('Closed OK')
+        return True
+    
+    ############################################################################
+    # Function to calculate the optical cavity
+    def calcCavity(self):
+        if not self.basicSetup():
+            return False
             
         # Calculate cavity matrix, for both saggital and tangential
         cavityMatrix = []
@@ -84,12 +133,114 @@ class cavity():
         self.z_tan, self.wz_tan, self.z_limits_tan, self.z_names_tan = self.propagation(self.elementList, self.q0[proy], self.wl_mm, proy)
         proy = 1
         self.z_sag, self.wz_sag, self.z_limits_sag, self.z_names_sag = self.propagation(self.elementList, self.q0[proy], self.wl_mm, proy)
+        
+        self.z_tan = np.array(self.z_tan)
+        self.z_sag = np.array(self.z_sag)
+        self.wz_tan = np.array(self.wz_tan)
+        self.wz_sag = np.array(self.wz_sag)
         print('data OK')
         
         return True
         
+    ############################################################################
+    # Function to calculate the stability in function of a variation
+    def calcStability(self, elementOrder, xstart, xend):
+        if not self.basicSetup():
+            print('Basics FAIL')
+            return False, False, False, False
+            
+        # Define coordinate X   
+        xvec = np.linspace(xstart, xend, num=100)
+        # Create another list, to be modified
+        stabilityList = list(self.elementList)
+        # Element to be modified
+        element = self.findElement_byNumber(elementOrder)
+        
+        # Calculate coordinate Y
+        yvec_tan = []
+        yvec_sag = []
+        
+        for number in xvec:
+            # Now modify ONLY the first entry of the chosen item, and the associated matrix:
+            # e1 = number
+            # e2 = element['entry2']
+            # elementType = element['Type']
+            # if elementType == 'Custom Element':
+            #     pass
+            # else:
+            #     # NEED TO CHANGE THIS TO PUT THE PROPER REFR INDEX
+            #     refr_index = 1
+            #     ##################
+            #     newdict = EF.assign(elementType, e1, e2, refr_index)
+            #     stabilityList[element['Order']] = newdict
+            stabilityList = self.updateOtherList(element['ID'], stabilityList, 'entry1', number)
+                
+            # Calculate cavity matrix, for both saggital and tangential
+            stabilityMatrix = [self.calcCavityMatrix(stabilityList,0),
+                               self.calcCavityMatrix(stabilityList,1)]
+            stab_val = self.stabilityValue(stabilityMatrix)
+
+            yvec_tan.append(stab_val[0])
+            yvec_sag.append(stab_val[1])
+            
+        xlabel = 'Variation of element ' + str(element['Order']) + ' (mm)'
+        return np.array(xvec), np.array(yvec_tan), np.array(yvec_sag), xlabel
+        
+    # Function to calculate beam size along a "distance" element
+    def calcBeamsize(self, watchElementOrder, varElementOrder, xstart, xend):
+        if not self.basicSetup():
+            print('Basics FAIL')
+            return False, False, False, False, False
+            
+        # Define coordinate X 
+        xvec = np.linspace(xstart, xend, num=100)
+        beamsizeList = list(self.elementList)
+        # Relevant elements
+        watchElement = self.findElement_byNumber(watchElementOrder)
+        varElement = self.findElement_byNumber(varElementOrder)
+        
+        # Calculate coordinate Y
+        yvec_tan = []
+        yvec_sag = []
+        
+        # For every value of the X axis vector
+        for number in xvec:
+            beamsizeList = self.updateOtherList(varElement['ID'], beamsizeList, 'entry1', number)
+            
+            beamsizeMatrix = [self.calcCavityMatrix(beamsizeList,0),
+                              self.calcCavityMatrix(beamsizeList,1)]
+            q0 = []
+            for matrix in beamsizeMatrix:
+                q0.append(abcd.q_resonator(matrix))
+            q = abcd.q_element(q0, watchElement, beamsizeList)
+            print(q0[0])
+            # Refractive index
+            if 'refr_index' in watchElement.keys():
+                refr_index = watchElement['refr_index']
+            else:
+                refr_index = 1.0
+                
+            # Wavelength (micrometres)
+            wl = self.wl_mm
+            
+            # Calculate beamsize
+            R, w = abcd.r_w(q[0], wl, refr_index)
+            yvec_tan.append(w*1E3)
+            R, w = abcd.r_w(q[1], wl, refr_index)
+            yvec_sag.append(w*1E3)
+            
+        xlabel = 'Variation of element ' + str(varElement['Order']) + ' (mm)'
+        ylabel = 'Beam size at element ' + str(watchElement['Order']) + ' (µm)'    
+        return np.array(xvec), np.array(yvec_tan), np.array(yvec_sag), xlabel, ylabel
+        
     #================= WORKING CONDITION FUNCTIONS =============================
     #%% -------------------- NonZero Lengths Condition --------------------
+    def minimumElements(self):
+        if self.numberOfElements < 3:
+            return False
+        else:
+            return True
+        
     def elementLengths(self):
         for element in self.elementList:
             if element['Type'] in ['Distance','Block','Brewster plate','Brewster crystal']:
@@ -170,7 +321,6 @@ class cavity():
     
         # Tangential or saggital proyection     
         for element in E_list[1:]:
-            #print("element Type, value :" + element['Type'] + "\n " + str(element['matrix']))
             M_cav = np.dot(element['matrix'][proy],M_cav)
             
         for element in E_list[len(E_list)-2::-1]:
@@ -239,7 +389,7 @@ class cavity():
             
             # ------------------- Distance -------------------            
             elif element['Type']=="Distance":
-                aux_vector = np.linspace(0,element['distance'],element['distance']*100)
+                aux_vector = np.linspace(0,element['distance'],num=100)
                 z.append(aux_vector+zmax)
                 zmax = zmax + max(aux_vector)
                 q = q0 + aux_vector

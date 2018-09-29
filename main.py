@@ -26,8 +26,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.initUI()
         
+        # Draw canvas for all the plots
+        self.drawCanvas()
+        
         self.element_list_setup()
-        self.cavity_icons_setup()
+        self.cavity_scheme_setup()
         
         self.cavity = SP.cavity()
         self.elementFocus = None
@@ -39,6 +42,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_moveDown.clicked.connect(self.handle_button_moveDown)
         self.button_delete.clicked.connect(self.handle_button_delete)
         self.button_calcCavity.clicked.connect(self.handle_button_calcCavity)
+        
+        # Stability buttons
+        self.button_calcStability.clicked.connect(self.handle_button_calcStability)
+        # Beam Size Buttons
+        self.button_calcBeamsize.clicked.connect(self.handle_button_calcBeamsize)
         
         # "Add element" functions
         self.button_flatMirror.clicked.connect(self.handle_button_addElement)
@@ -53,15 +61,53 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_customElement.clicked.connect(self.handle_button_addElement)
         #=======================================================================
         
+        # Counting elements
         self.numberOfElements = 0
     
     def initUI(self):
-        self.cavityPlot = PlotCanvas()
-        self.tab_cavity.layout = QtWidgets.QVBoxLayout()
-        self.tab_cavity.layout.addWidget(self.cavityPlot)
-        self.tab_cavity.setLayout(self.tab_cavity.layout)
+        # Float validator
+        self.validatorFloat = QtGui.QDoubleValidator()
+        self.validatorFloat.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        # Set validator in stability, beam size entries
+        self.stability_xstart.setValidator(self.validatorFloat)
+        self.stability_xend.setValidator(self.validatorFloat)
+        
+    def drawCanvas(self):
+        # Cavity tab
+        self.cavityPlot = PlotCanvas(xlabel='z (mm)', ylabel='w (µm)')
+        self.cavityPlot_toolbar = NavigationToolbar(self.cavityPlot, self)
+        self.tab_cavity.verticalLayout = QtWidgets.QVBoxLayout()
+        self.tab_cavity.verticalLayout.addWidget(self.cavityPlot)
+        self.tab_cavity.verticalLayout.addWidget(self.cavityPlot_toolbar)
+        self.tab_cavity.setLayout(self.tab_cavity.verticalLayout)
+        
+        # Stability tab
+        self.stabilityPlot = PlotCanvas(xlabel='Variation of element X (mm)', ylabel='Stability (norm.)')
+        self.stabilityPlot_toolbar = NavigationToolbar(self.stabilityPlot, self)
+        self.tab_stability.layout().addWidget(self.stabilityPlot)
+        self.tab_stability.layout().addWidget(self.stabilityPlot_toolbar)
+
+        # Beam Size tab
+        self.beamsizePlot = PlotCanvas(xlabel='Variation of element X (mm)', ylabel='Beam size at element X (µm)')
+        self.beamsizePlot_toolbar = NavigationToolbar(self.beamsizePlot, self)
+        self.tab_beamSize.layout().addWidget(self.beamsizePlot)
+        self.tab_beamSize.layout().addWidget(self.beamsizePlot_toolbar)
+        #self.addToolBar(QtCore.Qt.BottomToolBarArea, NavigationToolbar(self.stabilityPlot, self))
+        
+        # Default tab
+        self.tabWidget.setCurrentIndex(0)
+        
+    def populateComboBoxes(self):
+        self.stability_comboBox.clear()
+        self.beamsize_comboBox_watch.clear()
+        self.beamsize_comboBox_var.clear()
+        eList, vList, not_vList = self.cavity.optionMenuLists()
+        elementList = self.cavity.elementList
+        self.stability_comboBox.addItems(eList)
+        self.beamsize_comboBox_watch.addItems(not_vList)
+        self.beamsize_comboBox_var.addItems(eList)
     
-    def cavity_icons_setup(self):
+    def cavity_scheme_setup(self):
         # Layout for scroll area.
         # Widgets (cavity elements) have to be added to this layout
         self.cavityIconsLayout = QtWidgets.QHBoxLayout(self.scroll_cavityIconsArea)
@@ -95,11 +141,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             for elementID in self.elementFocus:
                 element = window.cavity.findElement(elementID)
                 element['Widget'].moveUp()
+            self.populateComboBoxes()
     def handle_button_moveDown(self):
         if self.elementFocus != None:
             for elementID in reversed(self.elementFocus):
                 element = window.cavity.findElement(elementID)
                 element['Widget'].moveDown()
+            self.populateComboBoxes()
             
     def handle_button_delete(self):
         if self.elementFocus != None:
@@ -111,20 +159,56 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 window.cavity.elementList.pop()
                 window.cavity.numberOfElements = window.cavity.numberOfElements - 1
                 window.updateElementList()
+            self.populateComboBoxes()
             
     def handle_button_calcCavity(self):
         # Calculate element matrixes
         calcCavity = self.cavity.calcCavity()
         # If not valid values, end calculations
         if not calcCavity:
-            print('Error happened')
             return False
-            
-        # Plot cavity    
-        self.cavityPlot.plot(self.cavity.z_tan, self.cavity.wz_tan, self.cavity.z_sag, self.cavity.wz_sag)
+              
+        # Plot cavity
+        self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, ymin=0)#xlabel='z (mm)', ylabel='w (µm)')
         
         # Plot vertical marks
         self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
+        
+        # Focus Cavity tab
+        self.tabWidget.setCurrentIndex(0)
+        return True
+        
+    def handle_button_calcStability(self):
+        # Get values, validating input
+        print('getting values')
+        elementOrder = self.stability_comboBox.currentIndex()
+        xstart = window.readEntry(self.stability_xstart)
+        xend = window.readEntry(self.stability_xend)
+        
+        z, stab_tan, stab_sag, xname = self.cavity.calcStability(elementOrder, xstart, xend)
+        
+        if z is False:
+            return False
+        
+        # Plot stability
+        self.stabilityPlot.plotData('stability', z, stab_tan, z, stab_sag, xlabel=xname, ymin=0, ymax=1)
+        return True
+        
+    def handle_button_calcBeamsize(self):
+        # Get values, validating input
+        watchElementOrder = int(self.beamsize_comboBox_watch.currentText()[0])
+        varElementOrder = self.beamsize_comboBox_var.currentIndex()
+        xstart = window.readEntry(self.beamsize_xstart)
+        xend = window.readEntry(self.beamsize_xend)
+        
+        z, wz_tan, wz_sag, xname, yname = self.cavity.calcBeamsize(watchElementOrder, varElementOrder, xstart, xend)
+        
+        if z is False:
+            return False
+        
+        # Plot stability
+        self.beamsizePlot.plotData('beamsize', z, wz_tan, z, wz_sag, xlabel=xname, ylabel=yname)
+        return True
         
     # Add element
     def handle_button_addElement(self):
@@ -139,14 +223,46 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         newElement = ElementWidget(window.cavity.numberOfElements, elementName)
         # Add widget to element box
         self.elementListLayout.addWidget(newElement)
-        # Add icon to cavity representation
+        
+        # Element Icon
         newIcon = IconWidget(elementName)
+        # Add icon to cavity representation
         self.cavityIconsLayout.addWidget(newIcon)
         
+        # Element is vectorial?
+        if elementName in ['Distance','Block','Brewster Plate','Brewster Crystal']:
+            vector = True
+        else:
+            vector = False             
         # Add element to cavity-class
-        self.cavity.addElement(newElement, newIcon)  
+        self.cavity.addElement(newElement, newIcon, vector)
+        
+        # Update combo boxes
+        self.populateComboBoxes()
         
         window.cavity.numberOfElements = window.cavity.numberOfElements + 1
+        
+    def readEntry(self, entry):
+        state = window.validatorFloat.validate(entry.text(), 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            #color = '#c4df9b' # green
+            color = ''
+            try:
+                value = float(entry.text().replace(",", "."))
+                print('VALIDATION CORRECT')
+            except:
+                # MAYBE PUT A MESSAGE HERE SAYING INVALID FLOAT
+                # TO THE MESSAGE BAR
+                entry.setText("")
+                value = False
+        elif state == QtGui.QValidator.Intermediate:
+            color = '#fff79a' # yellow
+            value = False
+        else:
+            color = '#f6989d' # red
+            value = False
+        entry.setStyleSheet('QLineEdit { background-color: %s }' % color)
+        return value
         
     # Button functions End 
     ################################################  
@@ -155,7 +271,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 #===============================================================================
 # Canvas plot
 class PlotCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, parent=None, width=5, height=4, dpi=100, xlabel='', ylabel=''):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
  
@@ -166,41 +282,69 @@ class PlotCanvas(FigureCanvas):
         #        QSizePolicy.Expanding,
         #        QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-        self.plot_init()
+        self.plot_init(xlabel, ylabel)
  
 
-    def plot_init(self):
-        data = [i**2 for i in range(25)]
-        self.axes.plot(data, 'r-')
-        self.axes.set_title('Plot init')
+    def plot_init(self, xlabel, ylabel):
+        #self.axes.set_title('Plot init')
+        #x = [0,1,2,3,4,5]
+        #self.axes.plot(x,x)
+        self.axes.set_xlabel(xlabel)
+        self.axes.set_ylabel(ylabel)
+        self.axes.set_ylim(ymin=0) # Adjust the vertical min
+        self.axes.grid(linestyle='dashed')
         self.draw()
     
-    def plot(self, x1, y1, x2, y2):
+    def plotData(self, plotType, x1, y1, x2, y2, xlabel=None, ylabel=None, xmin=None, xmax=None, ymin=None, ymax=None):
+        # Get previous labels
+        xlabel_old = self.axes.get_xlabel()
+        ylabel_old = self.axes.get_ylabel()
         # Clear figure
         self.axes.clear()
         
-        if len(x1) > 1:
-            for zrow, wrow in zip(x1,y1):
-                tan, = self.axes.plot(zrow,wrow*1000,'g',label='Tangential')
-            for zrow, wrow in zip(x2,y2):
-                sag, = self.axes.plot(zrow,wrow*1000,'b',label='Saggital')
+        # Plot data
+        if plotType == 'cavity':
+            # Plot for a whole cavity
+            # -> This is due to the Z variable being a multidimensional array!!!
+            if len(x1) >= 1:
+                for zrow, wrow in zip(x1,y1):
+                    tan, = self.axes.plot(zrow, wrow, 'g', label='Tangential')
+                for zrow, wrow in zip(x2,y2):
+                    sag, = self.axes.plot(zrow, wrow, 'b', label='Saggital')
+            else:
+                x1.append(0)
+                y1.append(0)
+                x2.append(0)
+                y2.append(0)
+                for zrow, wrow in zip(x1, y1):
+                    tan, = self.axes.plot(zrow, wrow, 'g', label='Tangential')
+                for zrow, wrow in zip(x2, y2):
+                    sag, = self.axes.plot(zrow, wrow, 'b', label='Saggital')
         else:
-            x1.append(0)
-            y1.append(0)
-            x2.append(0)
-            y2.append(0)
-            for zrow, wrow in zip(x1,y1):
-                tan, = self.axes.plot(zrow,wrow*1000,'g',label='Tangential')
-            for zrow, wrow in zip(x2,y2):
-                sag, = self.axes.plot(zrow,wrow*1000,'b',label='Saggital')
-                
-        self.axes.set_xlabel('z (mm)')
-        self.axes.set_ylabel('w (µm)')
-        self.axes.set_ylim(ymin=0) # Adjust the vertical min
+            # Other plots
+            tan, = self.axes.plot(x1, y1, 'g', label='Tangential')
+            sag, = self.axes.plot(x2, y2, 'b', label='Saggital')
         self.axes.legend(handles=[tan,sag], loc='upper left')
+        
+        # Plot Labels
+        if xlabel == None:
+            self.axes.set_xlabel(xlabel_old)
+        else:
+            self.axes.set_xlabel(xlabel)
+        # Plot Labels
+        if ylabel == None:
+            self.axes.set_ylabel(ylabel_old)
+        else:
+            self.axes.set_ylabel(ylabel)
+            
+        # Plot limits
+        # xmin and xmax should be an input to the plot function
+        self.axes.set_xlim(left=xmin, right=xmax)
+        self.axes.set_ylim(bottom=ymin, top=ymax)
+                
         self.axes.grid(linestyle='dashed')
-        #self.canvas.show()
-        self.draw()
+        self.draw_idle()
+        return True
         #toolbar = self.figure.canvas.toolbar
         #toolbar.update()       
         #toolbar.push_current()
@@ -208,7 +352,6 @@ class PlotCanvas(FigureCanvas):
     def plotVerticals(self, xpoints, xnames):
         y0, y1 = self.axes.get_ylim()
         for xi, element in zip(xpoints,xnames):
-            print(element)
             self.axes.axvline(x=xi, color='orange', alpha=0.7, linewidth=0.7)
             if 'Mirror' in element:
                 self.axes.text(xi,y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
@@ -219,8 +362,7 @@ class PlotCanvas(FigureCanvas):
             else:
                 self.axes.text((xi+xold)/2,y1-5,element,rotation=90, horizontalalignment='center', verticalalignment='top', backgroundcolor='w', bbox=dict(facecolor='w', edgecolor='k', boxstyle='round',linewidth=0.5, alpha=0.65))
             xold = xi
-        #self.canvas.show()
-        self.draw()
+        self.draw_idle()
 #===============================================================================
 
 #===============================================================================
@@ -230,11 +372,13 @@ class IconWidget(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self, parent)
         
         self.elementType = eType
-        self.icon = QtWidgets.QPushButton()
-        self.icon.setIcon(LI.elementIcon(eType))
+        #self.icon = QtWidgets.QPushButton()
+        self.icon = QtWidgets.QLabel()
+        pixmap = QtGui.QPixmap(LI.elementPixmap(eType))
+        self.icon.setPixmap(pixmap)
         self.icon.setMinimumWidth(40)
         self.icon.setMinimumHeight(40)
-        self.icon.setFlat(True)
+        #self.icon.setFlat(True)
         
         layout = QtWidgets.QHBoxLayout(self)
         layout.setAlignment(QtCore.Qt.AlignCenter)
@@ -273,10 +417,10 @@ class ElementWidget(QtWidgets.QWidget):
         self.columns['label_name'].setMinimumWidth(110)
         
         # Validate entry boxes values
-        self.validator = QtGui.QDoubleValidator()
-        self.validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
-        self.columns['entry1'].setValidator(self.validator)
-        self.columns['entry2'].setValidator(self.validator)
+        #self.validator = QtGui.QDoubleValidator()
+        #self.validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        self.columns['entry1'].setValidator(window.validatorFloat)
+        self.columns['entry2'].setValidator(window.validatorFloat)
         
         # Default values
         self.assignDefaults(etype)
@@ -310,10 +454,10 @@ class ElementWidget(QtWidgets.QWidget):
             self.columns['entry1'].setDisabled(True)
         else:
             self.columns['entry2'].setText(str(0))
-            
+                
     # Read entries
     def readEntry(self, entry):
-        state = self.validator.validate(self.columns[entry].text(), 0)[0]
+        state = window.validatorFloat.validate(self.columns[entry].text(), 0)[0]
         if state == QtGui.QValidator.Acceptable:
             #color = '#c4df9b' # green
             color = ''

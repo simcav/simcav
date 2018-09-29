@@ -166,9 +166,31 @@ def q_propagation(M,q0):
     
     q1 = (A*q0+B) / (C*q0+D)
     return q1
+    
+#%% ----------------------------------------------------------------------------
+# Calculate q at any dimensionless (z) element
+def q_element(q0, elementX, element_list):
+    # Propagation from q0 to elementX.
+    # elementX is the itemnumber of the element in element_list
+    
+    # If elementX is a length element, stop function, return False
+    #   Makes no sense to calculate the beam size for an element with
+    #   a z dimension (in this case).
+    if elementX['isVector']:
+        return False
+    
+    qProp = []
+    for proy in [0,1]:
+        matrix = np.identity(2)
+        for element in element_list[1:elementX['Order']]:
+            matrix = np.dot(element['matrix'][proy],matrix)
+        # Calculate q(x)
+        q = q_propagation(matrix, q0[proy])
+        qProp.append(q)
+    return qProp
 
 #%% ----------------------------------------------------------------------------
-# Calculate R(q) and w(q)
+# Calculate R(q) and w(q) (in mm)
 def r_w(q,wl,n):
     R = 1/np.real(1/q)
     w = np.sqrt(-wl/(np.pi*n*np.imag(1/q)))
