@@ -7,6 +7,7 @@ from matplotlib.figure import Figure
 
 # Other modules
 import numpy as np
+import pickle
 
 import load_icons as LI
 import simcav_physics as SP
@@ -59,8 +60,75 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_curvedInterface.clicked.connect(self.handle_button_addElement)
         self.button_thinLens.clicked.connect(self.handle_button_addElement)
         self.button_customElement.clicked.connect(self.handle_button_addElement)
-        #=======================================================================
         
+        # Toolbar Actions
+        self.toolBar.actionTriggered.connect(self.handle_toolbar_actions)
+        
+        # Menu
+        self.menuView.triggered[QtWidgets.QAction].connect(self.handle_viewMenu_actions)
+        
+        #=======================================================================
+    def handle_toolbar_actions(self, q):
+        if q.text() == "New":
+            pass
+        elif q.text() == "Open":
+            
+            openFile, filter = QtWidgets.QFileDialog.getOpenFileName(self, 'Load cavity', filter=("SimCav files (*.sc);;All files (*.*)"))
+            
+            if not openFile:
+                print('Nothing selected')
+                return False
+                
+            # CLEAR PROGRAM (IE. CALL NEW)
+            self.fileLoad(openFile)
+            
+        elif q.text() == "Save":
+            pass
+        elif q.text() == "Edit":
+            self.modifyCavity.setVisible(True)
+        elif q.text() == "Calculator":
+            pass
+        elif q.text() == "Quit":
+            app.quit()
+        else:
+            print(q.text())
+            
+    def fileLoad(self, openFile):
+        # Open file
+        with open(openFile, 'rb') as file:
+            # Load into a list
+            savedList = pickle.load(file)
+        # adds the saved elements
+        for element in savedList:
+            # Modify name for backwards compatibility
+            
+            window.handle_button_addElement(element['type'], element['entry1_val'], element['entry2_val'])
+            
+            
+            
+            
+            
+            
+        
+    # Actions
+    def handle_viewMenu_actions(self, q):
+        # Hide/Show "Add Element" widget
+        if q.text() == "Toolbar":
+            self.toolBar.setVisible(q.isChecked())
+        elif q.text() == "Add elements Widget":
+            self.modifyCavity.setVisible(q.isChecked())
+        elif q.text() == "Calculate solutions Box":
+            self.calculateSolutions.setVisible(q.isChecked())
+        else:
+            print(q.text())
+            
+            
+            
+            
+            
+            
+            
+            
         # Counting elements
         self.numberOfElements = 0
     
@@ -92,8 +160,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.beamsizePlot_toolbar = NavigationToolbar(self.beamsizePlot, self)
         self.tab_beamSize.layout().addWidget(self.beamsizePlot)
         self.tab_beamSize.layout().addWidget(self.beamsizePlot_toolbar)
-        #self.addToolBar(QtCore.Qt.BottomToolBarArea, NavigationToolbar(self.stabilityPlot, self))
-        
+            
         # Default tab
         self.tabWidget.setCurrentIndex(0)
         
@@ -210,17 +277,25 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.beamsizePlot.plotData('beamsize', z, wz_tan, z, wz_sag, xlabel=xname, ylabel=yname)
         return True
         
+    ############################################################################
     # Add element
-    def handle_button_addElement(self):
-        buttonName = self.sender().objectName()
+    def handle_button_addElement(self, name=None, entry1=None, entry2=None):
+        if not name:
+            buttonName = self.sender().objectName()        
+            # Nice name for on screen print
+            elementName = buttonName[7:].capitalize()
+            for i in range(len(buttonName[7:])):
+                if buttonName[7+i].isupper():
+                    elementName = buttonName[7:7+i].capitalize() + " " + buttonName[7+i:]
+        else:
+            if len(name) != 1:
+                oldName = []
+                for word in name.split():
+                    oldName.append(word.capitalize())
+                elementName = " ".join(oldName)
+        print(elementName)
         
-        # Nice name for on screen print
-        elementName = buttonName[7:].capitalize()
-        for i in range(len(buttonName[7:])):
-            if buttonName[7+i].isupper():
-                elementName = buttonName[7:7+i].capitalize() + " " + buttonName[7+i:]
-        
-        newElement = ElementWidget(window.cavity.numberOfElements, elementName)
+        newElement = ElementWidget(window.cavity.numberOfElements, elementName, entry1, entry2)
         # Add widget to element box
         self.elementListLayout.addWidget(newElement)
         
@@ -249,7 +324,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             color = ''
             try:
                 value = float(entry.text().replace(",", "."))
-                print('VALIDATION CORRECT')
             except:
                 # MAYBE PUT A MESSAGE HERE SAYING INVALID FLOAT
                 # TO THE MESSAGE BAR
@@ -265,7 +339,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         return value
         
     # Button functions End 
-    ################################################  
+    ################################################
+    
+    
 #===============================================================================
 
 #===============================================================================
@@ -274,6 +350,7 @@ class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100, xlabel='', ylabel=''):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
+        fig.set_tight_layout(True)
  
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
@@ -388,7 +465,7 @@ class IconWidget(QtWidgets.QWidget):
         
 # Element label
 class ElementWidget(QtWidgets.QWidget):
-    def __init__(self, eOrder, etype, parent=None):
+    def __init__(self, eOrder, etype, entry1=None, entry2=None, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         
         self.elementID = id(self)
@@ -411,6 +488,12 @@ class ElementWidget(QtWidgets.QWidget):
             'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
             'entry2': QtWidgets.QLineEdit()
         }
+        
+        # In case of loading, assign loaded values
+        if entry1:
+            self.columns['entry1'].setText(entry1)
+        if entry2:
+            self.columns['entry2'].setText(entry2)
 
         # CONFIG ---------------------------------------------------------------
         # Set minimum width so all labels are equal whatever the element name
