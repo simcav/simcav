@@ -1,5 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtWidgets import QMessageBox
 
 # Matplotlib stuff
 from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
@@ -7,7 +8,9 @@ from matplotlib.figure import Figure
 
 # Other modules
 import numpy as np
-import pickle
+import pickle           # To save and load files
+import hashlib, json    # For MD5 computation
+import atexit           # To run before exit
 
 import load_icons as LI
 import simcav_physics as SP
@@ -34,7 +37,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cavity_scheme_setup()
         
         self.cavity = SP.cavity()
-        self.elementFocus = None
+        self.elementFocus = None    # This will be a list, even if only one element
         
         
         # BUTTON FUNCTIONS =====================================================
@@ -63,27 +66,35 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # Toolbar Actions
         self.toolBar.actionTriggered.connect(self.handle_toolbar_actions)
+        self.wlBox.editingFinished.connect(self.setWavelength)
+        self.wlBox.returnPressed.connect(self.setWavelength)
         
         # Menu
+        #self.menuFile.triggered[QtWidgets.QAction].connect(self.handle_fileMenu_actions) # Not really needed
         self.menuView.triggered[QtWidgets.QAction].connect(self.handle_viewMenu_actions)
+        
+        # Counting elements
+        self.numberOfElements = 0
+        dummy, self.savedMD5 = self.constructSavingList()
         
         #=======================================================================
     def handle_toolbar_actions(self, q):
         if q.text() == "New":
-            pass
-        elif q.text() == "Open":
+            self.fileNew()
             
+        elif q.text() == "Open":
             openFile, filter = QtWidgets.QFileDialog.getOpenFileName(self, 'Load cavity', filter=("SimCav files (*.sc);;All files (*.*)"))
             
             if not openFile:
                 print('Nothing selected')
                 return False
                 
-            # CLEAR PROGRAM (IE. CALL NEW)
-            self.fileLoad(openFile)
+            self.fileOpen(openFile)
+            self.saveFile = openFile
             
         elif q.text() == "Save":
-            pass
+            self.fileSave()
+            
         elif q.text() == "Edit":
             self.modifyCavity.setVisible(True)
         elif q.text() == "Calculator":
@@ -91,26 +102,110 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         elif q.text() == "Quit":
             app.quit()
         else:
+            print("Button not recognized")
             print(q.text())
             
-    def fileLoad(self, openFile):
+    
+    
+    
+    def fileNew(self):
+        # Delete cavity elements
+        for element in reversed(self.cavity.elementList):
+            self.elementFocus = [element['ID']]
+            self.handle_button_delete()
+        # Delete save file not to overwrite by mistake
+        try:
+            del self.saveFile
+            del self.savedMD5
+        except:
+            pass
+            
+    def fileOpen(self, openFile):
         # Open file
         with open(openFile, 'rb') as file:
             # Load into a list
-            savedList = pickle.load(file)
+            loadedList = pickle.load(file)
+        # Clear program
+        self.fileNew()
+        hashingData = json.dumps(loadedList, sort_keys=True).encode('utf-8')
+        self.savedMD5 = hashlib.md5(hashingData)
         # adds the saved elements
-        for element in savedList:
-            # Modify name for backwards compatibility
-            
+        for element in loadedList:
+            # Create elements
             window.handle_button_addElement(element['type'], element['entry1_val'], element['entry2_val'])
             
+        # Set wavelength
+        wl_loaded = round(loadedList[0]['wavelength']*1E8)/100
+        self.wlBox.setText(str(wl_loaded))
+        print(self.wlBox.text())
+        self.setWavelength()
             
+        # Draw cavity
+        self.handle_button_calcCavity()
             
+    def fileSave(self, quit=False):
+        try:
+            # If already saved, use that file
+            self.saveFile
+        except:
+            saveFile, filter = QtWidgets.QFileDialog.getSaveFileName(self, 'Save cavity', filter=("SimCav files (*.sc)"))
+            # In case no file was chosen (eg. clicked on cancel)
+            if not saveFile:
+                print('Nothing selected')
+                return False
+            # Add extension if needed
+            if saveFile[-3:] != ".sc":
+                saveFile = saveFile + ".sc"
+            self.saveFile = saveFile
             
+        print('Saving in ' + self.saveFile)
+        if not quit:
+            # Creating data to save
+            savingList, savingListMD5 = self.constructSavingList()
+            
+            # If hash match, then dont save
+            if self.checkHash(savingListMD5):
+                print('No need to save')
+                return True
+            
+        # In any case (quit or not) if needed, save    
+        with open(self.saveFile, 'wb') as file:
+            print('YE need to save')
+            pickle.dump(savingList, file)
+        self.savedMD5 = savingListMD5
+        return True
+        
+    def constructSavingList(self):
+        # Construct data to save
+        savingList = []
+        for element in self.cavity.elementList:
+            my_dict = {}
+            my_dict['type'] = element['Type']
+            my_dict['entry1_val'] = element['Widget'].readEntry('entry1')
+            my_dict['entry2_val'] = element['Widget'].readEntry('entry2')
+            my_dict['wavelength'] = self.cavity.wl_mm
+            savingList.append(my_dict)
+        # Creating hash
+        hashingData = json.dumps(savingList, sort_keys=True).encode('utf-8')
+        savingListMD5 = hashlib.md5(hashingData)
+        return savingList, savingListMD5
+            
+    def checkHash(self, savingListMD5):
+        # If hash dont match, then save
+        if savingListMD5.hexdigest() == self.savedMD5.hexdigest():
+            return True
+        else:
+            return False     
             
             
         
     # Actions
+    def handle_fileMenu_actions(self, q):
+        print("fileMenu_actions")
+        if q.text() == 'Load':
+            print(q.text())
+        else:
+            print(q.text())
     def handle_viewMenu_actions(self, q):
         # Hide/Show "Add Element" widget
         if q.text() == "Toolbar":
@@ -122,21 +217,27 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             print(q.text())
             
-            
-            
-            
-            
-            
-            
-            
-        # Counting elements
-        self.numberOfElements = 0
+        
     
     def initUI(self):
+        # Add wavelength box in toolbar
+        wlLabel = QtWidgets.QLabel(text="λ = ")
+        wlLabel.setMinimumWidth(35)
+        wlLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.wlBox = QtWidgets.QLineEdit(text="1000", placeholderText="nm")
+        self.wlBox.setMaximumWidth(90)
+        self.wlBox.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        wlUnitsLabel = QtWidgets.QLabel(text=" nm")
+        self.toolBar.addWidget(wlLabel)
+        self.toolBar.addWidget(self.wlBox)
+        self.toolBar.addWidget(wlUnitsLabel)
+        
+        
         # Float validator
         self.validatorFloat = QtGui.QDoubleValidator()
         self.validatorFloat.setNotation(QtGui.QDoubleValidator.StandardNotation)
-        # Set validator in stability, beam size entries
+        # Set validator in wavelength, stability, beam size entries
+        self.wlBox.setValidator(self.validatorFloat)
         self.stability_xstart.setValidator(self.validatorFloat)
         self.stability_xend.setValidator(self.validatorFloat)
         
@@ -247,7 +348,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def handle_button_calcStability(self):
         # Get values, validating input
-        print('getting values')
         elementOrder = self.stability_comboBox.currentIndex()
         xstart = window.readEntry(self.stability_xstart)
         xend = window.readEntry(self.stability_xend)
@@ -277,6 +377,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.beamsizePlot.plotData('beamsize', z, wz_tan, z, wz_sag, xlabel=xname, ylabel=yname)
         return True
         
+    def setWavelength(self):
+        wl_nm = self.readEntry(self.wlBox)
+        wl_mm = wl_nm/1E6
+        if wl_mm != self.cavity.wl_mm:
+            self.cavity.wl_mm = wl_mm
+        
     ############################################################################
     # Add element
     def handle_button_addElement(self, name=None, entry1=None, entry2=None):
@@ -293,7 +399,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 for word in name.split():
                     oldName.append(word.capitalize())
                 elementName = " ".join(oldName)
-        print(elementName)
         
         newElement = ElementWidget(window.cavity.numberOfElements, elementName, entry1, entry2)
         # Add widget to element box
@@ -342,6 +447,36 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     ################################################
     
     
+    # Reimplement closing event
+    def closeEvent(self, event):
+        # Construct saving list
+        savingList, savingListMD5 = self.constructSavingList()
+        # Check hash, if no changes then quit
+        equalHash = self.checkHash(savingListMD5)
+        if equalHash:
+            event.accept()
+        else:
+            # If changes in hash, create modal dialogue and ask for instructions
+            msgBox = QMessageBox()
+            msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgBox.setWindowTitle("Save cavity?")
+            msgBox.setText("The document has been modified.");
+            msgBox.setInformativeText("Do you want to save your changes?");
+            msgBox.setStandardButtons(QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel);
+            msgBox.setDefaultButton(QMessageBox.Save);
+            reply = msgBox.exec_();
+            
+            # If choosing Save 
+            if reply == QtWidgets.QMessageBox.Save:
+                if self.fileSave():
+                    event.accept()
+                else:
+                    event.ignore()
+            elif reply == QtWidgets.QMessageBox.Cancel:
+                event.ignore()
+            else:
+                event.accept()
+    
 #===============================================================================
 
 #===============================================================================
@@ -369,6 +504,7 @@ class PlotCanvas(FigureCanvas):
         self.axes.set_xlabel(xlabel)
         self.axes.set_ylabel(ylabel)
         self.axes.set_ylim(ymin=0) # Adjust the vertical min
+        self.axes.set_title("λ = ") # Title
         self.axes.grid(linestyle='dashed')
         self.draw()
     
@@ -418,6 +554,9 @@ class PlotCanvas(FigureCanvas):
         # xmin and xmax should be an input to the plot function
         self.axes.set_xlim(left=xmin, right=xmax)
         self.axes.set_ylim(bottom=ymin, top=ymax)
+        
+        # Plot title
+        self.axes.set_title("λ = " + str(window.cavity.wl_mm*1E6) + " nm")
                 
         self.axes.grid(linestyle='dashed')
         self.draw_idle()
@@ -487,13 +626,7 @@ class ElementWidget(QtWidgets.QWidget):
             'label_name': QtWidgets.QLabel(text=etype),
             'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
             'entry2': QtWidgets.QLineEdit()
-        }
-        
-        # In case of loading, assign loaded values
-        if entry1:
-            self.columns['entry1'].setText(entry1)
-        if entry2:
-            self.columns['entry2'].setText(entry2)
+        }        
 
         # CONFIG ---------------------------------------------------------------
         # Set minimum width so all labels are equal whatever the element name
@@ -507,6 +640,12 @@ class ElementWidget(QtWidgets.QWidget):
         
         # Default values
         self.assignDefaults(etype)
+        
+        # In case of loading, assign loaded values
+        if entry1:
+            self.columns['entry1'].setText(str(entry1))
+        if entry2:
+            self.columns['entry2'].setText(str(entry2))
         
         # Disable entry boxes for Flat mirrors
         if etype == 'Flat Mirror':

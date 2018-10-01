@@ -7,7 +7,7 @@ class cavity():
         self.elementList = []
         self.refractiveIndex = 1.0
         self.numberOfElements = 0
-        self.wl_mm = 675E-6
+        self.wl_mm = 0.001   # Default 1µm
         
     def addElement(self, widget, icon, vector):
         elementDict = {
@@ -213,7 +213,7 @@ class cavity():
             for matrix in beamsizeMatrix:
                 q0.append(abcd.q_resonator(matrix))
             q = abcd.q_element(q0, watchElement, beamsizeList)
-            print(q0[0])
+            
             # Refractive index
             if 'refr_index' in watchElement.keys():
                 refr_index = watchElement['refr_index']
