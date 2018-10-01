@@ -161,18 +161,6 @@ class cavity():
         yvec_sag = []
         
         for number in xvec:
-            # Now modify ONLY the first entry of the chosen item, and the associated matrix:
-            # e1 = number
-            # e2 = element['entry2']
-            # elementType = element['Type']
-            # if elementType == 'Custom Element':
-            #     pass
-            # else:
-            #     # NEED TO CHANGE THIS TO PUT THE PROPER REFR INDEX
-            #     refr_index = 1
-            #     ##################
-            #     newdict = EF.assign(elementType, e1, e2, refr_index)
-            #     stabilityList[element['Order']] = newdict
             stabilityList = self.updateOtherList(element['ID'], stabilityList, 'entry1', number)
                 
             # Calculate cavity matrix, for both saggital and tangential
@@ -232,6 +220,11 @@ class cavity():
         xlabel = 'Variation of element ' + str(varElement['Order']) + ' (mm)'
         ylabel = 'Beam size at element ' + str(watchElement['Order']) + ' (µm)'    
         return np.array(xvec), np.array(yvec_tan), np.array(yvec_sag), xlabel, ylabel
+        
+    def calcCrossSection(self, z_position):
+        # Calculate cavity
+        if not self.calcCavity():
+            return False
         
     #================= WORKING CONDITION FUNCTIONS =============================
     #%% -------------------- NonZero Lengths Condition --------------------

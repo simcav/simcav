@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import QMessageBox
 # Matplotlib stuff
 from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
+from matplotlib.patches import Ellipse
+
 
 # Other modules
 import numpy as np
@@ -51,6 +53,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_calcStability.clicked.connect(self.handle_button_calcStability)
         # Beam Size Buttons
         self.button_calcBeamsize.clicked.connect(self.handle_button_calcBeamsize)
+        # Cross Section Widgets
+        self.button_crossSectionUpdate.clicked.connect(self.handle_button_crossSectionUpdate)
+        # When user tweaks using the slider
+        self.crossSectionSlider.valueChanged[int].connect(self.modified_crossSectionSlider)
+        # When user modify via the textBox
+        # self.crossSectionBox.editingFinished.connect(self.update_crossSectionSlider)
         
         # "Add element" functions
         self.button_flatMirror.clicked.connect(self.handle_button_addElement)
@@ -70,155 +78,17 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.wlBox.returnPressed.connect(self.setWavelength)
         
         # Menu
-        #self.menuFile.triggered[QtWidgets.QAction].connect(self.handle_fileMenu_actions) # Not really needed
+        self.menuFile.triggered[QtWidgets.QAction].connect(self.handle_fileMenu_actions) # Needed if action isn't as well in toolbar
         self.menuView.triggered[QtWidgets.QAction].connect(self.handle_viewMenu_actions)
         
         # Counting elements
         self.numberOfElements = 0
         dummy, self.savedMD5 = self.constructSavingList()
-        
-        #=======================================================================
-    def handle_toolbar_actions(self, q):
-        if q.text() == "New":
-            self.fileNew()
-            
-        elif q.text() == "Open":
-            openFile, filter = QtWidgets.QFileDialog.getOpenFileName(self, 'Load cavity', filter=("SimCav files (*.sc);;All files (*.*)"))
-            
-            if not openFile:
-                print('Nothing selected')
-                return False
-                
-            self.fileOpen(openFile)
-            self.saveFile = openFile
-            
-        elif q.text() == "Save":
-            self.fileSave()
-            
-        elif q.text() == "Edit":
-            self.modifyCavity.setVisible(True)
-        elif q.text() == "Calculator":
-            pass
-        elif q.text() == "Quit":
-            app.quit()
-        else:
-            print("Button not recognized")
-            print(q.text())
-            
+    # End INIT
+    #===========================================================================
     
-    
-    
-    def fileNew(self):
-        # Delete cavity elements
-        for element in reversed(self.cavity.elementList):
-            self.elementFocus = [element['ID']]
-            self.handle_button_delete()
-        # Delete save file not to overwrite by mistake
-        try:
-            del self.saveFile
-            del self.savedMD5
-        except:
-            pass
-            
-    def fileOpen(self, openFile):
-        # Open file
-        with open(openFile, 'rb') as file:
-            # Load into a list
-            loadedList = pickle.load(file)
-        # Clear program
-        self.fileNew()
-        hashingData = json.dumps(loadedList, sort_keys=True).encode('utf-8')
-        self.savedMD5 = hashlib.md5(hashingData)
-        # adds the saved elements
-        for element in loadedList:
-            # Create elements
-            window.handle_button_addElement(element['type'], element['entry1_val'], element['entry2_val'])
-            
-        # Set wavelength
-        wl_loaded = round(loadedList[0]['wavelength']*1E8)/100
-        self.wlBox.setText(str(wl_loaded))
-        print(self.wlBox.text())
-        self.setWavelength()
-            
-        # Draw cavity
-        self.handle_button_calcCavity()
-            
-    def fileSave(self, quit=False):
-        try:
-            # If already saved, use that file
-            self.saveFile
-        except:
-            saveFile, filter = QtWidgets.QFileDialog.getSaveFileName(self, 'Save cavity', filter=("SimCav files (*.sc)"))
-            # In case no file was chosen (eg. clicked on cancel)
-            if not saveFile:
-                print('Nothing selected')
-                return False
-            # Add extension if needed
-            if saveFile[-3:] != ".sc":
-                saveFile = saveFile + ".sc"
-            self.saveFile = saveFile
-            
-        print('Saving in ' + self.saveFile)
-        if not quit:
-            # Creating data to save
-            savingList, savingListMD5 = self.constructSavingList()
-            
-            # If hash match, then dont save
-            if self.checkHash(savingListMD5):
-                print('No need to save')
-                return True
-            
-        # In any case (quit or not) if needed, save    
-        with open(self.saveFile, 'wb') as file:
-            print('YE need to save')
-            pickle.dump(savingList, file)
-        self.savedMD5 = savingListMD5
-        return True
-        
-    def constructSavingList(self):
-        # Construct data to save
-        savingList = []
-        for element in self.cavity.elementList:
-            my_dict = {}
-            my_dict['type'] = element['Type']
-            my_dict['entry1_val'] = element['Widget'].readEntry('entry1')
-            my_dict['entry2_val'] = element['Widget'].readEntry('entry2')
-            my_dict['wavelength'] = self.cavity.wl_mm
-            savingList.append(my_dict)
-        # Creating hash
-        hashingData = json.dumps(savingList, sort_keys=True).encode('utf-8')
-        savingListMD5 = hashlib.md5(hashingData)
-        return savingList, savingListMD5
-            
-    def checkHash(self, savingListMD5):
-        # If hash dont match, then save
-        if savingListMD5.hexdigest() == self.savedMD5.hexdigest():
-            return True
-        else:
-            return False     
-            
-            
-        
-    # Actions
-    def handle_fileMenu_actions(self, q):
-        print("fileMenu_actions")
-        if q.text() == 'Load':
-            print(q.text())
-        else:
-            print(q.text())
-    def handle_viewMenu_actions(self, q):
-        # Hide/Show "Add Element" widget
-        if q.text() == "Toolbar":
-            self.toolBar.setVisible(q.isChecked())
-        elif q.text() == "Add elements Widget":
-            self.modifyCavity.setVisible(q.isChecked())
-        elif q.text() == "Calculate solutions Box":
-            self.calculateSolutions.setVisible(q.isChecked())
-        else:
-            print(q.text())
-            
-        
-    
+    ############################################################################
+    # Other GUI stuff
     def initUI(self):
         # Add wavelength box in toolbar
         wlLabel = QtWidgets.QLabel(text="λ = ")
@@ -261,6 +131,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.beamsizePlot_toolbar = NavigationToolbar(self.beamsizePlot, self)
         self.tab_beamSize.layout().addWidget(self.beamsizePlot)
         self.tab_beamSize.layout().addWidget(self.beamsizePlot_toolbar)
+        
+        # crossSection tab
+        self.crossSectionPlot = PlotCanvas(xlabel='Saggital (µm)', ylabel='Tangential (µm)')
+        self.crossSectionPlot_toolbar = NavigationToolbar(self.crossSectionPlot, self)
+        self.tab_crossSection.layout().addWidget(self.crossSectionPlot)
+        self.tab_crossSection.layout().addWidget(self.crossSectionPlot_toolbar)
             
         # Default tab
         self.tabWidget.setCurrentIndex(0)
@@ -274,7 +150,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.stability_comboBox.addItems(eList)
         self.beamsize_comboBox_watch.addItems(not_vList)
         self.beamsize_comboBox_var.addItems(eList)
-    
+        
     def cavity_scheme_setup(self):
         # Layout for scroll area.
         # Widgets (cavity elements) have to be added to this layout
@@ -298,6 +174,158 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         for element in self.cavity.elementList:
             self.elementListLayout.addWidget(element['Widget'])
             self.cavityIconsLayout.addWidget(element['Icon'])
+    # End Other GUI stuff
+    #===========================================================================
+    
+    ############################################################################
+    # Menu actions 
+    def handle_fileMenu_actions(self, q):
+        print("fileMenu_actions")
+        if q.text() == "Save as...":
+            self.fileSave(saveAs=True)
+        elif q.text() == "Quit":
+            self.closeEvent(QtGui.QCloseEvent)
+        else:
+            pass
+    def handle_viewMenu_actions(self, q):
+        # Hide/Show "Add Element" widget
+        if q.text() == "Toolbar":
+            self.toolBar.setVisible(q.isChecked())
+        elif q.text() == "Add elements Widget":
+            self.modifyCavity.setVisible(q.isChecked())
+        elif q.text() == "Calculate solutions Box":
+            #self.calculateSolutions.setVisible(q.isChecked())
+            pass
+        else:
+            print(q.text())
+            
+    # Toolbar actions 
+    def handle_toolbar_actions(self, q):
+        print(q.text())
+        if q.text() == "New":
+            self.fileNew()
+            
+        elif q.text() == "Open":
+            openFile, filter = QtWidgets.QFileDialog.getOpenFileName(self, 'Load cavity', filter=("SimCav files (*.sc);;All files (*.*)"))
+            
+            if not openFile:
+                print('Nothing selected')
+                return False
+                
+            self.fileOpen(openFile)
+            self.saveFile = openFile
+            
+        elif q.text() == "Save":
+            self.fileSave()
+            
+        # elif q.text() == "Save as...":
+        #     self.fileSaveAs(saveAs=True)
+            
+        elif q.text() == "Edit":
+            self.modifyCavity.setVisible(True)
+        elif q.text() == "Calculator":
+            pass
+        elif q.text() == "Quit":
+            pass
+        else:
+            print("Button not recognized")
+            print(q.text())
+            
+    ############################################################################
+    # ToolBar functions 
+    def fileNew(self):
+        # Delete cavity elements
+        for element in reversed(self.cavity.elementList):
+            self.elementFocus = [element['ID']]
+            self.handle_button_delete()
+        # Delete save file not to overwrite by mistake
+        try:
+            del self.saveFile
+            del self.savedMD5
+        except:
+            pass
+            
+    def fileOpen(self, openFile):
+        # Open file
+        with open(openFile, 'rb') as file:
+            # Load into a list
+            loadedList = pickle.load(file)
+        # Clear program
+        self.fileNew()
+        hashingData = json.dumps(loadedList, sort_keys=True).encode('utf-8')
+        self.savedMD5 = hashlib.md5(hashingData)
+        # adds the saved elements
+        for element in loadedList:
+            # Create elements
+            window.handle_button_addElement(element['type'], element['entry1_val'], element['entry2_val'])
+            
+        # Set wavelength
+        wl_loaded = round(loadedList[0]['wavelength']*1E8)/100
+        self.wlBox.setText(str(wl_loaded))
+        print(self.wlBox.text())
+        self.setWavelength()
+            
+        # Draw cavity
+        self.handle_button_calcCavity()
+            
+    def fileSave(self, saveAs=False, quit=False, theList=None, theHash=None):            
+        try:
+            # If already saved, use that file
+            self.saveFile
+        except:
+            # If not saved before, behave as "Save as..."
+            saveAs = True
+            
+        if saveAs:
+            saveFile, filter = QtWidgets.QFileDialog.getSaveFileName(self, 'Save cavity', filter=("SimCav files (*.sc)"))
+            # In case no file was chosen (eg. clicked on cancel)
+            if not saveFile:
+                print('Nothing selected')
+                return False
+            # Add extension if needed
+            if saveFile[-3:] != ".sc":
+                saveFile = saveFile + ".sc"
+            self.saveFile = saveFile
+            
+        print('Saving in ' + self.saveFile)
+        if not quit:
+            # Creating data to save
+            savingList, savingListMD5 = self.constructSavingList()
+            
+            # If hash match, then dont save
+            if self.checkHash(savingListMD5) and not saveAs:
+                return True
+        else:
+            savingList = theList
+            savingListMD5 = theHash
+            
+        # In any case (quit or not) if needed, save    
+        with open(self.saveFile, 'wb') as file:
+            pickle.dump(savingList, file)
+        self.savedMD5 = savingListMD5
+        return True
+        
+    def constructSavingList(self):
+        # Construct data to save
+        savingList = []
+        for element in self.cavity.elementList:
+            my_dict = {}
+            my_dict['type'] = element['Type']
+            my_dict['entry1_val'] = element['Widget'].readEntry('entry1')
+            my_dict['entry2_val'] = element['Widget'].readEntry('entry2')
+            my_dict['wavelength'] = self.cavity.wl_mm
+            savingList.append(my_dict)
+        # Creating hash
+        hashingData = json.dumps(savingList, sort_keys=True).encode('utf-8')
+        savingListMD5 = hashlib.md5(hashingData)
+        return savingList, savingListMD5
+            
+    def checkHash(self, savingListMD5):
+        # If hash dont match, then save
+        if savingListMD5.hexdigest() == self.savedMD5.hexdigest():
+            return True
+        else:
+            return False
             
             
     ################################################    
@@ -342,6 +370,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Plot vertical marks
         self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
         
+        # Update cross section stuff
+        self.handle_button_crossSectionUpdate()
         # Focus Cavity tab
         self.tabWidget.setCurrentIndex(0)
         return True
@@ -373,9 +403,64 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         if z is False:
             return False
         
-        # Plot stability
+        # Plot beam size
         self.beamsizePlot.plotData('beamsize', z, wz_tan, z, wz_sag, xlabel=xname, ylabel=yname)
         return True
+        
+    # def handle_button_calcCrossSection(self):
+    #     # Get values, validating input
+    #     z = self.crossSectionSlider.value()
+    #     print("Slider value = ", str(z))
+    # 
+    #     z, wz_tan, wz_sag, xname, yname = self.cavity.calcBeamsize(watchElementOrder, varElementOrder, xstart, xend)
+    # 
+    #     if z is False:
+    #         return False
+    # 
+    #     # Plot stability
+    #     self.beamsizePlot.plotData('beamsize', z, wz_tan, z, wz_sag, xlabel=xname, ylabel=yname)
+    #     return True
+        
+    def handle_button_crossSectionUpdate(self):
+        if not self.cavity.calcCavity():
+            return False
+        # Get z and its shape
+        z = self.cavity.z_tan
+        zShape = np.shape(z)
+        # Adjust slider Max value accordingly:
+        # number of colums times number of rows, minus 1
+        maxValue = zShape[0]*zShape[1]-1
+        self.crossSectionSlider.setMaximum(maxValue)
+        self.crossSectionSlider.setTickInterval(maxValue/10)
+        
+        self.modified_crossSectionSlider(0)
+            
+    def modified_crossSectionSlider(self, value):
+        try:
+            iCoord = int(value/100)
+            jCoord = value%100
+            zvalue = self.cavity.z_tan[iCoord][jCoord]
+            wz_tan = self.cavity.wz_tan[iCoord][jCoord]
+            wz_sag = self.cavity.wz_sag[iCoord][jCoord]
+            # Update text box
+            self.update_crossSectionBox(zvalue)
+            # Limits
+            max_tan = np.amax(self.cavity.wz_tan)
+            max_sag = np.amax(self.cavity.wz_sag)
+            max_limit = max(max_tan,max_sag)*1000/2
+            max_limit = max_limit + max_limit*0.1
+            # Plot
+            self.crossSectionPlot.plotData('crossSection', 0, wz_tan*1000, 0, wz_sag*1000, xmin=-max_limit, xmax=max_limit, ymin=-max_limit, ymax=max_limit)
+        except:
+            print('Error with the slider')
+            
+    def update_crossSectionBox(self, value):
+        self.crossSectionBox.setText(str(round(value*100)/100))
+        
+    def update_crossSectionSlider(self):
+        #crossSectionBox_value = self.crossSectionBox.text()
+        #self.slider.setSliderPosition(spinbox_value)
+        pass
         
     def setWavelength(self):
         wl_nm = self.readEntry(self.wlBox)
@@ -468,7 +553,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
             # If choosing Save 
             if reply == QtWidgets.QMessageBox.Save:
-                if self.fileSave():
+                if self.fileSave(quit=True, theList=savingList, theHash=savingListMD5):
                     event.accept()
                 else:
                     event.ignore()
@@ -533,11 +618,16 @@ class PlotCanvas(FigureCanvas):
                     tan, = self.axes.plot(zrow, wrow, 'g', label='Tangential')
                 for zrow, wrow in zip(x2, y2):
                     sag, = self.axes.plot(zrow, wrow, 'b', label='Saggital')
+            self.axes.legend(handles=[tan,sag], loc='upper left')
+        elif plotType == 'crossSection':
+            self.axes.set_aspect('equal')
+            ellipse = Ellipse(xy=(x1,x2), width=y2, height=y1)
+            self.axes.add_artist(ellipse)
         else:
             # Other plots
             tan, = self.axes.plot(x1, y1, 'g', label='Tangential')
             sag, = self.axes.plot(x2, y2, 'b', label='Saggital')
-        self.axes.legend(handles=[tan,sag], loc='upper left')
+            self.axes.legend(handles=[tan,sag], loc='upper left')
         
         # Plot Labels
         if xlabel == None:
