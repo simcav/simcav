@@ -9,6 +9,7 @@ from matplotlib.patches import Ellipse
 
 
 # Other modules
+import math
 import numpy as np
 import pickle           # To save and load files
 import hashlib, json    # For MD5 computation
@@ -35,11 +36,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Draw canvas for all the plots
         self.drawCanvas()
         
+        self.designer_list_setup()
         self.element_list_setup()
         self.cavity_scheme_setup()
         
         self.cavity = SP.cavity()
-        self.elementFocus = None    # This will be a list, even if only one element
+        self.elementFocus = []    # This will be a list, even if only one element
         
         
         # BUTTON FUNCTIONS =====================================================
@@ -71,6 +73,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_curvedInterface.clicked.connect(self.handle_button_addElement)
         self.button_thinLens.clicked.connect(self.handle_button_addElement)
         self.button_customElement.clicked.connect(self.handle_button_addElement)
+        
+        # Tab controls 
+        self.tabWidget_controls.currentChanged.connect(self.handle_controlTab_changed)
         
         # Toolbar Actions
         self.toolBar.actionTriggered.connect(self.handle_toolbar_actions)
@@ -139,7 +144,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tab_crossSection.layout().addWidget(self.crossSectionPlot_toolbar)
             
         # Default tab
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget_plots.setCurrentIndex(0)
+        self.tabWidget_controls.setCurrentIndex(0)
+        self.tabWidget_controls.setTabEnabled(1, False)
         
     def populateComboBoxes(self):
         self.stability_comboBox.clear()
@@ -159,6 +166,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cavityIconsLayout.setContentsMargins(0,0,0,0)
         self.cavityIconsLayout.setSpacing(0)
         
+    def designer_list_setup(self):
+        # Layout for scroll area.
+        # designer widgets have to be added to this layout
+        self.designerListLayout = QtWidgets.QVBoxLayout(self.scrollArea_computation_layout)
+        self.designerListLayout.setAlignment(QtCore.Qt.AlignTop)
+        self.designerListLayout.setContentsMargins(0,0,0,0)
+        self.designerListLayout.setSpacing(0)
+        
     def element_list_setup(self):
         # Layout for scroll area.
         # Widgets (cavity elements) have to be added to this layout
@@ -174,6 +189,30 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         for element in self.cavity.elementList:
             self.elementListLayout.addWidget(element['Widget'])
             self.cavityIconsLayout.addWidget(element['Icon'])
+            
+    def handle_controlTab_changed(self, tab):
+        if tab == 0:
+            # Going back to modify cavity, clear Designer
+            self.tab_designer_destruction()
+        elif tab == 1:
+            # Going into designer, create items
+            self.tab_designer_creation()
+            
+    def tab_designer_creation(self):
+        layout = self.designerListLayout
+        #self.scrollArea_computation.
+        self.designerElements = []
+        for element in self.cavity.elementList:
+            item = DesignerWidget(element['Order'], element['Type'], element['entry1'], element['entry2'])
+            layout.addWidget(item)
+            self.designerElements.append(item)
+        
+    def tab_designer_destruction(self):
+        layout = self.designerListLayout
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
     # End Other GUI stuff
     #===========================================================================
     
@@ -218,9 +257,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         elif q.text() == "Save":
             self.fileSave()
             
-        # elif q.text() == "Save as...":
-        #     self.fileSaveAs(saveAs=True)
-            
         elif q.text() == "Edit":
             self.modifyCavity.setVisible(True)
         elif q.text() == "Calculator":
@@ -231,6 +267,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             print("Button not recognized")
             print(q.text())
             
+    def toggleDesigner(self):
+        if self.cavity.minimumElements() and self.cavity.closedCavity():
+            self.tabWidget_controls.setTabEnabled(1, True)
+        else:
+            self.tabWidget_controls.setTabEnabled(1, False)
     ############################################################################
     # ToolBar functions 
     def fileNew(self):
@@ -355,6 +396,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 window.cavity.elementList.pop()
                 window.cavity.numberOfElements = window.cavity.numberOfElements - 1
                 window.updateElementList()
+                self.toggleDesigner()
+            self.elementFocus = []
             self.populateComboBoxes()
             
     def handle_button_calcCavity(self):
@@ -365,7 +408,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             return False
               
         # Plot cavity
-        self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, ymin=0)#xlabel='z (mm)', ylabel='w (µm)')
+        self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, ymin=0)
         
         # Plot vertical marks
         self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
@@ -373,7 +416,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Update cross section stuff
         self.handle_button_crossSectionUpdate()
         # Focus Cavity tab
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget_plots.setCurrentIndex(0)
         return True
         
     def handle_button_calcStability(self):
@@ -407,29 +450,18 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.beamsizePlot.plotData('beamsize', z, wz_tan, z, wz_sag, xlabel=xname, ylabel=yname)
         return True
         
-    # def handle_button_calcCrossSection(self):
-    #     # Get values, validating input
-    #     z = self.crossSectionSlider.value()
-    #     print("Slider value = ", str(z))
-    # 
-    #     z, wz_tan, wz_sag, xname, yname = self.cavity.calcBeamsize(watchElementOrder, varElementOrder, xstart, xend)
-    # 
-    #     if z is False:
-    #         return False
-    # 
-    #     # Plot stability
-    #     self.beamsizePlot.plotData('beamsize', z, wz_tan, z, wz_sag, xlabel=xname, ylabel=yname)
-    #     return True
-        
     def handle_button_crossSectionUpdate(self):
-        if not self.cavity.calcCavity():
-            return False
+        # if not self.cavity.calcCavity():
+        #     return False                      # I THINK NOT NEEDED (too much)
         # Get z and its shape
         z = self.cavity.z_tan
         zShape = np.shape(z)
         # Adjust slider Max value accordingly:
-        # number of colums times number of rows, minus 1
-        maxValue = zShape[0]*zShape[1]-1
+        # number of colums times 100 (should be number of rows zshape[1], but shape may not get it), minus 1
+        try:
+            maxValue = (zShape[0]*100)-1
+        except:
+            print(zShape)
         self.crossSectionSlider.setMaximum(maxValue)
         self.crossSectionSlider.setTickInterval(maxValue/10)
         
@@ -449,10 +481,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             max_sag = np.amax(self.cavity.wz_sag)
             max_limit = max(max_tan,max_sag)*1000/2
             max_limit = max_limit + max_limit*0.1
+            if max_limit:
+                if math.isinf(max_limit) or math.isnan(max_limit):
+                    max_limit = 1E6
             # Plot
             self.crossSectionPlot.plotData('crossSection', 0, wz_tan*1000, 0, wz_sag*1000, xmin=-max_limit, xmax=max_limit, ymin=-max_limit, ymax=max_limit)
         except:
             print('Error with the slider')
+            raise
             
     def update_crossSectionBox(self, value):
         self.crossSectionBox.setText(str(round(value*100)/100))
@@ -506,6 +542,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.populateComboBoxes()
         
         window.cavity.numberOfElements = window.cavity.numberOfElements + 1
+        self.toggleDesigner()
         
     def readEntry(self, entry):
         state = window.validatorFloat.validate(entry.text(), 0)[0]
@@ -719,14 +756,28 @@ class ElementWidget(QtWidgets.QWidget):
         }        
 
         # CONFIG ---------------------------------------------------------------
-        # Set minimum width so all labels are equal whatever the element name
-        self.columns['label_name'].setMinimumWidth(110)
+        for item in self.columns:
+            if 'entry' in item:
+                # Validate entry boxes values
+                self.columns[item].setValidator(window.validatorFloat)
+                # Connect return signal
+                self.columns[item].returnPressed.connect(window.button_calcCavity.click)
+                # Set size
+                #self.columns[item].setFixedWidth(40)
+            elif 'number' in item:
+                self.columns[item].setMinimumWidth(15)
+                #self.columns[item].setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+                pass
+            elif 'name' in item:
+                # Set minimum width so all labels are equal whatever the element name
+                self.columns[item].setMinimumWidth(110)
         
         # Validate entry boxes values
-        #self.validator = QtGui.QDoubleValidator()
-        #self.validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.columns['entry1'].setValidator(window.validatorFloat)
         self.columns['entry2'].setValidator(window.validatorFloat)
+        # Connect return signal
+        self.columns['entry1'].returnPressed.connect(window.button_calcCavity.click)
+        self.columns['entry2'].returnPressed.connect(window.button_calcCavity.click)
         
         # Default values
         self.assignDefaults(etype)
@@ -749,21 +800,23 @@ class ElementWidget(QtWidgets.QWidget):
             
     def assignDefaults(self, eType):
         # Default values for the entries
-        if eType in ['Distance','Block','Brewster Plate','Brewster Crystal']:
+        if eType in ['Block','Brewster Plate','Brewster Crystal']:
+            self.columns['entry2'].setPlaceholderText("n")
+        elif eType == 'Distance':
             self.columns['entry2'].setText(str(1))
         elif eType in ['Curved Mirror','Thin lens']:
             self.columns['entry2'].setText(str(0))
-        elif eType == 'Curved Interface':
-            self.columns['entry2'].setText(str(1))
         elif eType == 'Flat Mirror':
             self.columns['entry1'].setText(str(0))
             self.columns['entry2'].setText(str(0))
             self.columns['entry1'].setDisabled(True)
             self.columns['entry2'].setDisabled(True)
         elif eType == 'Flat Interface':
-            self.columns['entry2'].setText(str(0))
-            self.columns['entry2'].setText(str(1))
+            self.columns['entry1'].setText(str(0))
+            self.columns['entry2'].setPlaceholderText("n2")
             self.columns['entry1'].setDisabled(True)
+        elif eType == 'Curved Interface':
+            self.columns['entry2'].setPlaceholderText("n2")
         else:
             self.columns['entry2'].setText(str(0))
                 
@@ -905,6 +958,106 @@ class ElementWidget(QtWidgets.QWidget):
         window.cavity.reorderList()
         # Update GUI
         window.updateElementList()
+        
+# Designer widget
+class DesignerWidget(QtWidgets.QWidget):
+    def __init__(self, eOrder, etype, entry1, entry2, entry3=None, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.elementType = etype
+
+        layout = QtWidgets.QHBoxLayout(self)
+
+        self.columns = {
+            'label_number': QtWidgets.QLabel(text=str(eOrder)),
+            'label_name': QtWidgets.QLabel(text=etype),
+            'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
+            'entry2': QtWidgets.QLineEdit(placeholderText="mm")
+        }
+
+        # CONFIG ---------------------------------------------------------------
+        for item in self.columns:
+            if 'entry' in item:
+                # Validate entry boxes values
+                self.columns[item].setValidator(window.validatorFloat)
+                # Connect return signal
+                #self.columns[item].returnPressed.connect(window.button_calcComputation.click)
+                # Set size
+                self.columns[item].setFixedWidth(40)
+            elif 'number' in item:
+                self.columns[item].setFixedWidth(15)
+                #self.columns[item].setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+                pass
+            elif 'name' in item:
+                # Set minimum width so all labels are equal whatever the element name
+                self.columns[item].setMinimumWidth(110)
+                
+        # Default values
+        self.assignDefaults(etype, entry1, entry2)
+        
+        # In case of loading, assign loaded values
+        if entry1:
+            self.columns['entry1'].setText(str(entry1))
+        if entry2:
+            self.columns['entry2'].setText(str(entry2))
+        if entry3:
+            self.columns['entry3'].setText(str(entry3))
+        
+        # Disable entry boxes for Flat mirrors
+        if etype == 'Flat Mirror':
+            self.columns['entry1'].setDisabled(True)
+            self.columns['entry2'].setDisabled(True)
+            self.columns['entry3'].setDisabled(True)
+        # CONFIG End -----------------------------------------------------------
+        
+        # Add the columns to the widget
+        for i in self.columns:
+            layout.addWidget(self.columns[i])
+            
+    def assignDefaults(self, eType):
+        self.columns['entry1'].setText(str(entry1))
+        self.columns['entry2'].setText(str(entry1))
+        self.columns['entry3'].setText(str(1))
+        # Default values for the entries
+        if eType in ['Distance','Block','Brewster Plate','Brewster Crystal']:
+            pass
+        elif eType in ['Curved Mirror','Thin lens']:
+            pass
+        elif eType == 'Curved Interface':
+            pass
+        elif eType == 'Flat Mirror':
+            self.columns['entry1'].setDisabled(True)
+            self.columns['entry2'].setDisabled(True)
+            self.columns['entry3'].setDisabled(True)
+        elif eType == 'Flat Interface':
+            self.columns['entry1'].setText(str(entry2))
+            self.columns['entry2'].setText(str(entry2))
+            self.columns['entry3'].setText(str(1))
+            self.columns['entry1'].setPlaceholderText("n2")
+            self.columns['entry2'].setPlaceholderText("n2")
+        else:
+            pass        
+                
+    # Read entries
+    def readEntry(self, entry):
+        state = window.validatorFloat.validate(self.columns[entry].text(), 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            #color = '#c4df9b' # green
+            color = ''
+            try:
+                value = float(self.columns[entry].text().replace(",", "."))
+            except:
+                # MAYBE PUT A MESSAGE HERE SAYING INVALID FLOAT
+                # TO THE MESSAGE BAR
+                self.columns[entry].setText("")
+                value = False
+        elif state == QtGui.QValidator.Intermediate:
+            color = '#fff79a' # yellow
+            value = False
+        else:
+            color = '#f6989d' # red
+            value = False
+        self.columns[entry].setStyleSheet('QLineEdit { background-color: %s }' % color)
+        return value
 
 #===============================================================================
 # Launching the program

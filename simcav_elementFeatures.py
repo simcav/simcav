@@ -7,6 +7,7 @@ def assign(elementType, entry1, entry2, refr_index=1.0):
     
     myDict['entry1'] = entry1
     myDict['entry2'] = entry2
+    myDict['refr_index'] = 1.0
     
     # Flat mirror
     if elementType == 'Flat Mirror':

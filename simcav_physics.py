@@ -221,11 +221,6 @@ class cavity():
         ylabel = 'Beam size at element ' + str(watchElement['Order']) + ' (µm)'    
         return np.array(xvec), np.array(yvec_tan), np.array(yvec_sag), xlabel, ylabel
         
-    def calcCrossSection(self, z_position):
-        # Calculate cavity
-        if not self.calcCavity():
-            return False
-        
     #================= WORKING CONDITION FUNCTIONS =============================
     #%% -------------------- NonZero Lengths Condition --------------------
     def minimumElements(self):
@@ -296,12 +291,17 @@ class cavity():
             # If any entry isn't valid return False to end loop
             if entry1 is False or entry2 is False:
                 return False
-            
+            try:
+                refr_index = self.elementList[element['Order']-1]['refr_index']
+            except:
+                refr_index = 1.0
             # Calculate matrix and assign distance/radius, etc.
-            element.update(EF.assign(element['Type'], entry1, entry2, self.refractiveIndex))
+            element.update(EF.assign(element['Type'], entry1, entry2, refr_index))
             # Update refractive index after interfaces
-            if element['Type'] in ['Flat interface', 'Curved interface']:
-                self.refractiveIndex = element['refr_index']
+            # if element['Type'] in ['Flat interface', 'Curved interface']:
+            #     self.refractiveIndex = element['refr_index']
+            # PROBABLY NOT NEEDED SINCE DEALING WITH REFR INDEX DIFFERENTLY
+            
         return True
     
     #================= PHYSICAL CALCULATIONS =============================
@@ -321,7 +321,7 @@ class cavity():
         return M_cav
         
     #%% ----------------- Propagation calculation ------------------------------    
-    def propagation(self, E_list, q0, wl, proy, chivato=False):    
+    def propagation(self, E_list, q0, wl, proy, chivato=True):    
         # Propagation
         zmax = 0
         z = []
@@ -332,7 +332,7 @@ class cavity():
         z_names = []
         
         # Debugging ----------------------------------------
-        show_n = False   
+        show_n = True   
         if chivato:
             print('Im in cavity.propagation. For loop through elements:')
         if show_n:
@@ -407,9 +407,12 @@ class cavity():
                 I = abcd.flat_interface(refr_index_global,element['refr_index'])
                 q = abcd.q_propagation(I[proy],q0)
                 q0 = q
+                # Some debugging
+                if chivato:
+                    print('Imag(q)',np.imag(q))
                 
                 # Distance
-                aux_vector = np.linspace(0,element['distance'],element['distance']*100)
+                aux_vector = np.linspace(0,element['distance'],num=100)
                 z.append(aux_vector+zmax)
                 zmax = zmax + max(aux_vector)
                 q = q0 + aux_vector
@@ -421,6 +424,9 @@ class cavity():
                 I = abcd.flat_interface(element['refr_index'], refr_index_global)
                 q = abcd.q_propagation(I[proy],q0)
                 q0 = q
+                # Some debugging
+                if chivato:
+                    print('Imag(q)',np.imag(q))
                 
                 if show_n:
                     print(element['Type'],refr_index_global)
@@ -430,30 +436,38 @@ class cavity():
                 z_names.append(element['Type'])
                 
             # ------------------- Brewster Plate -------------------
-            elif element['Type']=="Brewster plate":
+            elif element['Type']=="Brewster Plate":
                 # Block divided in interface - distance - interface
                 # First interface
                 I = abcd.flat_interface_br(refr_index_global,element['refr_index'])
                 q = abcd.q_propagation(I[proy],q0)
                 q0 = q
+                # Some debugging
+                if chivato:
+                    print('Imag(q)',np.imag(q))
                 
                 # Distance
                 thi = np.arctan(element['refr_index']/refr_index_global)    
                 thr = np.arcsin( refr_index_global*np.sin(thi) / element['refr_index'] )    
                 d_temp = element['distance'] / np.cos(thr)
                 
-                aux_vector = np.linspace(0,d_temp,d_temp*100)
+                aux_vector = np.linspace(0,d_temp,num=100)
                 z.append(aux_vector+zmax)
                 zmax = zmax + max(aux_vector)
                 q = q0 + aux_vector
                 q0 = q[-1]
                 w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
+                if proy == 0:
+                    w = w/element['refr_index']
                 wz.append(w)
                 
                 # Second interface
                 I = abcd.flat_interface_br(element['refr_index'], refr_index_global)
                 q = abcd.q_propagation(I[proy],q0)
                 q0 = q
+                # Some debugging
+                if chivato:
+                    print('Imag(q)',np.imag(q))
                 
                 if show_n:
                     print(element['Type'],refr_index_global)
@@ -463,26 +477,34 @@ class cavity():
                 z_names.append(element['Type'])
             
             # ------------------- Brewster Crystal -------------------
-            elif element['Type']=="Brewster crystal":
+            elif element['Type']=="Brewster Crystal":
                 # Block divided in interface - distance - interface
                 # First interface
                 I = abcd.flat_interface_br(refr_index_global,element['refr_index'])
                 q = abcd.q_propagation(I[proy],q0)
                 q0 = q
+                # Some debugging
+                if chivato:
+                    print('Imag(q)',np.imag(q))
                 
                 # Distance
-                aux_vector = np.linspace(0,element['distance'],element['distance']*100)
+                aux_vector = np.linspace(0,element['distance'],num=100)
                 z.append(aux_vector+zmax)
                 zmax = zmax + max(aux_vector)
                 q = q0 + aux_vector
                 q0 = q[-1]
                 w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
+                if proy == 0:
+                    w = w/element['refr_index']
                 wz.append(w)
                 
                 # Second interface
                 I = abcd.flat_interface_br(element['refr_index'], refr_index_global)
                 q = abcd.q_propagation(I[proy],q0)
                 q0 = q
+                # Some debugging
+                if chivato:
+                    print('Imag(q)',np.imag(q))
                 
                 if show_n:
                     print(element['Type'],refr_index_global)
