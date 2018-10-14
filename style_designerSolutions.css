@@ -1,0 +1,27 @@
+/*
+simcav-green = #005200
+simcav-green-light = #009f00
+
+*/
+
+QWidget#SolutionsTab {
+  
+}
+
+LabelTitle {
+  min-height: 40;
+  max-height: 40;
+  color: white;
+  background-color: #005200
+}
+
+LabelSubtitle {
+  min-height: 30;
+  max-height: 30;
+  color: white;
+  background-color: #009f00
+}
+
+tableCell[impar=True] {
+  #alternate-background-color
+}

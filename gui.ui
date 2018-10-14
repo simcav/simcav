@@ -306,6 +306,25 @@
        <attribute name="title">
         <string>Designer Solutions</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QScrollArea" name="scrollArea_solutions">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollArea_solutionsContent">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>787</width>
+             <height>679</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -869,7 +888,7 @@
              <x>0</x>
              <y>0</y>
              <width>296</width>
-             <height>444</height>
+             <height>458</height>
             </rect>
            </property>
           </widget>
@@ -878,8 +897,29 @@
         <item>
          <widget class="QWidget" name="designer_headers2" native="true">
           <layout class="QHBoxLayout" name="horizontalLayout_11">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>2</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>2</number>
+           </property>
            <item>
             <widget class="QLabel" name="label_29">
+             <property name="minimumSize">
+              <size>
+               <width>130</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Condition</string>
              </property>
@@ -890,6 +930,12 @@
            </item>
            <item>
             <widget class="QLabel" name="label_30">
+             <property name="minimumSize">
+              <size>
+               <width>70</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Element</string>
              </property>
@@ -900,6 +946,12 @@
            </item>
            <item>
             <widget class="QLabel" name="label_31">
+             <property name="minimumSize">
+              <size>
+               <width>49</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Min.</string>
              </property>
@@ -910,6 +962,12 @@
            </item>
            <item>
             <widget class="QLabel" name="label_32">
+             <property name="minimumSize">
+              <size>
+               <width>49</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Max.</string>
              </property>
@@ -941,7 +999,7 @@
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents_4">
+          <widget class="QWidget" name="scrollArea_conditions_layout">
            <property name="geometry">
             <rect>
              <x>0</x>
@@ -956,13 +1014,13 @@
         <item>
          <layout class="QHBoxLayout" name="elementList_buttons_2">
           <item>
-           <widget class="QPushButton" name="button_condition_add">
+           <widget class="QPushButton" name="button_conditionAdd">
             <property name="text">
              <string/>
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>Icons/arrowUp.png</normaloff>Icons/arrowUp.png</iconset>
+              <normaloff>Icons/misc_plus.png</normaloff>Icons/misc_plus.png</iconset>
             </property>
            </widget>
           </item>
@@ -980,7 +1038,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="button_condition_delete">
+           <widget class="QPushButton" name="button_conditionDel">
             <property name="text">
              <string/>
             </property>
@@ -1092,17 +1150,6 @@
    <addaction name="actionEdit"/>
    <addaction name="actionCalculator"/>
    <addaction name="separator"/>
-  </widget>
-  <widget class="QToolBar" name="toolBar_2">
-   <property name="windowTitle">
-    <string>toolBar_2</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
   </widget>
   <action name="actionNew">
    <property name="icon">
