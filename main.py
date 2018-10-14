@@ -515,16 +515,17 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.solutionsBox = SD.SolutionsTab(elementList, conditionList)
         self.designerSolutionsLayout.addWidget(self.solutionsBox)
         self.tabWidget_plots.setCurrentIndex(4)
-        for i in conditionList:
-            print(i['ID'])
+        
         designerList = self.designerElements
         combination, stablility, results = self.cavity.calcSolutions(designerList, conditionList)
         
         if results:
-            self.presentResults()
+            self.presentResults(self.solutionsBox, combination, stablility, results)
             
-    def presentResults(self):
-        pass
+    def presentResults(self, theBox, combination, stablility, results):
+        for i in range(0,len(results)-1):
+            theBox.addRow(combination[i], stablility[i], results[i])    
+        
         
     def setWavelength(self):
         wl_nm = self.readEntry(self.wlBox)
@@ -1152,6 +1153,8 @@ class ConditionWidget(QtWidgets.QWidget):
         
         # Add the columns to the widget
         for i in self.columns:
+            if 'entry' in i:
+                self.columns[i].setValidator(window.validatorFloat)
             layout.addWidget(self.columns[i])
         
     def assignDefaults(self):
@@ -1211,6 +1214,28 @@ class ConditionWidget(QtWidgets.QWidget):
                 else:
                     element['Widget'].setAutoFillBackground(False)
                     element['Widget'].setBackgroundRole(QtGui.QPalette.Base)
+                    
+    # Read entries
+    def readEntry(self, entry):
+        state = window.validatorFloat.validate(self.columns[entry].text(), 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            #color = '#c4df9b' # green
+            color = ''
+            try:
+                value = float(self.columns[entry].text().replace(",", "."))
+            except:
+                # MAYBE PUT A MESSAGE HERE SAYING INVALID FLOAT
+                # TO THE MESSAGE BAR
+                self.columns[entry].setText("")
+                value = False
+        elif state == QtGui.QValidator.Intermediate:
+            color = '#fff79a' # yellow
+            value = False
+        else:
+            color = '#f6989d' # red
+            value = False
+        self.columns[entry].setStyleSheet('QLineEdit { background-color: %s }' % color)
+        return value
 
 #===============================================================================
 # Launching the program

@@ -2,6 +2,10 @@
 simcav-green = #005200
 simcav-green-light = #009f00
 
+alternative Stability = #abeded
+
+cell = #ffffff
+cell-alternative = #f9f0e6
 */
 
 QWidget#SolutionsTab {
@@ -22,6 +26,14 @@ LabelSubtitle {
   background-color: #009f00
 }
 
-tableCell[impar=True] {
-  #alternate-background-color
+LabelCell {
+  min-height: 20;
+  max-height: 20;
+  background-color: #ffffff
+}
+
+LabelCell[impar=true] {
+  min-height: 20;
+  max-height: 20;
+  background-color: #f9f0e6
 }

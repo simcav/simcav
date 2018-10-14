@@ -4,6 +4,7 @@ class SolutionsTab(QtWidgets.QWidget):
     def __init__(self, elementList, conditionList, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.setStyleSheet(open('style_designerSolutions.css').read())
+        self.row = 1
         
         numElements = len(elementList)
         numConditions = len(conditionList)
@@ -12,6 +13,7 @@ class SolutionsTab(QtWidgets.QWidget):
         layout.setAlignment(QtCore.Qt.AlignTop)
         layout.setContentsMargins(0,0,0,0)
         layout.setSpacing(0)
+        self.layout = layout
         
         # Table title: Items, Stability and Conditions
         #font = QtGui.QFont()
@@ -26,7 +28,7 @@ class SolutionsTab(QtWidgets.QWidget):
         layout.addWidget(QVLine(), 0, numElements, 1, 1)
         layout.addWidget(self.title['stability'], 0, numElements + 1, 1, 2)
         layout.addWidget(QVLine(), 0, numElements + 3, 1, 1)
-        layout.addWidget(self.title['conditions'], 0, numElements + 4, 1, numConditions)
+        layout.addWidget(self.title['conditions'], 0, numElements + 4, 1, 2*numConditions)
         
         # ACTUALLY, ADD THE SEPARATOR AT THE END, SPANNING THE WHOLE VERTICAL.
         
@@ -48,10 +50,26 @@ class SolutionsTab(QtWidgets.QWidget):
         for i, element in enumerate(conditionList):
             name = element['Widget'].columns['condition'].currentText()
             label = LabelSubtitle(self, text=name)
-            layout.addWidget(label, 1, numElements + 4 + i, 1, 1)
+            layout.addWidget(label, 1, numElements + 4 + 2*i, 1, 2)
             
     def addRow(self, combination, stability, results):
-        pass
+        row = self.row
+        numberItems = len(combination)
+        # Add combination of elements
+        for column, i in enumerate(combination):
+            label = LabelCell(i, row)
+            self.layout.addWidget(label, 1+row, column, 1, 1)
+        # Add stability
+        for column, i in enumerate(stability):
+            label = LabelCell(round(i,2), row)
+            self.layout.addWidget(label, 1+row, numberItems+1+column, 1, 1)
+        # Add condition value
+        for column, i in enumerate(results):
+            label = LabelCell(round(i[0],2), row)
+            self.layout.addWidget(label, 1+row, numberItems+1+2+1+column, 1, 1)
+            label = LabelCell(round(i[1],2), row)
+            self.layout.addWidget(label, 1+row, numberItems+1+2+1+column+1, 1, 1)
+        self.row = row + 1
         
     def addCombination(self, combination):
         pass
@@ -78,9 +96,14 @@ class LabelSubtitle(QtWidgets.QLabel):
         self.setAlignment(QtCore.Qt.AlignCenter)
 
 class LabelCell(QtWidgets.QLabel):
-    def __init__(self, parity, group=0, parent=None, *args, **kwargs):
+    def __init__(self, value, row, group=0, parent=None, *args, **kwargs):
         QtWidgets.QLabel.__init__(self, parent, *args, **kwargs)
         self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setText(str(value))
+        if row%2:
+            self.setProperty('impar', False)
+        else:
+            self.setProperty('impar', True) 
         
 class QVLine(QtWidgets.QFrame):
     def __init__(self):

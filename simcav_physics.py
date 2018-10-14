@@ -69,7 +69,12 @@ class cavity():
                 
             if stability[0] and stability[1]:
                 results = []
-                for condition in conditionsList:
+                for condition in conditionList:
+                    conditionName = str(condition['Widget'].columns['condition'].currentText())
+                    conditionAt = condition['Widget'].columns['onElement'].currentIndex()
+                    condStart = condition['Widget'].readEntry('entry1')
+                    condEnd = condition['Widget'].readEntry('entry2')
+                    print(conditionName, conditionAt, condStart, condEnd)
                     answer = SC.evalConditions(cavityMatrix, elementList, stability, conditionName, conditionAt, condStart, condEnd, self.wl_mm)
                     #self.conditions_call[condition['condition_var'].get()](condition)
                     if True:

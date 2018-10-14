@@ -23,13 +23,11 @@ def cond_w0_size(cavityMatrix, condStart, condEnd, wl):
     w0 = []
     for matrix in cavityMatrix:
         q0 = abcd.q_resonator(matrix)
-        r0, w0 = abcd.r_w(q0, wl, 1)
-        # print('In w0 size condition')
-        # print('I(1/q)=',np.imag(1/q0))
-        # print('R =',r0,' --- w =',w0)
+        r0, w0_pre = abcd.r_w(q0, wl, 1)
+        w0_pre = w0_pre*1000    # Convert to µm
 
-        if (w0 > condStart and  w0 < conEnd):
-            w0.append(w0)
+        if (w0_pre > condStart and  w0_pre < condEnd):
+            w0.append(w0_pre)
     return w0
 
 def cond_waist(cavityMatrix, elementList, conditionAt, wl, condStart, condEnd):
@@ -43,8 +41,8 @@ def cond_waist(cavityMatrix, elementList, conditionAt, wl, condStart, condEnd):
     z_tan, wz_tan, z_limits_tan, z_names_tan = SP.propagation(elementList, q0[proy], wl, proy)
     proy = 1
     z_sag, wz_sag, z_limits_sag, z_names_sag = SP.propagation(elementList, q0[proy], wl, proy)
-    
-    wz_both = [wz_tan, wz_sag]
+    # Join and convert to µm
+    wz_both = [wz_tan*1000, wz_sag*1000]
 
     if master.toolbar.chivato:
         print('In waist condition')
