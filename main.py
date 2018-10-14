@@ -17,6 +17,8 @@ import atexit           # To run before exit
 
 import load_icons as LI
 import simcav_physics as SP
+import simcav_designer as SD
+import simcav_conditions as SC
 
 #===============================================================================
 # Creating the GUI
@@ -37,12 +39,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.drawCanvas()
         
         self.designer_list_setup()
+        self.designer_conditions_setup()
         self.element_list_setup()
         self.cavity_scheme_setup()
         
         self.cavity = SP.cavity()
-        self.elementFocus = []    # This will be a list, even if only one element
         
+        self.elementFocus = []    # This will be a list, even if only one element
+        self.conditionFocus = []    # This will be a list, even if only one element
         
         # BUTTON FUNCTIONS =====================================================
         # Cavity buttons
@@ -61,6 +65,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.crossSectionSlider.valueChanged[int].connect(self.modified_crossSectionSlider)
         # When user modify via the textBox
         # self.crossSectionBox.editingFinished.connect(self.update_crossSectionSlider)
+        
+        # Designer buttons
+        self.button_conditionAdd.clicked.connect(self.handle_button_conditionAdd)
+        self.button_conditionDel.clicked.connect(self.handle_button_conditionDel)
+        self.button_calcSolutions.clicked.connect(self.handle_button_calcSolutions)
+        
         
         # "Add element" functions
         self.button_flatMirror.clicked.connect(self.handle_button_addElement)
@@ -107,7 +117,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolBar.addWidget(self.wlBox)
         self.toolBar.addWidget(wlUnitsLabel)
         
-        
+        # Int validator
+        self.validatorInt = QtGui.QIntValidator()
         # Float validator
         self.validatorFloat = QtGui.QDoubleValidator()
         self.validatorFloat.setNotation(QtGui.QDoubleValidator.StandardNotation)
@@ -115,6 +126,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.wlBox.setValidator(self.validatorFloat)
         self.stability_xstart.setValidator(self.validatorFloat)
         self.stability_xend.setValidator(self.validatorFloat)
+        self.beamsize_xstart.setValidator(self.validatorFloat)
+        self.beamsize_xend.setValidator(self.validatorFloat)
         
     def drawCanvas(self):
         # Cavity tab
@@ -153,7 +166,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.beamsize_comboBox_watch.clear()
         self.beamsize_comboBox_var.clear()
         eList, vList, not_vList = self.cavity.optionMenuLists()
-        elementList = self.cavity.elementList
+        #elementList = self.cavity.elementList
         self.stability_comboBox.addItems(eList)
         self.beamsize_comboBox_watch.addItems(not_vList)
         self.beamsize_comboBox_var.addItems(eList)
@@ -174,6 +187,18 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.designerListLayout.setContentsMargins(0,0,0,0)
         self.designerListLayout.setSpacing(0)
         
+    def designer_conditions_setup(self):
+        # Layout for scroll area.
+        # condition widgets have to be added to this layout
+        self.designerConditionsLayout = QtWidgets.QVBoxLayout(self.scrollArea_conditions_layout)
+        self.designerConditionsLayout.setAlignment(QtCore.Qt.AlignTop)
+        self.designerConditionsLayout.setContentsMargins(0,0,0,0)
+        self.designerConditionsLayout.setSpacing(0)
+        # Printing solutions
+        self.designerSolutionsLayout = QtWidgets.QVBoxLayout(self.scrollArea_solutionsContent)
+        self.designerSolutionsLayout.setContentsMargins(0,0,0,0)
+        self.designerSolutionsLayout.setSpacing(0)
+        
     def element_list_setup(self):
         # Layout for scroll area.
         # Widgets (cavity elements) have to be added to this layout
@@ -189,6 +214,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         for element in self.cavity.elementList:
             self.elementListLayout.addWidget(element['Widget'])
             self.cavityIconsLayout.addWidget(element['Icon'])
+        self.toggleDesigner()
             
     def handle_controlTab_changed(self, tab):
         if tab == 0:
@@ -197,29 +223,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         elif tab == 1:
             # Going into designer, create items
             self.tab_designer_creation()
-            
-    def tab_designer_creation(self):
-        layout = self.designerListLayout
-        #self.scrollArea_computation.
-        self.designerElements = []
-        for element in self.cavity.elementList:
-            item = DesignerWidget(element['Order'], element['Type'], element['entry1'], element['entry2'])
-            layout.addWidget(item)
-            self.designerElements.append(item)
-        
-    def tab_designer_destruction(self):
-        layout = self.designerListLayout
-        while layout.count():
-            child = layout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
+             
     # End Other GUI stuff
     #===========================================================================
     
     ############################################################################
     # Menu actions 
     def handle_fileMenu_actions(self, q):
-        print("fileMenu_actions")
         if q.text() == "Save as...":
             self.fileSave(saveAs=True)
         elif q.text() == "Quit":
@@ -240,7 +250,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
     # Toolbar actions 
     def handle_toolbar_actions(self, q):
-        print(q.text())
         if q.text() == "New":
             self.fileNew()
             
@@ -272,6 +281,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tabWidget_controls.setTabEnabled(1, True)
         else:
             self.tabWidget_controls.setTabEnabled(1, False)
+            
     ############################################################################
     # ToolBar functions 
     def fileNew(self):
@@ -303,7 +313,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Set wavelength
         wl_loaded = round(loadedList[0]['wavelength']*1E8)/100
         self.wlBox.setText(str(wl_loaded))
-        print(self.wlBox.text())
         self.setWavelength()
             
         # Draw cavity
@@ -370,36 +379,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
             
     ################################################    
-    # Button functions Start
-    
-    # Move Up
-    def handle_button_moveUp(self):
-        if self.elementFocus != None:
-            for elementID in self.elementFocus:
-                element = window.cavity.findElement(elementID)
-                element['Widget'].moveUp()
-            self.populateComboBoxes()
-    def handle_button_moveDown(self):
-        if self.elementFocus != None:
-            for elementID in reversed(self.elementFocus):
-                element = window.cavity.findElement(elementID)
-                element['Widget'].moveDown()
-            self.populateComboBoxes()
-            
-    def handle_button_delete(self):
-        if self.elementFocus != None:
-            for elementID in reversed(self.elementFocus):
-                element = window.cavity.findElement(elementID)
-                element['Widget'].moveBottom()
-                element['Widget'].deleteLater()
-                element['Icon'].deleteLater()
-                window.cavity.elementList.pop()
-                window.cavity.numberOfElements = window.cavity.numberOfElements - 1
-                window.updateElementList()
-                self.toggleDesigner()
-            self.elementFocus = []
-            self.populateComboBoxes()
-            
+    # Button functions Start            
     def handle_button_calcCavity(self):
         # Calculate element matrixes
         calcCavity = self.cavity.calcCavity()
@@ -412,7 +392,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # Plot vertical marks
         self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
-        
         # Update cross section stuff
         self.handle_button_crossSectionUpdate()
         # Focus Cavity tab
@@ -498,6 +477,55 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.slider.setSliderPosition(spinbox_value)
         pass
         
+    def tab_designer_creation(self):            
+        layout = self.designerListLayout
+        #self.scrollArea_computation.
+        self.designerElements = []
+        for element in self.cavity.elementList:
+            try:
+                item = DesignerWidget(element['Order'], element['Type'], element['entry1'], element['entry2'])
+            except:
+                item = DesignerWidget(element['Order'], element['Type'])
+            layout.addWidget(item)
+            
+            myDict = {'ID': item.itemID, 'Widget': item, 'Type': element['Type'], 'Order': element['Order'], 'oldEntry1': element['entry1'], 'oldEntry2': element['entry2']}
+            self.designerElements.append(myDict)
+        
+    def tab_designer_destruction(self):
+        layout = self.designerListLayout
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()   
+        
+    def handle_button_conditionAdd(self):
+        item = ConditionWidget()
+        self.designerConditionsLayout.addWidget(item)
+        self.cavity.addCondition(item)
+        
+    def handle_button_conditionDel(self):
+        if self.conditionFocus != None:
+            for item in self.conditionFocus:
+                self.cavity.delCondition(item)
+        
+    def handle_button_calcSolutions(self):
+        self.clearLayout(self.designerSolutionsLayout)
+        elementList = self.cavity.elementList
+        conditionList = self.cavity.conditionList
+        self.solutionsBox = SD.SolutionsTab(elementList, conditionList)
+        self.designerSolutionsLayout.addWidget(self.solutionsBox)
+        self.tabWidget_plots.setCurrentIndex(4)
+        for i in conditionList:
+            print(i['ID'])
+        designerList = self.designerElements
+        combination, stablility, results = self.cavity.calcSolutions(designerList, conditionList)
+        
+        if results:
+            self.presentResults()
+            
+    def presentResults(self):
+        pass
+        
     def setWavelength(self):
         wl_nm = self.readEntry(self.wlBox)
         wl_mm = wl_nm/1E6
@@ -505,6 +533,33 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cavity.wl_mm = wl_mm
         
     ############################################################################
+    # Move Up
+    def handle_button_moveUp(self):
+        if self.elementFocus != None:
+            for elementID in self.elementFocus:
+                element = window.cavity.findElement(elementID)
+                element['Widget'].moveUp()
+            self.populateComboBoxes()
+    def handle_button_moveDown(self):
+        if self.elementFocus != None:
+            for elementID in reversed(self.elementFocus):
+                element = window.cavity.findElement(elementID)
+                element['Widget'].moveDown()
+            self.populateComboBoxes()
+            
+    def handle_button_delete(self):
+        if self.elementFocus != None:
+            for elementID in reversed(self.elementFocus):
+                element = window.cavity.findElement(elementID)
+                element['Widget'].moveBottom()
+                element['Widget'].deleteLater()
+                element['Icon'].deleteLater()
+                window.cavity.elementList.pop()
+                window.cavity.numberOfElements = window.cavity.numberOfElements - 1
+                window.updateElementList()
+            self.elementFocus = []
+            self.populateComboBoxes()
+            
     # Add element
     def handle_button_addElement(self, name=None, entry1=None, entry2=None):
         if not name:
@@ -568,6 +623,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     # Button functions End 
     ################################################
     
+    def clearLayout(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+              child.widget().deleteLater()
     
     # Reimplement closing event
     def closeEvent(self, event):
@@ -776,8 +836,8 @@ class ElementWidget(QtWidgets.QWidget):
         self.columns['entry1'].setValidator(window.validatorFloat)
         self.columns['entry2'].setValidator(window.validatorFloat)
         # Connect return signal
-        self.columns['entry1'].returnPressed.connect(window.button_calcCavity.click)
-        self.columns['entry2'].returnPressed.connect(window.button_calcCavity.click)
+        self.columns['entry1'].returnPressed.connect(self.entry_onReturn)
+        self.columns['entry2'].returnPressed.connect(self.entry_onReturn)
         
         # Default values
         self.assignDefaults(etype)
@@ -841,6 +901,17 @@ class ElementWidget(QtWidgets.QWidget):
             value = False
         self.columns[entry].setStyleSheet('QLineEdit { background-color: %s }' % color)
         return value
+        
+    def entry_onReturn(self):
+        for element in window.cavity.elementList:
+            if element['Widget'].readEntry('entry1') is False:
+                element['Widget'].columns['entry1'].setFocus()
+                return True
+            if element['Widget'].readEntry('entry2') is False:
+                element['Widget'].columns['entry2'].setFocus()
+                return True
+        #window.button_calcCavity.click()
+        return True
 
     # Mouse click events
     def mousePressEvent(self, QMouseEvent):
@@ -853,6 +924,8 @@ class ElementWidget(QtWidgets.QWidget):
                 window.elementFocus.append(self.elementID)
             elif modifiers == QtCore.Qt.ControlModifier:
                 # Remove focus
+                if self.elementID in window.elementFocus:
+                    window.elementFocus.remove(self.elementID)
                 window.elementFocus.remove(self.elementID)
             else:
                 window.elementFocus = self.elementID
@@ -961,9 +1034,10 @@ class ElementWidget(QtWidgets.QWidget):
         
 # Designer widget
 class DesignerWidget(QtWidgets.QWidget):
-    def __init__(self, eOrder, etype, entry1, entry2, entry3=None, parent=None):
+    def __init__(self, eOrder, etype, entry1=None, entry2=None, entry3=1, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.elementType = etype
+        self.itemID = id(self)
 
         layout = QtWidgets.QHBoxLayout(self)
 
@@ -971,18 +1045,24 @@ class DesignerWidget(QtWidgets.QWidget):
             'label_number': QtWidgets.QLabel(text=str(eOrder)),
             'label_name': QtWidgets.QLabel(text=etype),
             'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
-            'entry2': QtWidgets.QLineEdit(placeholderText="mm")
+            'entry2': QtWidgets.QLineEdit(placeholderText="mm"),
+            'entry3': QtWidgets.QLineEdit(text=str(entry3))
         }
 
         # CONFIG ---------------------------------------------------------------
         for item in self.columns:
             if 'entry' in item:
                 # Validate entry boxes values
-                self.columns[item].setValidator(window.validatorFloat)
+                if '3' in item:
+                    self.columns[item].setValidator(window.validatorInt)
+                    # Set size
+                    self.columns[item].setFixedWidth(30)
+                else:
+                    self.columns[item].setValidator(window.validatorFloat)
+                    # Set size
+                    self.columns[item].setFixedWidth(50)
                 # Connect return signal
                 #self.columns[item].returnPressed.connect(window.button_calcComputation.click)
-                # Set size
-                self.columns[item].setFixedWidth(40)
             elif 'number' in item:
                 self.columns[item].setFixedWidth(15)
                 #self.columns[item].setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
@@ -994,30 +1074,19 @@ class DesignerWidget(QtWidgets.QWidget):
         # Default values
         self.assignDefaults(etype, entry1, entry2)
         
-        # In case of loading, assign loaded values
-        if entry1:
-            self.columns['entry1'].setText(str(entry1))
-        if entry2:
-            self.columns['entry2'].setText(str(entry2))
-        if entry3:
-            self.columns['entry3'].setText(str(entry3))
-        
-        # Disable entry boxes for Flat mirrors
-        if etype == 'Flat Mirror':
-            self.columns['entry1'].setDisabled(True)
-            self.columns['entry2'].setDisabled(True)
-            self.columns['entry3'].setDisabled(True)
         # CONFIG End -----------------------------------------------------------
         
         # Add the columns to the widget
         for i in self.columns:
             layout.addWidget(self.columns[i])
             
-    def assignDefaults(self, eType):
-        self.columns['entry1'].setText(str(entry1))
-        self.columns['entry2'].setText(str(entry1))
-        self.columns['entry3'].setText(str(1))
-        # Default values for the entries
+    def assignDefaults(self, eType, entry1, entry2):
+        # Assign cavity values
+        if entry1:
+            self.columns['entry1'].setText(str(entry1))
+            self.columns['entry2'].setText(str(entry1))            
+            
+        # Special configuration for particular entries
         if eType in ['Distance','Block','Brewster Plate','Brewster Crystal']:
             pass
         elif eType in ['Curved Mirror','Thin lens']:
@@ -1025,15 +1094,17 @@ class DesignerWidget(QtWidgets.QWidget):
         elif eType == 'Curved Interface':
             pass
         elif eType == 'Flat Mirror':
+            self.columns['entry1'].setText(str(0))
+            self.columns['entry2'].setText(str(0))
             self.columns['entry1'].setDisabled(True)
             self.columns['entry2'].setDisabled(True)
             self.columns['entry3'].setDisabled(True)
         elif eType == 'Flat Interface':
-            self.columns['entry1'].setText(str(entry2))
-            self.columns['entry2'].setText(str(entry2))
-            self.columns['entry3'].setText(str(1))
             self.columns['entry1'].setPlaceholderText("n2")
             self.columns['entry2'].setPlaceholderText("n2")
+            if entry2:
+                self.columns['entry1'].setText(str(entry2))
+                self.columns['entry2'].setText(str(entry2))
         else:
             pass        
                 
@@ -1058,6 +1129,88 @@ class DesignerWidget(QtWidgets.QWidget):
             value = False
         self.columns[entry].setStyleSheet('QLineEdit { background-color: %s }' % color)
         return value
+        
+class ConditionWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        
+        self.conditionID = id(self)
+        
+        self.setMinimumHeight(40)
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(3,3,8,3)
+        
+        self.columns = {
+            'condition': QtWidgets.QComboBox(),
+            'onElement': QtWidgets.QComboBox(),
+            'entry1': QtWidgets.QLineEdit(placeholderText='µm'),
+            'entry2': QtWidgets.QLineEdit(placeholderText='µm')
+        }
+        
+        # Default values
+        self.assignDefaults()
+        
+        # Add the columns to the widget
+        for i in self.columns:
+            layout.addWidget(self.columns[i])
+        
+    def assignDefaults(self):
+        self.columns['condition'].addItems(SC.allConditions)
+        self.columns['condition'].currentIndexChanged['QString'].connect(self.setConditionElements)
+        self.columns['condition'].setMinimumWidth(100)
+        self.columns['onElement'].setMinimumWidth(90)
+        self.columns['entry1'].setMinimumWidth(40)
+        self.columns['entry2'].setMinimumWidth(40)
+        self.setConditionElements("w(0)")
+        
+    def setConditionElements(self, condition):
+        eList, vList, not_vList = window.cavity.optionMenuLists()
+        self.columns['onElement'].clear()
+        if condition == "w(0)":
+            self.columns['onElement'].addItem(eList[0])
+            self.columns['onElement'].setDisabled(True)
+            self.columns['entry1'].setPlaceholderText('µm')
+            self.columns['entry2'].setPlaceholderText('µm')
+        elif condition == "w(element)":
+            self.columns['onElement'].addItems(not_vList)
+            self.columns['onElement'].setDisabled(False)
+            self.columns['entry1'].setPlaceholderText('µm')
+            self.columns['entry2'].setPlaceholderText('µm')
+        elif condition == "Waist":
+            self.columns['onElement'].addItems(vList)
+            self.columns['onElement'].setDisabled(False)
+            self.columns['entry1'].setPlaceholderText('mm')
+            self.columns['entry2'].setPlaceholderText('mm')
+        elif condition == "Cav. length":
+            self.columns['onElement'].addItem(eList[0])
+            self.columns['onElement'].setDisabled(True)
+            self.columns['entry1'].setPlaceholderText('mm')
+            self.columns['entry2'].setPlaceholderText('mm')
+            
+    # Mouse click events
+    def mousePressEvent(self, QMouseEvent):
+        # If shift is pressed...
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
+        if QMouseEvent.button() == QtCore.Qt.LeftButton:
+            self.setFocus()
+            # Save element as focused, add if mayus is pressed.
+            if modifiers == QtCore.Qt.ShiftModifier and self.conditionID is not None:
+                window.conditionFocus.append(self.conditionID)
+            elif modifiers == QtCore.Qt.ControlModifier:
+                # Remove focus
+                if self.conditionID in window.conditionFocus:
+                    window.conditionFocus.remove(self.conditionID)
+            else:
+                window.conditionFocus = [self.conditionID]
+                
+            # Change background
+            for element in window.cavity.conditionList:
+                if element['ID'] in window.conditionFocus:
+                    element['Widget'].setAutoFillBackground(True)
+                    element['Widget'].setBackgroundRole(QtGui.QPalette.AlternateBase)
+                else:
+                    element['Widget'].setAutoFillBackground(False)
+                    element['Widget'].setBackgroundRole(QtGui.QPalette.Base)
 
 #===============================================================================
 # Launching the program

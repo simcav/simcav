@@ -169,20 +169,21 @@ def q_propagation(M,q0):
     
 #%% ----------------------------------------------------------------------------
 # Calculate q at any dimensionless (z) element
-def q_element(q0, elementX, element_list):
+def q_element(q0, elementX, elementList):
     # Propagation from q0 to elementX.
-    # elementX is the itemnumber of the element in element_list
+    # elementX is an element in element_list
     
     # If elementX is a length element, stop function, return False
     #   Makes no sense to calculate the beam size for an element with
     #   a z dimension (in this case).
-    if elementX['isVector']:
-        return False
+    # if elementX['isVector']:
+    #     return False
+    # MOVE THIS CHECKING OUTSIDE THE FUNCTION
     
     qProp = []
     for proy in [0,1]:
         matrix = np.identity(2)
-        for element in element_list[1:elementX['Order']]:
+        for element in elementList[1:elementX['Order']]:
             matrix = np.dot(element['matrix'][proy],matrix)
         # Calculate q(x)
         q = q_propagation(matrix, q0[proy])

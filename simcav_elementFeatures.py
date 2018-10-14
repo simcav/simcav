@@ -84,7 +84,6 @@ def assign(elementType, entry1, entry2, refr_index=1.0):
         myDict['matrix'] = I
         myDict['refr_index'] = entry2
         
-        
     else:
         print(elementType)
         print('Error: Element does not exist.')

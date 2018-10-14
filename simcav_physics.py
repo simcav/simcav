@@ -1,13 +1,89 @@
 import numpy as np
+import itertools
 import simcav_elementFeatures as EF
 import simcav_ABCD as abcd
+import simcav_conditions as SC
 
 class cavity():
     def __init__(self):
         self.elementList = []
-        self.refractiveIndex = 1.0
+        self.conditionList = []
         self.numberOfElements = 0
         self.wl_mm = 0.001   # Default 1µm
+        
+    def addCondition(self, widget):
+        conditionDict = {
+            'ID': widget.conditionID,
+            'Widget': widget
+        }
+        self.conditionList.append(conditionDict)
+        
+    def delCondition(self, id):
+        # id should be a list of IDs
+        for condition in self.conditionList:
+            if condition['ID'] == id:
+                condition['Widget'].deleteLater()
+                self.conditionList.remove(condition)
+            
+    def calcSolutions(self, elementList, conditionList):
+        print('Calculating solutions')
+        for element in elementList:
+            myDict = {}
+            a = element['Widget'].readEntry('entry1')
+            b = element['Widget'].readEntry('entry2')
+            c = element['Widget'].readEntry('entry3')
+            myDict['vector'] = np.linspace(a, b, c)
+            element.update(myDict)
+            print(element)
+            
+        # Where the real magic starts
+        refr_index = 1.0
+        print('COMBINING')
+        combination_final = []
+        stablility_final = []
+        results_final = []
+        for combination in itertools.product(*[i['vector'] for i in elementList]):
+            for element, entry in zip(elementList, combination):
+                print(entry)
+                # Create matrix for each element
+                kind = element['Type']
+                e1 = entry
+                e2 = element['oldEntry2']
+                if kind == 'Custom element':
+                    pass
+                else:
+                    element.update(EF.assign(kind, e1, e2, refr_index))
+                    try:
+                        refr_index = element['refr_index']
+                    except:
+                        pass
+                        
+            # Calculate cavity matrix, for both saggital and tangential
+            cavityMatrix = []
+            cavityMatrix.append(self.calcCavityMatrix(elementList,0))
+            cavityMatrix.append(self.calcCavityMatrix(elementList,1))
+            # stable1 = SIMU.stabilitycalc(self.cav_matrix_tan)
+            # stable2 = SIMU.stabilitycalc(self.cav_matrix_sag)
+            # Before anything check stability
+            stability = self.stabilityValue(cavityMatrix)
+                
+            if stability[0] and stability[1]:
+                results = []
+                for condition in conditionsList:
+                    answer = SC.evalConditions(cavityMatrix, elementList, stability, conditionName, conditionAt, condStart, condEnd, self.wl_mm)
+                    #self.conditions_call[condition['condition_var'].get()](condition)
+                    if True:
+                        print('answer',answer)
+                    if not answer:
+                        pass
+                    else:
+                        results.append(answer)
+                if results:
+                    combination_final.append(combination)
+                    stablility_final.append(stability)
+                    results_final.append(results)
+            # Since this repeats for each different configuration, if it isnt stable nothing is done, y listo!
+        return combination_final, stablility_final, results_final
         
     def addElement(self, widget, icon, vector):
         elementDict = {
@@ -126,7 +202,6 @@ class cavity():
         self.q0 = []
         for matrix in cavityMatrix:
             self.q0.append(abcd.q_resonator(matrix))
-        print('q0 OK')
             
         # Calculate propagation through cavity, both proyections
         proy = 0
@@ -138,7 +213,6 @@ class cavity():
         self.z_sag = np.array(self.z_sag)
         self.wz_tan = np.array(self.wz_tan)
         self.wz_sag = np.array(self.wz_sag)
-        print('data OK')
         
         return True
         
@@ -243,7 +317,7 @@ class cavity():
         side1 = self.elementList[0]["Type"]
         side2 = self.elementList[-1]["Type"]
 
-        if "Mirror" in (side1 and side2):
+        if "Mirror" in side1 and "Mirror" in side2:
             return True
         else:
             return False
@@ -321,7 +395,7 @@ class cavity():
         return M_cav
         
     #%% ----------------- Propagation calculation ------------------------------    
-    def propagation(self, E_list, q0, wl, proy, chivato=True):    
+    def propagation(self, E_list, q0, wl, proy, chivato=False):    
         # Propagation
         zmax = 0
         z = []
@@ -332,7 +406,7 @@ class cavity():
         z_names = []
         
         # Debugging ----------------------------------------
-        show_n = True   
+        show_n = False
         if chivato:
             print('Im in cavity.propagation. For loop through elements:')
         if show_n:
@@ -514,6 +588,5 @@ class cavity():
                 z_names.append(element['Type'])
                 
             else:
-                print(element['Type'])
-                print('Element not available!')
+                print('Element ' + element['Type'] + ' not available!')
         return z, wz, z_limits, z_names
