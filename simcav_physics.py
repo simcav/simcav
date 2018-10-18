@@ -34,17 +34,25 @@ class cavity():
             c = element['Widget'].readEntry('entry3')
             myDict['vector'] = np.linspace(a, b, c)
             element.update(myDict)
-            print(element)
             
+        iterElements = []
+        for element in elementList:
+            if len(element['vector']) > 1:
+                name = str(element['Order']) + ' ' + element['Type']
+                iterElements.append(name)
+        # If there arent any changing elements
+        if not iterElements:
+            for element in elementList:
+                name = element['Type']
+                iterElements.append(name)
+                
         # Where the real magic starts
         refr_index = 1.0
-        print('COMBINING')
         combination_final = []
         stablility_final = []
         results_final = []
         for combination in itertools.product(*[i['vector'] for i in elementList]):
             for element, entry in zip(elementList, combination):
-                print(entry)
                 # Create matrix for each element
                 kind = element['Type']
                 e1 = entry
@@ -71,24 +79,30 @@ class cavity():
                 results = []
                 for condition in conditionList:
                     conditionName = str(condition['Widget'].columns['condition'].currentText())
-                    conditionAt = condition['Widget'].columns['onElement'].currentIndex()
+                    if conditionName in ["Stability", "Cav. length"]:
+                        conditionAt = None
+                        conditionAtNumber = None
+                    else:
+                        conditionAt = condition['Widget'].columns['onElement'].currentText()
+                        conditionAt = int(conditionAt[0])
+                        conditionAtNumber = condition['Widget'].columns['onElement'].currentIndex()
                     condStart = condition['Widget'].readEntry('entry1')
                     condEnd = condition['Widget'].readEntry('entry2')
-                    print(conditionName, conditionAt, condStart, condEnd)
-                    answer = SC.evalConditions(cavityMatrix, elementList, stability, conditionName, conditionAt, condStart, condEnd, self.wl_mm)
-                    #self.conditions_call[condition['condition_var'].get()](condition)
-                    if True:
-                        print('answer',answer)
+                    
+                    answer = SC.evalConditions(cavityMatrix, elementList, stability, conditionName, conditionAt, conditionAtNumber, condStart, condEnd, self.wl_mm)
+                    
                     if not answer:
-                        pass
+                        print('No valid answer')
                     else:
                         results.append(answer)
+                        
                 if results:
+                    print('We have results!')
                     combination_final.append(combination)
                     stablility_final.append(stability)
                     results_final.append(results)
-            # Since this repeats for each different configuration, if it isnt stable nothing is done, y listo!
-        return combination_final, stablility_final, results_final
+            # Since this repeats for each different configuration, if it isn't stable nothing is done, y listo!
+        return iterElements, combination_final, stablility_final, results_final
         
     def addElement(self, widget, icon, vector):
         elementDict = {
@@ -210,9 +224,9 @@ class cavity():
             
         # Calculate propagation through cavity, both proyections
         proy = 0
-        self.z_tan, self.wz_tan, self.z_limits_tan, self.z_names_tan = self.propagation(self.elementList, self.q0[proy], self.wl_mm, proy)
+        self.z_tan, self.wz_tan, self.z_limits_tan, self.z_names_tan = abcd.propagation(self.elementList, self.q0[proy], self.wl_mm, proy)
         proy = 1
-        self.z_sag, self.wz_sag, self.z_limits_sag, self.z_names_sag = self.propagation(self.elementList, self.q0[proy], self.wl_mm, proy)
+        self.z_sag, self.wz_sag, self.z_limits_sag, self.z_names_sag = abcd.propagation(self.elementList, self.q0[proy], self.wl_mm, proy)
         
         self.z_tan = np.array(self.z_tan)
         self.z_sag = np.array(self.z_sag)
@@ -398,200 +412,3 @@ class cavity():
         for element in E_list[len(E_list)-2::-1]:
             M_cav = np.dot(element['matrix'][proy],M_cav)
         return M_cav
-        
-    #%% ----------------- Propagation calculation ------------------------------    
-    def propagation(self, E_list, q0, wl, proy, chivato=False):    
-        # Propagation
-        zmax = 0
-        z = []
-        wz = []
-        
-        # To draw limiting lines for each element
-        z_limits = []
-        z_names = []
-        
-        # Debugging ----------------------------------------
-        show_n = False
-        if chivato:
-            print('Im in cavity.propagation. For loop through elements:')
-        if show_n:
-            print(' ')
-            print('Refractive index')
-        #---------------------------------------------------
-        
-        refr_index_global = 1.0 
-          
-        for element in E_list:
-            # Some debugging
-            if chivato:
-                print(element['Type'])
-            
-            # ------------------- Mirror -------------------
-            if (
-                (element['Type']=="Flat Mirror") or 
-                (element['Type']=="Curved Mirror") or 
-                (element['Type']=="Thin Lens") or
-                (element['Type']=="Flat Interface") or
-                (element['Type']=="Curved Interface") or
-                (element['Type']=="Custom Element") ):
-                
-                # Calculate complex beam parameter (q)
-                q = abcd.q_propagation(element['matrix'][proy],q0)
-                q0 = q
-                
-                # Modify refractive index of the medium
-                if 'refr_index' in element.keys():
-                    refr_index_global = element['refr_index']
-                if show_n:
-                    print(element['Type'],refr_index_global)
-                            
-                # Some debugging
-                if chivato:
-                    print('Imag(q)',np.imag(q))
-                    
-                # Add mirror position
-                try:
-                    z_limits.append(z_limits[-1])
-                    z_names.append(element['Type'])
-                except:
-                    z_limits.append(0)
-                    z_names.append(element['Type'])
-                #if z:
-                #    plt.vlines(z[-1][-1],0,1)
-            
-            # ------------------- Distance -------------------            
-            elif element['Type']=="Distance":
-                aux_vector = np.linspace(0,element['distance'],num=100)
-                z.append(aux_vector+zmax)
-                zmax = zmax + max(aux_vector)
-                q = q0 + aux_vector
-                q0 = q[-1]
-                w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
-                wz.append(w)
-                
-                # Modify refractive index of the medium
-                refr_index_global = element['refr_index']
-                
-                if show_n:
-                    print(element['Type'],refr_index_global)
-                    
-                # Add finish position.
-                z_limits.append(zmax)
-                z_names.append('')
-            
-            # ------------------- Block -------------------
-            elif element['Type']=="Block":
-                # Block divided in interface - distance - interface
-                # First interface
-                I = abcd.flat_interface(refr_index_global,element['refr_index'])
-                q = abcd.q_propagation(I[proy],q0)
-                q0 = q
-                # Some debugging
-                if chivato:
-                    print('Imag(q)',np.imag(q))
-                
-                # Distance
-                aux_vector = np.linspace(0,element['distance'],num=100)
-                z.append(aux_vector+zmax)
-                zmax = zmax + max(aux_vector)
-                q = q0 + aux_vector
-                q0 = q[-1]
-                w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
-                wz.append(w)
-                
-                # Second interface
-                I = abcd.flat_interface(element['refr_index'], refr_index_global)
-                q = abcd.q_propagation(I[proy],q0)
-                q0 = q
-                # Some debugging
-                if chivato:
-                    print('Imag(q)',np.imag(q))
-                
-                if show_n:
-                    print(element['Type'],refr_index_global)
-                    
-                # Add finish position.
-                z_limits.append(zmax)
-                z_names.append(element['Type'])
-                
-            # ------------------- Brewster Plate -------------------
-            elif element['Type']=="Brewster Plate":
-                # Block divided in interface - distance - interface
-                # First interface
-                I = abcd.flat_interface_br(refr_index_global,element['refr_index'])
-                q = abcd.q_propagation(I[proy],q0)
-                q0 = q
-                # Some debugging
-                if chivato:
-                    print('Imag(q)',np.imag(q))
-                
-                # Distance
-                thi = np.arctan(element['refr_index']/refr_index_global)    
-                thr = np.arcsin( refr_index_global*np.sin(thi) / element['refr_index'] )    
-                d_temp = element['distance'] / np.cos(thr)
-                
-                aux_vector = np.linspace(0,d_temp,num=100)
-                z.append(aux_vector+zmax)
-                zmax = zmax + max(aux_vector)
-                q = q0 + aux_vector
-                q0 = q[-1]
-                w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
-                if proy == 0:
-                    w = w/element['refr_index']
-                wz.append(w)
-                
-                # Second interface
-                I = abcd.flat_interface_br(element['refr_index'], refr_index_global)
-                q = abcd.q_propagation(I[proy],q0)
-                q0 = q
-                # Some debugging
-                if chivato:
-                    print('Imag(q)',np.imag(q))
-                
-                if show_n:
-                    print(element['Type'],refr_index_global)
-                    
-                # Add finish position.
-                z_limits.append(zmax)
-                z_names.append(element['Type'])
-            
-            # ------------------- Brewster Crystal -------------------
-            elif element['Type']=="Brewster Crystal":
-                # Block divided in interface - distance - interface
-                # First interface
-                I = abcd.flat_interface_br(refr_index_global,element['refr_index'])
-                q = abcd.q_propagation(I[proy],q0)
-                q0 = q
-                # Some debugging
-                if chivato:
-                    print('Imag(q)',np.imag(q))
-                
-                # Distance
-                aux_vector = np.linspace(0,element['distance'],num=100)
-                z.append(aux_vector+zmax)
-                zmax = zmax + max(aux_vector)
-                q = q0 + aux_vector
-                q0 = q[-1]
-                w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
-                if proy == 0:
-                    w = w/element['refr_index']
-                wz.append(w)
-                
-                # Second interface
-                I = abcd.flat_interface_br(element['refr_index'], refr_index_global)
-                q = abcd.q_propagation(I[proy],q0)
-                q0 = q
-                # Some debugging
-                if chivato:
-                    print('Imag(q)',np.imag(q))
-                
-                if show_n:
-                    print(element['Type'],refr_index_global)
-                    
-                # Add finish position.
-                z_limits.append(zmax)
-                z_names.append(element['Type'])
-                
-            else:
-                print('Element ' + element['Type'] + ' not available!')
-        return z, wz, z_limits, z_names

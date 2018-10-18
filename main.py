@@ -490,16 +490,27 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
             myDict = {'ID': item.itemID, 'Widget': item, 'Type': element['Type'], 'Order': element['Order'], 'oldEntry1': element['entry1'], 'oldEntry2': element['entry2']}
             self.designerElements.append(myDict)
+            
+        # Add Stability condition
+        self.handle_button_conditionAdd(disableWidget=True)
         
     def tab_designer_destruction(self):
         layout = self.designerListLayout
         while layout.count():
             child = layout.takeAt(0)
             if child.widget():
-                child.widget().deleteLater()   
+                child.widget().deleteLater()
+        layout = self.designerConditionsLayout
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+        self.conditionList = []
         
-    def handle_button_conditionAdd(self):
+    def handle_button_conditionAdd(self, disableWidget=False):
         item = ConditionWidget()
+        if disableWidget:
+            item.setDisabled(True)
         self.designerConditionsLayout.addWidget(item)
         self.cavity.addCondition(item)
         
@@ -512,19 +523,22 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clearLayout(self.designerSolutionsLayout)
         elementList = self.cavity.elementList
         conditionList = self.cavity.conditionList
-        self.solutionsBox = SD.SolutionsTab(elementList, conditionList)
+        self.solutionsBox = SD.SolutionsTab()
         self.designerSolutionsLayout.addWidget(self.solutionsBox)
         self.tabWidget_plots.setCurrentIndex(4)
         
         designerList = self.designerElements
-        combination, stablility, results = self.cavity.calcSolutions(designerList, conditionList)
+        iterElements, combination, stablility, results = self.cavity.calcSolutions(designerList, conditionList)
         
         if results:
-            self.presentResults(self.solutionsBox, combination, stablility, results)
+            self.presentResults(self.solutionsBox, iterElements, elementList, conditionList, combination, stablility, results)
             
-    def presentResults(self, theBox, combination, stablility, results):
-        for i in range(0,len(results)-1):
-            theBox.addRow(combination[i], stablility[i], results[i])    
+    def presentResults(self, theBox, iterElements, elementList, conditionList, combination, stablility, results):        
+        # Headers
+        theBox.addHeaders(iterElements, conditionList)
+        # Results
+        for i, j in enumerate(results):
+            theBox.addRow(combination[i], stablility[i], results[i], conditionList)    
         
         
     def setWavelength(self):
@@ -1164,11 +1178,13 @@ class ConditionWidget(QtWidgets.QWidget):
         self.columns['onElement'].setMinimumWidth(90)
         self.columns['entry1'].setMinimumWidth(40)
         self.columns['entry2'].setMinimumWidth(40)
-        self.setConditionElements("w(0)")
+        self.setConditionElements("Stability")
         
     def setConditionElements(self, condition):
         eList, vList, not_vList = window.cavity.optionMenuLists()
         self.columns['onElement'].clear()
+        self.columns['entry1'].clear()
+        self.columns['entry2'].clear()
         if condition == "w(0)":
             self.columns['onElement'].addItem(eList[0])
             self.columns['onElement'].setDisabled(True)
@@ -1182,16 +1198,26 @@ class ConditionWidget(QtWidgets.QWidget):
         elif condition == "Waist":
             self.columns['onElement'].addItems(vList)
             self.columns['onElement'].setDisabled(False)
-            self.columns['entry1'].setPlaceholderText('mm')
-            self.columns['entry2'].setPlaceholderText('mm')
+            self.columns['entry1'].setPlaceholderText('µm')
+            self.columns['entry2'].setPlaceholderText('µm')
         elif condition == "Cav. length":
-            self.columns['onElement'].addItem(eList[0])
+            #self.columns['onElement'].addItem(eList[0])
             self.columns['onElement'].setDisabled(True)
             self.columns['entry1'].setPlaceholderText('mm')
             self.columns['entry2'].setPlaceholderText('mm')
+        elif condition == "Stability":
+            #self.columns['onElement'].addItem(eList[0])
+            self.columns['onElement'].setDisabled(True)
+            self.columns['entry1'].setText('0')
+            self.columns['entry2'].setText('1')
             
     # Mouse click events
     def mousePressEvent(self, QMouseEvent):
+        # Do nothing if widget is disabled:
+        if not self.isEnabled:
+            print('Widget disabled')
+            QMouseEvent.ignore()
+            return False
         # If shift is pressed...
         modifiers = QtWidgets.QApplication.keyboardModifiers()
         if QMouseEvent.button() == QtCore.Qt.LeftButton:

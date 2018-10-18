@@ -11,14 +11,11 @@ This suit includes several functions such as:
  
 **This program uses milimeter (mm) as the standart unit for input and output.
 
-The returns of the functions are lists of 2 elements: tangential and sagital matrix.#
+The returns of the functions are lists of 2 elements: tangential and sagital matrix.
 
 
 Tangential plane refers to the plane parallel to the optical table (horizontal).
 Sagittal plane is perpendicular to the tangential plane (vertical).
-
-
-The matrixes this file gives have been reviewed at 03/2016.
 """
 
 #%%
@@ -192,7 +189,204 @@ def q_element(q0, elementX, elementList):
 
 #%% ----------------------------------------------------------------------------
 # Calculate R(q) and w(q) (in mm)
-def r_w(q,wl,n):
+def r_w(q, wl, n):
     R = 1/np.real(1/q)
     w = np.sqrt(-wl/(np.pi*n*np.imag(1/q)))
     return R, w
+    
+#%% ----------------- Propagation calculation ------------------------------    
+def propagation(E_list, q0, wl, proy, chivato=False):    
+    # Propagation
+    zmax = 0
+    z = []
+    wz = []
+    
+    # To draw limiting lines for each element
+    z_limits = []
+    z_names = []
+    
+    # Debugging ----------------------------------------
+    show_n = False
+    if chivato:
+        print('Im in cavity.propagation. For loop through elements:')
+    if show_n:
+        print(' ')
+        print('Refractive index')
+    #---------------------------------------------------
+    
+    refr_index_global = 1.0 
+      
+    for element in E_list:
+        # Some debugging
+        if chivato:
+            print(element['Type'])
+        
+        # ------------------- Mirror -------------------
+        if (
+            (element['Type']=="Flat Mirror") or 
+            (element['Type']=="Curved Mirror") or 
+            (element['Type']=="Thin Lens") or
+            (element['Type']=="Flat Interface") or
+            (element['Type']=="Curved Interface") or
+            (element['Type']=="Custom Element") ):
+            
+            # Calculate complex beam parameter (q)
+            q = q_propagation(element['matrix'][proy],q0)
+            q0 = q
+            
+            # Modify refractive index of the medium
+            if 'refr_index' in element.keys():
+                refr_index_global = element['refr_index']
+            if show_n:
+                print(element['Type'],refr_index_global)
+                        
+            # Some debugging
+            if chivato:
+                print('Imag(q)',np.imag(q))
+                
+            # Add mirror position
+            try:
+                z_limits.append(z_limits[-1])
+                z_names.append(element['Type'])
+            except:
+                z_limits.append(0)
+                z_names.append(element['Type'])
+            #if z:
+            #    plt.vlines(z[-1][-1],0,1)
+        
+        # ------------------- Distance -------------------            
+        elif element['Type']=="Distance":
+            aux_vector = np.linspace(0,element['distance'],num=100)
+            z.append(aux_vector+zmax)
+            zmax = zmax + max(aux_vector)
+            q = q0 + aux_vector
+            q0 = q[-1]
+            w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
+            wz.append(w)
+            
+            # Modify refractive index of the medium
+            refr_index_global = element['refr_index']
+            
+            if show_n:
+                print(element['Type'],refr_index_global)
+                
+            # Add finish position.
+            z_limits.append(zmax)
+            z_names.append('')
+        
+        # ------------------- Block -------------------
+        elif element['Type']=="Block":
+            # Block divided in interface - distance - interface
+            # First interface
+            I = flat_interface(refr_index_global,element['refr_index'])
+            q = q_propagation(I[proy],q0)
+            q0 = q
+            # Some debugging
+            if chivato:
+                print('Imag(q)',np.imag(q))
+            
+            # Distance
+            aux_vector = np.linspace(0,element['distance'],num=100)
+            z.append(aux_vector+zmax)
+            zmax = zmax + max(aux_vector)
+            q = q0 + aux_vector
+            q0 = q[-1]
+            w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
+            wz.append(w)
+            
+            # Second interface
+            I = flat_interface(element['refr_index'], refr_index_global)
+            q = q_propagation(I[proy],q0)
+            q0 = q
+            # Some debugging
+            if chivato:
+                print('Imag(q)',np.imag(q))
+            
+            if show_n:
+                print(element['Type'],refr_index_global)
+                
+            # Add finish position.
+            z_limits.append(zmax)
+            z_names.append(element['Type'])
+            
+        # ------------------- Brewster Plate -------------------
+        elif element['Type']=="Brewster Plate":
+            # Block divided in interface - distance - interface
+            # First interface
+            I = flat_interface_br(refr_index_global,element['refr_index'])
+            q = q_propagation(I[proy],q0)
+            q0 = q
+            # Some debugging
+            if chivato:
+                print('Imag(q)',np.imag(q))
+            
+            # Distance
+            thi = np.arctan(element['refr_index']/refr_index_global)    
+            thr = np.arcsin( refr_index_global*np.sin(thi) / element['refr_index'] )    
+            d_temp = element['distance'] / np.cos(thr)
+            
+            aux_vector = np.linspace(0,d_temp,num=100)
+            z.append(aux_vector+zmax)
+            zmax = zmax + max(aux_vector)
+            q = q0 + aux_vector
+            q0 = q[-1]
+            w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
+            if proy == 0:
+                w = w/element['refr_index']
+            wz.append(w)
+            
+            # Second interface
+            I = flat_interface_br(element['refr_index'], refr_index_global)
+            q = q_propagation(I[proy],q0)
+            q0 = q
+            # Some debugging
+            if chivato:
+                print('Imag(q)',np.imag(q))
+            
+            if show_n:
+                print(element['Type'],refr_index_global)
+                
+            # Add finish position.
+            z_limits.append(zmax)
+            z_names.append(element['Type'])
+        
+        # ------------------- Brewster Crystal -------------------
+        elif element['Type']=="Brewster Crystal":
+            # Block divided in interface - distance - interface
+            # First interface
+            I = flat_interface_br(refr_index_global,element['refr_index'])
+            q = q_propagation(I[proy],q0)
+            q0 = q
+            # Some debugging
+            if chivato:
+                print('Imag(q)',np.imag(q))
+            
+            # Distance
+            aux_vector = np.linspace(0,element['distance'],num=100)
+            z.append(aux_vector+zmax)
+            zmax = zmax + max(aux_vector)
+            q = q0 + aux_vector
+            q0 = q[-1]
+            w = np.sqrt(-wl/(np.pi*element['refr_index']*np.imag(1/q)))
+            if proy == 0:
+                w = w/element['refr_index']
+            wz.append(w)
+            
+            # Second interface
+            I = flat_interface_br(element['refr_index'], refr_index_global)
+            q = q_propagation(I[proy],q0)
+            q0 = q
+            # Some debugging
+            if chivato:
+                print('Imag(q)',np.imag(q))
+            
+            if show_n:
+                print(element['Type'],refr_index_global)
+                
+            # Add finish position.
+            z_limits.append(zmax)
+            z_names.append(element['Type'])
+            
+        else:
+            print('Element ' + element['Type'] + ' not available!')
+    return z, wz, z_limits, z_names
