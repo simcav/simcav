@@ -222,7 +222,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tab_designer_destruction()
         elif tab == 1:
             # Going into designer, create items
-            self.tab_designer_creation()
+            if not self.tab_designer_creation():
+                self.tabWidget_controls.setCurrentIndex(0)
+                
              
     # End Other GUI stuff
     #===========================================================================
@@ -477,7 +479,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         #self.slider.setSliderPosition(spinbox_value)
         pass
         
-    def tab_designer_creation(self):            
+    def tab_designer_creation(self):
+        # First of all actually build the cavity (and check for errors)
+        if not self.handle_button_calcCavity():
+            return False
         layout = self.designerListLayout
         #self.scrollArea_computation.
         self.designerElements = []
@@ -493,6 +498,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
         # Add Stability condition
         self.handle_button_conditionAdd(disableWidget=True)
+        return True
         
     def tab_designer_destruction(self):
         layout = self.designerListLayout
@@ -505,7 +511,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             child = layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-        self.conditionList = []
+        self.cavity.conditionList = []
+        return True
         
     def handle_button_conditionAdd(self, disableWidget=False):
         item = ConditionWidget()
