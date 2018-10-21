@@ -7,7 +7,6 @@ from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2
 from matplotlib.figure import Figure
 from matplotlib.patches import Ellipse
 
-
 # Other modules
 import math
 import numpy as np
@@ -19,6 +18,7 @@ import load_icons as LI
 import simcav_physics as SP
 import simcav_designer as SD
 import simcav_conditions as SC
+import simcav_statusBar as sBar
 
 #===============================================================================
 # Creating the GUI
@@ -30,6 +30,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
+        self.setStyleSheet(open('style_main.css').read())
         
         
         self.setupUi(self)
@@ -99,6 +100,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Counting elements
         self.numberOfElements = 0
         dummy, self.savedMD5 = self.constructSavingList()
+        
+        self.wlLabel = sBar.init_statusBar(self.statusBar, self.cavity.wl_mm)
     # End INIT
     #===========================================================================
     
@@ -117,6 +120,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolBar.addWidget(self.wlBox)
         self.toolBar.addWidget(wlUnitsLabel)
         
+        # Add property to "calculate!" buttons to CSS them
+        self.button_calcCavity.setProperty('calculate', True)
+        # THIS ISNT WORKING, COULD DELETE
+                
         # Int validator
         self.validatorInt = QtGui.QIntValidator()
         # Float validator
@@ -151,7 +158,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tab_beamSize.layout().addWidget(self.beamsizePlot_toolbar)
         
         # crossSection tab
-        self.crossSectionPlot = PlotCanvas(xlabel='Saggital (µm)', ylabel='Tangential (µm)')
+        self.crossSectionPlot = PlotCanvas(xlabel='Tangential (µm)', ylabel='Saggital (µm)')
         self.crossSectionPlot_toolbar = NavigationToolbar(self.crossSectionPlot, self)
         self.tab_crossSection.layout().addWidget(self.crossSectionPlot)
         self.tab_crossSection.layout().addWidget(self.crossSectionPlot_toolbar)
@@ -553,6 +560,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         wl_mm = wl_nm/1E6
         if wl_mm != self.cavity.wl_mm:
             self.cavity.wl_mm = wl_mm
+            sBar.updateWavelength(self.wlLabel, wl_mm*1E6)
         
     ############################################################################
     # Move Up

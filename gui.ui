@@ -18,11 +18,29 @@
     <normaloff>Icons/logo-tg3.png</normaloff>Icons/logo-tg3.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="1">
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
+    <property name="leftMargin">
+     <number>9</number>
+    </property>
+    <property name="topMargin">
+     <number>9</number>
+    </property>
+    <property name="rightMargin">
+     <number>9</number>
+    </property>
+    <property name="bottomMargin">
+     <number>9</number>
+    </property>
+    <item row="1" column="1">
      <widget class="QScrollArea" name="scroll_cavityIcons">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -30,7 +48,7 @@
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>35</height>
+        <height>50</height>
        </size>
       </property>
       <property name="maximumSize">
@@ -38,6 +56,9 @@
         <width>16777215</width>
         <height>50</height>
        </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 255);</string>
       </property>
       <property name="verticalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -63,7 +84,7 @@
       </widget>
      </widget>
     </item>
-    <item row="1" column="1">
+    <item row="0" column="1">
      <widget class="QTabWidget" name="tabWidget_plots">
       <property name="enabled">
        <bool>true</bool>
@@ -72,7 +93,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -320,7 +341,7 @@
          <number>0</number>
         </property>
         <property name="bottomMargin">
-         <number>1</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="QScrollArea" name="scrollArea_solutions">
@@ -739,6 +760,18 @@
             </disabled>
            </palette>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -747,8 +780,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>805</width>
-             <height>696</height>
+             <width>807</width>
+             <height>699</height>
             </rect>
            </property>
           </widget>
@@ -773,9 +806,15 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
-      <widget class="QWidget" name="tab_cavity">
+      <property name="elideMode">
+       <enum>Qt::ElideNone</enum>
+      </property>
+      <property name="usesScrollButtons">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="tab_cavityControl">
        <attribute name="title">
         <string>Cavity</string>
        </attribute>
@@ -835,6 +874,9 @@
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 255, 255);</string>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -847,14 +889,14 @@
              <x>0</x>
              <y>0</y>
              <width>296</width>
-             <height>429</height>
+             <height>434</height>
             </rect>
            </property>
            <property name="layoutDirection">
             <enum>Qt::LeftToRight</enum>
            </property>
            <property name="autoFillBackground">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </widget>
@@ -921,11 +963,7 @@
            <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>Icons/cavity_go1.png</normaloff>Icons/cavity_go1.png</iconset>
+           <string>CALCULATE!</string>
           </property>
           <property name="iconSize">
            <size>
@@ -946,8 +984,26 @@
         </item>
         <item>
          <layout class="QFormLayout" name="formLayout_elementButtons">
+          <property name="formAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <property name="horizontalSpacing">
+           <number>10</number>
+          </property>
           <item row="0" column="0">
            <widget class="QPushButton" name="button_flatMirror">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -963,25 +1019,20 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="button_curvedMirror">
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>Icons/e_curved_mirror.png</normaloff>Icons/e_curved_mirror.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>120</width>
-              <height>30</height>
-             </size>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="button_distance">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -999,6 +1050,18 @@
           </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="button_block">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1016,6 +1079,18 @@
           </item>
           <item row="2" column="0">
            <widget class="QPushButton" name="button_brewsterPlate">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1033,6 +1108,18 @@
           </item>
           <item row="2" column="1">
            <widget class="QPushButton" name="button_brewsterCrystal">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1050,6 +1137,18 @@
           </item>
           <item row="3" column="0">
            <widget class="QPushButton" name="button_flatInterface">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1067,6 +1166,18 @@
           </item>
           <item row="3" column="1">
            <widget class="QPushButton" name="button_curvedInterface">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1084,6 +1195,18 @@
           </item>
           <item row="4" column="0">
            <widget class="QPushButton" name="button_thinLens">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1101,12 +1224,56 @@
           </item>
           <item row="4" column="1">
            <widget class="QPushButton" name="button_customElement">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
             </property>
             <property name="icon">
              <iconset>
               <normaloff>Icons/e_custom_element.png</normaloff>Icons/e_custom_element.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>120</width>
+              <height>30</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="button_curvedMirror">
+            <property name="minimumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>142</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Icons/e_curved_mirror.png</normaloff>Icons/e_curved_mirror.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -1285,6 +1452,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 255, 255);</string>
+          </property>
           <property name="frameShadow">
            <enum>QFrame::Plain</enum>
           </property>
@@ -1306,7 +1476,7 @@
              <x>0</x>
              <y>0</y>
              <width>296</width>
-             <height>429</height>
+             <height>434</height>
             </rect>
            </property>
           </widget>
@@ -1411,6 +1581,9 @@
             <height>179</height>
            </size>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 255, 255);</string>
+          </property>
           <property name="horizontalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOff</enum>
           </property>
@@ -1480,11 +1653,7 @@
            <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>Icons/cavity_go1.png</normaloff>Icons/cavity_go1.png</iconset>
+           <string>CALCULATE!</string>
           </property>
           <property name="iconSize">
            <size>
@@ -1547,7 +1716,7 @@
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>

@@ -186,15 +186,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.23891"
-     inkscape:cx="342.70677"
-     inkscape:cy="882.9322"
+     inkscape:cx="345.93541"
+     inkscape:cy="556.8391"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="mm"
      inkscape:window-width="1280"
      inkscape:window-height="996"
-     inkscape:window-x="0"
+     inkscape:window-x="3200"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      showguides="false"
@@ -314,5 +314,19 @@
          y="37.060253"
          style="fill:#32cd32;fill-opacity:1;stroke-width:0.26458332;"
          id="tspan923">results-alternative</tspan></text>
+    <rect
+       style="opacity:1;fill:#005200;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.11666656;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+       id="rect905"
+       width="52.963223"
+       height="15.803542"
+       x="11.318753"
+       y="171.85301" />
+    <rect
+       y="193.0197"
+       x="11.318753"
+       height="15.803542"
+       width="52.963223"
+       id="rect907"
+       style="opacity:1;fill:#009f00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.11666656;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill" />
   </g>
 </svg>

@@ -1,1 +1,98 @@
+import QtQuick 2.0
+import QtQuick.Controls 2.1
+import QtQuick.Controls.Material 2.1
+
+
+/*
+
+GOOD REFERENCE
+http://doc.qt.io/qt-5/style-reference.html
+
+
+simcav-green = #005200
+simcav-green-light = #009f00
+
+stability             = #e0ffff = rgb(152, 251, 153)
+stability-alternative = #afeeef = rgb(50, 205, 50)
+
+results = #98fb99
+results-alternative = #32cd32
+
+cell = #ffffff
+cell-alternative = #f9f0e6
+*/
+
 QLineEdit[readOnly="true"] { color: gray }
+
+/* QWidget {
+  background-color: white;
+} */
+
+ApplicationWindow {
+  visible: true
+  Material.theme: Material.Dark;
+  Material.accent: Material.Purple;
+  /* background-color: white; */
+}
+
+/* QMainWindow {
+  background-color: white;
+} */
+
+
+
+
+/* QMenuBar {
+  color: white;
+  background-color: black;
+} */
+/* QMenu {
+  color: black;
+  background-color: #84ff84;
+} */
+
+
+
+/* QToolBar {
+  background-color: white;
+} */
+
+
+
+
+/* QPushButton#button_calcCavity, QPushButton#button_calcSolutions {
+  color: #005200;
+  background-color: white;
+  font: bold 18px;
+  padding: 6px;
+}
+QPushButton#button_calcCavity:hover {
+  color: white;
+  background-color: #009f00;
+  font: bold 18px;
+  padding: 6px;
+}
+QPushButton#button_calcCavity:pressed {
+  color: white;
+  background-color: #005200;
+  font: bold 18px;
+  padding: 6px;
+} */
+
+/* #cavityIconsLayout {
+  background-color: #005200;
+} */
+
+/* QFormLayout#formLayout_elementButtons > * {
+  background-color: red;
+} */
+
+QTabWidget {
+  background-color: white;
+}
+
+
+
+QStatusBar {
+  background: #98fb99
+}
