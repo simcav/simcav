@@ -2024,7 +2024,8 @@ class MainApplication(tk.Frame):
                         self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.gitlab.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
                     else:
                         self.warningbar.warbar_message('A new version is available at https://simcav.gitlab.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
-                    self.toolbar.toolbar_buttons['f_button_update'].config(state="normal")
+                    # PORTABLE VERSION DOESN'T UPDATE
+                    # self.toolbar.toolbar_buttons['f_button_update'].config(state="normal")
                 error = 0
             elif versiondata.status_code == requests.codes.not_found:
                 self.warningbar.warbar_message('Unable to retrieve online information about version, please try again later.', 'firebrick')
