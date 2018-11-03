@@ -48,7 +48,7 @@ Self contained version of SimCav including the Python interpreter. Simply downlo
 ## Running the source code
 The main file is simcav_main.py. Of course the rest of the source files are also needed. 
 You need Python 3.x installed in your computer. 
-Due to changes in the Matplotlib libraries that are not backwards compatible, you need at least version 1.5 of Matplotlib. 
+Due to changes in the Matplotlib libraries that are not backwards compatible, you need at least version 2.2 of Matplotlib. 
 
 
 ## Contact

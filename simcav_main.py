@@ -28,7 +28,7 @@ import webbrowser       # To open webbrowser
 # Imports for plotting
 import matplotlib
 matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib.pyplot as plt
 
 # Hide matplotlib deprecation warnings
@@ -174,11 +174,11 @@ class Toolbar(tk.Frame):
         master.physics.element_list = []
         # Delete plots
         master.framecentral.cavityplot.figureplot.clear()
-        master.framecentral.cavityplot.canvas.show()
+        master.framecentral.cavityplot.canvas.draw()
         for i in master.framecentral.__dict__:
             if i in ['stabilityplot', 'beamsizeplot']:
                 master.framecentral.__dict__[i].plotframe.figureplot.clear()
-                master.framecentral.__dict__[i].plotframe.canvas.show()
+                master.framecentral.__dict__[i].plotframe.canvas.draw()
         # Call modify frame
         master.toolbar.func_button_add()
         master.warningbar.warbar_message('New cavity  --  Adding elements...', 'lawn green')
@@ -416,7 +416,7 @@ class Physics():
         else:
             master.framecentral.cavityplot.plot(1, 1, 1, 1)
             master.framecentral.cavityplot.figureplot.clear()
-            master.framecentral.cavityplot.canvas.show()
+            master.framecentral.cavityplot.canvas.draw()
             if not self.closed:
                 master.warningbar.warbar_message('Mirrors needed at the sides of the cavity!', 'firebrick')
             elif not self.nozeros:
@@ -845,7 +845,7 @@ class Centralplot(tk.Frame):
         self.canvas.get_tk_widget().pack(side='bottom', fill='x', expand=1)
         self.canvas.get_tk_widget().configure(bg='white', bd=0, highlightthickness=0)
         self.canvas._tkcanvas.pack(side='top', fill='both', expand=1)
-        self.figuretoolbar = NavigationToolbar2TkAgg(self.canvas, self)
+        self.figuretoolbar = NavigationToolbar2Tk(self.canvas, self)
         self.figuretoolbar.configure(bg='white')
         self.figuretoolbar.update()
 
@@ -864,7 +864,7 @@ class Centralplot(tk.Frame):
 
         self.figureplot.set_xlabel(xaxis)
         self.figureplot.set_ylabel(yaxis)
-        self.canvas.show()
+        self.canvas.draw()
         toolbar = self.figure.canvas.toolbar
         toolbar.update()       
         toolbar.push_current()
@@ -1104,7 +1104,7 @@ class Cavityplot(tk.Frame):
         self.canvas.get_tk_widget().pack(side='bottom', fill='x', expand=1)
         self.canvas.get_tk_widget().configure(bg='white', bd=0, highlightthickness=0)
         self.canvas._tkcanvas.pack(side='top', fill='both', expand=1)
-        self.figuretoolbar = NavigationToolbar2TkAgg(self.canvas, self)
+        self.figuretoolbar = NavigationToolbar2Tk(self.canvas, self)
         self.figuretoolbar.configure(bg='white')
         self.figuretoolbar.update()
 
@@ -1133,7 +1133,7 @@ class Cavityplot(tk.Frame):
             self.figureplot.set_ylim(ymin=0) # Adjust the vertical min
             self.figureplot.legend(handles=[tan,sag], loc='upper left')
             self.figureplot.grid(linestyle='dashed')
-            self.canvas.show()
+            self.canvas.draw()
             toolbar = self.figure.canvas.toolbar
             toolbar.update()       
             toolbar.push_current()
@@ -1151,7 +1151,7 @@ class Cavityplot(tk.Frame):
             else:
                 self.figureplot.text((xi+xold)/2,y1-5,element,rotation=90, horizontalalignment='center', verticalalignment='top', backgroundcolor='w', bbox=dict(facecolor='w', edgecolor='k', boxstyle='round',linewidth=0.5, alpha=0.65))
             xold = xi
-        self.canvas.show()
+        self.canvas.draw()
 #==============================================================================
 
 
@@ -2049,7 +2049,7 @@ def mainfunc():
     except:
         root.attributes('-zoomed', True)
     # Program version
-    versionnumber = '4.8.3'
+    versionnumber = '4.8.4'
     # Window title (version cap to first two numbers)
     root.wm_title("SimCav %.3s" %versionnumber)
     try:
