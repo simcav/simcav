@@ -1,3 +1,15 @@
+# 4.8.4
+Fully backwards compatible.
+
+## Features
+- Updater
+    Update to current version clicking a button.
+- Adapt to matplotlib 2.2 not backwards compatible changes.
+    NavigationToolbar2TkAgg -> NavigationToolbar2Tk and canvas.show() -> canvas.draw()
+
+## Bugs
+None?
+
 # 4.8.3
 Fully backwards compatible.
 
