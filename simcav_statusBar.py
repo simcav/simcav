@@ -7,5 +7,9 @@ def init_statusBar(statusBar, wl_mm):
     
     return wlLabel
     
-def updateWavelength(label, wavelength):
+def showWavelength(label, wavelength):
     label.setText("λ = {} nm".format(wavelength*1E6))
+    #label.setStyleSheet("QLabel { background-color : red; color : blue;}");
+    
+def showUpdates(message, timer):
+    statusBar.showMessage(message, timer)
