@@ -31,6 +31,10 @@ matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 import matplotlib.pyplot as plt
 
+# Hide matplotlib deprecation warnings
+import warnings
+warnings.simplefilter("ignore")
+
 # import for scrolled window
 import scrolledframe as scrollf
 import tooltips as tt
@@ -64,12 +68,13 @@ class Toolbar(tk.Frame):
         self.img_save = tk.PhotoImage(file=resource_path("Icons/t_save.png"))
         self.img_load = tk.PhotoImage(file=resource_path("Icons/t_load.png"))
         self.img_compute = tk.PhotoImage(file=resource_path("Icons/t_calcu.png"))
+        self.img_update = tk.PhotoImage(file=resource_path("Icons/t_update.png"))
         self.img_quit = tk.PhotoImage(file=resource_path("Icons/t_quit.png"))
         self.img_quit2 = tk.PhotoImage(file=resource_path("Icons/t_quit2.png"))
         #self.img_test = tk.PhotoImage(file="test.gif")
 
         # Creating buttons
-        self.toolbar_buttons['a0_separator'] = ttk.Separator(self, orient='vertical')
+        #self.toolbar_buttons['a0_separator'] = ttk.Separator(self, orient='vertical')
         self.toolbar_buttons['a_button_new'] = tk.Button(self, text='New',
                                                image=self.img_new, command=self.func_button_new,
                                                highlightthickness=0)
@@ -88,6 +93,9 @@ class Toolbar(tk.Frame):
                                                        command=self.func_button_computation,
                                                        highlightthickness=0)
         self.toolbar_buttons['f0_separator'] = ttk.Separator(self, orient='vertical')
+        self.toolbar_buttons['f_button_update'] = tk.Button(self, text='Update',
+                                                        image=self.img_update,
+                                                        command=self.func_button_update, highlightthickness=0, state='disabled')
         self.toolbar_buttons['z_button_quit'] = tk.Button(self, text='Quit',
                                                 image=self.img_quit, command=self.func_button_quit,
                                                 highlightthickness=0)
@@ -106,8 +114,8 @@ class Toolbar(tk.Frame):
                 self.toolbar_buttons[button].pack(side='left', fill='y')
             else:
                 self.toolbar_buttons[button].configure(width=35, height=35, bd=0, bg='white')
-                self.toolbar_buttons[button].bind('<Enter>', self.func_color_enter)
-                self.toolbar_buttons[button].bind('<Leave>', self.func_color_leave)
+                #self.toolbar_buttons[button].bind('<Enter>', self.func_color_enter)
+                #self.toolbar_buttons[button].bind('<Leave>', self.func_color_leave)
                 self.toolbar_buttons[button].pack(side='left')
 
         # Tooltips
@@ -116,6 +124,7 @@ class Toolbar(tk.Frame):
         self.testtip = tt.createToolTip(self.toolbar_buttons['c_button_save'], "Save cavity")
         self.testtip = tt.createToolTip(self.toolbar_buttons['d_button_add'], "Modify cavity")
         self.testtip = tt.createToolTip(self.toolbar_buttons['e_button_computation'], "Design calculator")
+        self.testtip = tt.createToolTip(self.toolbar_buttons['f_button_update'], "Update SimCav")
         # Quit tooltip removed because it interferes with icon change.
         #self.testtip = tt.createToolTip(self.toolbar_buttons['z_button_quit'], "Quit")
 
@@ -176,6 +185,11 @@ class Toolbar(tk.Frame):
 
     def func_button_quit(self):
         # Close program
+        killing_root()
+        
+    def func_button_update(self):
+        import subprocess
+        subprocess.Popen([sys.executable, 'simcav_updater.py'])
         killing_root()
 
     def func_button_add(self):
@@ -1128,9 +1142,9 @@ class Cavityplot(tk.Frame):
         y0, y1 = self.figureplot.get_ylim()
         for xi, element in zip(xpoints,xnames):
             self.figureplot.axvline(x=xi, color='orange', alpha=0.7, linewidth=0.7)
-            if 'Mirror' in element:
+            if 'mirror' in element:
                 self.figureplot.text(xi,y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
-            elif 'Lens' in element:
+            elif 'lens' in element:
                 self.figureplot.text(xi, y0+5, element, rotation=90, horizontalalignment='right', verticalalignment='bottom')
             elif 'Block' in element:
                 self.figureplot.text((xi+xold)/2, y1-5, element,rotation=0, horizontalalignment='center', verticalalignment='top', color='w', bbox=dict(facecolor='k', edgecolor='k', boxstyle='round', linewidth=0, alpha=0.65))
@@ -1825,8 +1839,8 @@ class ResultsWindow2(tk.Frame):
             master.physics.element_list[i]['entry1'].delete(0, tk.END)
             # Writes new (computed) value
             master.physics.element_list[i]['entry1'].insert(0, round(combination*100)/100)
-            master.elementbox.func_button_calc()
-            master.warningbar.warbar_message('Solution ported to cavity','lawngreen')
+        master.elementbox.func_button_calc()
+        master.warningbar.warbar_message('Solution ported to cavity','lawngreen')
 
 #==============================================================================
 #%% Frame on the right
@@ -1955,12 +1969,12 @@ class MainApplication(tk.Frame):
         self.warningbar.warbar_message('Checking version, please wait','grey')
         self.after(0, self.checkupdates, versionnum)
         
-    # Read version from simcav.github.io website (program's own website).
+    # Read version from simcav.gitlab.io website (program's own website).
     def checkupdates(self, versionnum):
         # Update GUI in case checking updates takes long.
         root.update_idletasks()
         try:
-            versiondata = requests.get("http://simcav.github.io/version", timeout=5)
+            versiondata = requests.get("http://simcav.gitlab.io/version", timeout=5)
         except requests.exceptions.ConnectTimeout as e:
             print(type(e))    # the exception instance
             self.warningbar.warbar_message('Error fetching version information: Timeout error', 'firebrick')
@@ -1990,12 +2004,15 @@ class MainApplication(tk.Frame):
                 s2 = s[6:]
                 if versionnum == s1:
                     self.warningbar.warbar_message('SimCav is up-to-date (v%s)' %versionnum, 'lawn green')
+                elif versionnum > s1:
+                    self.warningbar.warbar_message('You are using a future version, please report any bugs :)', 'lawn green')
                 else:
                     # Make warninbar clickable to launch web browser
                     if 'important' in s2:
-                        self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
+                        self.warningbar.warbar_message('IMPORTANT UPDATE: A new version is available at https://simcav.gitlab.io (v%s, you are using v%s)' %(s1,versionnum), 'firebrick')
                     else:
-                        self.warningbar.warbar_message('A new version is available at https://simcav.github.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
+                        self.warningbar.warbar_message('A new version is available at https://simcav.gitlab.io (v%s, you are using v%s)' %(s1,versionnum), 'goldenrod')
+                    self.toolbar.toolbar_buttons['f_button_update'].config(state="normal")
                 error = 0
             elif versiondata.status_code == requests.codes.not_found:
                 self.warningbar.warbar_message('Unable to retrieve online information about version, please try again later.', 'firebrick')
@@ -2010,16 +2027,20 @@ class MainApplication(tk.Frame):
         return error
         
     def labelclick(self, event):
-        webbrowser.open_new(r"http://simcav.github.io")
+        webbrowser.open_new(r"http://simcav.gitlab.io")
 #==============================================================================
+def killing_root():
+    root.quit()
 
+def mainfunc():
+    script_path = os.path.dirname(os.path.abspath( __file__ ))
+    os.chdir(script_path)
+    #May not woth with PyInstaller
+    #The solution for the executables I created with py2exe was this one:
+    #os.path.abspath(os.path.dirname(sys.argv[0]))
+    # source: https://www.blog.pythonlibrary.org/2013/10/29/python-101-how-to-find-the-path-of-a-running-script/
 
-#%%
-if __name__ == "__main__":
-
-    def killing_root():
-        root.quit()
-
+    global root, master
     root = tk.Tk()
     # Start maximized
     try:
@@ -2028,15 +2049,15 @@ if __name__ == "__main__":
     except:
         root.attributes('-zoomed', True)
     # Program version
-    versionnumber = '4.8.2'
+    versionnumber = '4.8.3'
     # Window title (version cap to first two numbers)
     root.wm_title("SimCav %.3s" %versionnumber)
     try:
         # This is for windows
-        root.wm_iconbitmap(resource_path("Icons/logo-tg3.ico"))#root.wm_iconbitmap(resource_path("Icons/Icon2.ico"))
+        root.wm_iconbitmap(resource_path(os.path.join("Icons","logo-tg3.ico")))
     except:
         # This is for linux
-        myicon = tk.PhotoImage(file=resource_path("Icons/logo-tg3.png"))
+        myicon = tk.PhotoImage(file=resource_path(os.path.join("Icons","logo-tg3.png")))
         root.tk.call('wm', 'iconphoto', root._w, myicon)
     root.minsize(1100,400)
     # Kill process when click on window close button
@@ -2046,3 +2067,7 @@ if __name__ == "__main__":
     master.pack(side="top", fill="both", expand=True)
 
     root.mainloop()
+
+#%%
+if __name__ == "__main__":
+    mainfunc()
