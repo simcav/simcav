@@ -83,7 +83,7 @@ class Display(tk.Frame):
         simcav_icons = []
         simcav_api = self.get_api()
         # Get icons list from repo
-        r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
+        r = requests.get(simcav_api+'tree?ref=master-old&per_page=100', params={'path':'Icons/'})
         for i in r.json():
             if not '.svg' in i['name']:
                 simcav_icons.append(i['name'])
@@ -93,7 +93,7 @@ class Display(tk.Frame):
         simcav_saves = []
         simcav_api = self.get_api()
         # Get icons list from repo
-        r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Saves/'})
+        r = requests.get(simcav_api+'tree?ref=master-old&per_page=100', params={'path':'Saves/'})
         for i in r.json():
             simcav_saves.append(i['name'])
         return simcav_saves
@@ -113,7 +113,7 @@ class Display(tk.Frame):
         return api_url
 
     def get_repo(self):
-        repo_url = 'https://gitlab.com/simcav/simcav/raw/master/'
+        repo_url = 'https://gitlab.com/simcav/simcav/raw/master-old/'
         return repo_url
         
     # DOWNLOADS
