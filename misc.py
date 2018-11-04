@@ -2,6 +2,10 @@ import sys, os, requests, hashlib, urllib.request
 import tkinter as tk
 from tkinter import messagebox
 
+# Add user site to path, just in case.
+import site
+sys.path.insert(0, site.USER_SITE)
+
 # Console GUI
 class Display(tk.Frame):
     def __init__(self, parent):
@@ -223,17 +227,21 @@ class Display(tk.Frame):
         return sys.platform
         
     def pipinstall(self, package):
-    	self.printcmd("\n ---------------------\n Installing " + package)
-    	try:
-    		pipcode = self.pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
-    		if not pipcode:
-    			return True
-    		else:
-    			return False
-    	except Exception as inst:
-    		self.printcmd(inst)
-    		self.printcmd("Error")
-    		return False
+        self.printcmd("\n ---------------------\n Installing " + package)
+        try:
+            try:
+                pipcode = self.pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
+            except:
+                # Older versions of pip may lack no-conflicts flag
+                pipcode = self.pipmain(['install', package, '--user', '--disable-pip-version-check'])
+            if not pipcode:
+                return True
+            else:
+                return False
+        except Exception as inst:
+            self.printcmd(inst)
+            self.printcmd("Error")
+            return False
             
     def pipuninstall(self, package):
     	try:

@@ -3,6 +3,10 @@ import sys, os
 import tkinter as tk
 from tkinter import messagebox
 
+# Add user site to path, just in case.
+import site
+sys.path.insert(0, site.USER_SITE)
+
 # Defining exceptions
 class PythonVersionError(Exception):
 	def __init__(self):
@@ -27,7 +31,11 @@ class TheCode():
 	def install(self, package):
 		self.gui_app.printcmd("\n ---------------------\n Installing " + package)
 		try:
-			pipcode = self.pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
+			try:
+				pipcode = self.pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
+			except:
+				# Older versions of pip may lack no-conflicts flag
+				pipcode = self.pipmain(['install', package, '--user', '--disable-pip-version-check'])
 			if not pipcode:
 				return True
 			else:
