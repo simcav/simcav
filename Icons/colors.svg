@@ -185,9 +185,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.23891"
-     inkscape:cx="345.93541"
-     inkscape:cy="556.8391"
+     inkscape:zoom="0.43802083"
+     inkscape:cx="320.36059"
+     inkscape:cy="748.05831"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -315,12 +315,19 @@
          style="fill:#32cd32;fill-opacity:1;stroke-width:0.26458332;"
          id="tspan923">results-alternative</tspan></text>
     <rect
-       style="opacity:1;fill:#005200;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.11666656;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+       style="opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:2.11666656;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+       id="rect910"
+       width="141.37764"
+       height="24.559559"
+       x="-13.454367"
+       y="166.72752" />
+    <rect
+       style="opacity:1;fill:#008c00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.11666656;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect905"
        width="52.963223"
        height="15.803542"
-       x="11.318753"
-       y="171.85301" />
+       x="25.204372"
+       y="172.46332" />
     <rect
        y="193.0197"
        x="11.318753"
