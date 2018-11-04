@@ -925,7 +925,7 @@ class Beamsizeplot(tk.Frame):
         self.controls['h_entry2'].bind("<Return>", self.pressed_enter)
         
         # Place items
-        for element in self.controls:
+        for element in sorted(self.controls):
             self.controls[element].pack(side='left')
             
     def update_menus(self):
@@ -1062,7 +1062,7 @@ class Stabilityplot(tk.Frame):
         self.controls['h_entry2'].bind("<Return>", self.pressed_enter)
         
         # Place items
-        for element in self.controls:
+        for element in sorted(self.controls):
             self.controls[element].pack(side='left')
         
     def update_menus(self):
