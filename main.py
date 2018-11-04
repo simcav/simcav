@@ -19,6 +19,7 @@ import simcav_physics as SP
 import simcav_designer as SD
 import simcav_conditions as SC
 import simcav_statusBar as sBar
+import simcav_updates as updates
 
 #===============================================================================
 # Creating the GUI
@@ -31,6 +32,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setStyleSheet(open('style_main.css').read())
+        self.version = '5.0'
         
         
         self.setupUi(self)
@@ -101,6 +103,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.numberOfElements = 0
         dummy, self.savedMD5 = self.constructSavingList()
         
+        self.checkupdates()
         self.wlLabel = sBar.init_statusBar(self.statusBar, self.cavity.wl_mm)
     # End INIT
     #===========================================================================
@@ -279,6 +282,15 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.modifyCavity.setVisible(True)
         elif q.text() == "Calculator":
             pass
+        elif q.text() == "Update":
+            status = self.checkupdates()
+            if status in [0,1]:
+                self.updateSimcav()
+                import subprocess
+                subprocess.Popen([sys.executable, 'updater.py'])
+                sys.exit()
+            else:
+                self.statusBar.showMessage('Already up-to-date.', 10E3)
         elif q.text() == "Quit":
             pass
         else:
@@ -560,7 +572,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         wl_mm = wl_nm/1E6
         if wl_mm != self.cavity.wl_mm:
             self.cavity.wl_mm = wl_mm
-            sBar.updateWavelength(self.wlLabel, wl_mm*1E6)
+            sBar.showWavelength(self.wlLabel, wl_mm)
         
     ############################################################################
     # Move Up
@@ -652,6 +664,49 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
     # Button functions End 
     ################################################
+    
+    def checkupdates(self):
+        status = updates.checkupdates(self.version)
+        print(self.version)
+        self.inform_updating(status)
+        return status
+        
+    def inform_updating(self, status):
+        if status == 200:
+            message = 'SimCav is up-to-date (v{})'.format(self.version)
+            timer = 10E3
+        elif status == 0:
+            message = 'IMPORTANT UPDATE: please update ASAP.'
+            timer = 0
+        elif status == 1:
+            message = 'A new version is available'
+            timer = 0
+        elif status == 2:
+            message = 'Error fetching version information: Unknown error.'
+            color = 'red'
+            timer = 10E3
+        elif status == 400:
+            message = 'Error fetching version information: Connection error (no internet?)'
+            timer = 10E3
+        elif status == 404:
+            #message = 'Error fetching version information: HTTP error' #(rare invalid HTTP response)'
+            message = 'Unable to retrieve online information, please try again later.'
+            timer = 10E3
+        elif status == 408:
+            message = 'Error fetching version information: Timeout error.'
+            timer = 10E3
+        elif status == 1000:
+            message = 'You are living in the future!'
+            timer = 10E3
+        else:
+            message = "Not sure what's going on..."
+        # Corresponding message
+        self.statusBar.showMessage(message)
+        # Enable/disable toolbar button.
+        if status in [0,1]:
+            self.actionUpdate.setEnabled(True)
+        else:
+            self.actionUpdate.setDisabled(True)
     
     def clearLayout(self, layout):
         while layout.count():
@@ -843,7 +898,8 @@ class ElementWidget(QtWidgets.QWidget):
             'label_name': QtWidgets.QLabel(text=etype),
             'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
             'entry2': QtWidgets.QLineEdit()
-        }        
+        }
+        
 
         # CONFIG ---------------------------------------------------------------
         for item in self.columns:
@@ -956,7 +1012,6 @@ class ElementWidget(QtWidgets.QWidget):
                 # Remove focus
                 if self.elementID in window.elementFocus:
                     window.elementFocus.remove(self.elementID)
-                window.elementFocus.remove(self.elementID)
             else:
                 window.elementFocus = self.elementID
                 
