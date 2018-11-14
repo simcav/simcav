@@ -208,6 +208,7 @@ class cavity():
         cavityMatrix = []
         cavityMatrix.append(self.calcCavityMatrix(self.elementList,0))
         cavityMatrix.append(self.calcCavityMatrix(self.elementList,1))
+        self.cavityMatrix = cavityMatrix
         
         # Before anything check stability
         if not self.stabilityBool(cavityMatrix):

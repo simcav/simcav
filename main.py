@@ -10,6 +10,7 @@ from matplotlib.patches import Ellipse
 # Other modules
 import math
 import numpy as np
+import itertools
 import pickle           # To save and load files
 import hashlib, json    # For MD5 computation
 import atexit           # To run before exit
@@ -20,6 +21,7 @@ import simcav_designer as SD
 import simcav_conditions as SC
 import simcav_statusBar as sBar
 import simcav_updates as updates
+import matrixWidget
 
 #===============================================================================
 # Creating the GUI
@@ -74,7 +76,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_conditionDel.clicked.connect(self.handle_button_conditionDel)
         self.button_calcSolutions.clicked.connect(self.handle_button_calcSolutions)
         
-        
         # "Add element" functions
         self.button_flatMirror.clicked.connect(self.handle_button_addElement)
         self.button_curvedMirror.clicked.connect(self.handle_button_addElement)
@@ -105,8 +106,66 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
         self.checkupdates()
         self.wlLabel = sBar.init_statusBar(self.statusBar, self.cavity.wl_mm)
+        
+        # Test button
+        self.pushButtonTest.clicked.connect(self.testFunction)
     # End INIT
     #===========================================================================
+    
+    def testFunction(self):
+        matrixWindow = matrixWidget.MainWidget()
+        matrixWindow.title('ABCD Matrices')
+        
+        def formWidgets(name, valueT, valueS):
+            widget_tan = matrixWidget.MatrixWidget()
+            widget_sag = matrixWidget.MatrixWidget()
+            widget_tan.setValues(values_tan)
+            widget_sag.setValues(values_sag)
+            matrixWindow.addFormContent(0, name, widget_tan)
+            matrixWindow.addFormContent(1, name, widget_sag)
+        
+        try:
+            values_tan = list(itertools.chain.from_iterable(self.cavity.cavityMatrix[0]))
+            values_sag = list(itertools.chain.from_iterable(self.cavity.cavityMatrix[1]))
+        except:
+            return False
+            
+        name = 'Cavity matrix'
+        formWidgets(name, values_tan, values_sag)
+        
+        for element in self.cavity.elementList:
+            if 'matrix' in element:
+                values_tan = list(itertools.chain.from_iterable(element['matrix'][0]))
+                values_sag = list(itertools.chain.from_iterable(element['matrix'][1]))
+                
+                name = str(element['Order']) + ' ' + element['Type']
+                formWidgets(name, values_tan, values_sag)
+                
+        return True    
+                
+        # otherWindow.addLayoutForm()
+        # 
+        # matrixWidget = QtWidgets.QWidget()
+        # layout = QtWidgets.QGridLayout()
+        # matrixWidget.setLayout(layout)
+        # matrix = []
+        # for i in ['a','b','c','d']:
+        #     label =QtWidgets.QLabel(i)
+        #     label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        #     matrix.append(label)
+        # 
+        # matrixWidget.layout().addWidget(matrix[0], 0, 0)
+        # matrixWidget.layout().addWidget(matrix[1], 0, 1)
+        # matrixWidget.layout().addWidget(matrix[2], 1, 0)
+        # matrixWidget.layout().addWidget(matrix[3], 1, 1)
+        # 
+        # #matrixWidget.resize(100, 100)
+        # matrixWidget.setFixedWidth(100)
+        # 
+        # otherWindow.addFormContent('Mirror', matrixWidget)
+    
+            
+            
     
     ############################################################################
     # Other GUI stuff
