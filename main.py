@@ -107,65 +107,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.checkupdates()
         self.wlLabel = sBar.init_statusBar(self.statusBar, self.cavity.wl_mm)
         
-        # Test button
-        self.pushButtonTest.clicked.connect(self.testFunction)
     # End INIT
     #===========================================================================
     
-    def testFunction(self):
-        matrixWindow = matrixWidget.MainWidget()
-        matrixWindow.title('ABCD Matrices')
-        
-        def formWidgets(name, valueT, valueS):
-            widget_tan = matrixWidget.MatrixWidget()
-            widget_sag = matrixWidget.MatrixWidget()
-            widget_tan.setValues(values_tan)
-            widget_sag.setValues(values_sag)
-            matrixWindow.addFormContent(0, name, widget_tan)
-            matrixWindow.addFormContent(1, name, widget_sag)
-        
-        try:
-            values_tan = list(itertools.chain.from_iterable(self.cavity.cavityMatrix[0]))
-            values_sag = list(itertools.chain.from_iterable(self.cavity.cavityMatrix[1]))
-        except:
-            return False
-            
-        name = 'Cavity matrix'
-        formWidgets(name, values_tan, values_sag)
-        
-        for element in self.cavity.elementList:
-            if 'matrix' in element:
-                values_tan = list(itertools.chain.from_iterable(element['matrix'][0]))
-                values_sag = list(itertools.chain.from_iterable(element['matrix'][1]))
-                
-                name = str(element['Order']) + ' ' + element['Type']
-                formWidgets(name, values_tan, values_sag)
-                
-        return True    
-                
-        # otherWindow.addLayoutForm()
-        # 
-        # matrixWidget = QtWidgets.QWidget()
-        # layout = QtWidgets.QGridLayout()
-        # matrixWidget.setLayout(layout)
-        # matrix = []
-        # for i in ['a','b','c','d']:
-        #     label =QtWidgets.QLabel(i)
-        #     label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        #     matrix.append(label)
-        # 
-        # matrixWidget.layout().addWidget(matrix[0], 0, 0)
-        # matrixWidget.layout().addWidget(matrix[1], 0, 1)
-        # matrixWidget.layout().addWidget(matrix[2], 1, 0)
-        # matrixWidget.layout().addWidget(matrix[3], 1, 1)
-        # 
-        # #matrixWidget.resize(100, 100)
-        # matrixWidget.setFixedWidth(100)
-        # 
-        # otherWindow.addFormContent('Mirror', matrixWidget)
-    
-            
-            
+              
     
     ############################################################################
     # Other GUI stuff
@@ -311,8 +256,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Hide/Show "Add Element" widget
         if q.text() == "Toolbar":
             self.toolBar.setVisible(q.isChecked())
-        elif q.text() == "Add elements Widget":
-            self.modifyCavity.setVisible(q.isChecked())
+        elif q.text() == "ABCD matrices":
+            self.showABCD()
         elif q.text() == "Calculate solutions Box":
             #self.calculateSolutions.setVisible(q.isChecked())
             pass
@@ -724,6 +669,44 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     # Button functions End 
     ################################################
     
+    # ==========================================================================
+    # SHOW ABCD
+    # ==========================================================================
+    def showABCD(self):
+        matrixWindow = matrixWidget.MainWidget()
+        matrixWindow.title('ABCD Matrices')
+        
+        def formWidgets(name, valueT, valueS):
+            widget_tan = matrixWidget.MatrixWidget()
+            widget_sag = matrixWidget.MatrixWidget()
+            widget_tan.setValues(values_tan)
+            widget_sag.setValues(values_sag)
+            matrixWindow.addFormContent(0, name, widget_tan)
+            matrixWindow.addFormContent(1, name, widget_sag)
+        
+        try:
+            values_tan = list(itertools.chain.from_iterable(self.cavity.cavityMatrix[0]))
+            values_sag = list(itertools.chain.from_iterable(self.cavity.cavityMatrix[1]))
+        except:
+            self.statusBar.showMessage('Error: No matrices calculated yet.')
+            return False
+            
+        name = 'Cavity matrix'
+        formWidgets(name, values_tan, values_sag)
+        
+        for element in self.cavity.elementList:
+            if 'matrix' in element:
+                values_tan = list(itertools.chain.from_iterable(element['matrix'][0]))
+                values_sag = list(itertools.chain.from_iterable(element['matrix'][1]))
+                
+                name = str(element['Order']) + ' ' + element['Type']
+                formWidgets(name, values_tan, values_sag)
+                
+        return True 
+    
+    # ==========================================================================
+    # UPDATES
+    # ==========================================================================
     def checkupdates(self):
         status = updates.checkupdates(self.version)
         print(self.version)
@@ -752,7 +735,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             message = 'Unable to retrieve online information, please try again later.'
             timer = 10E3
         elif status == 408:
-            message = 'Error fetching version information: Timeout error.'
+            message = 'Error fetching online version information: Timeout error.'
             timer = 10E3
         elif status == 1000:
             message = 'You are living in the future!'

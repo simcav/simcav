@@ -63,15 +63,15 @@ class MatrixWidget(QtWidgets.QWidget):
         
     def setValues(self, valueList):
         for i, j in zip(self.abcd, valueList):
-            #value = str(round(j,3))
-            value = str(j)
+            value = str(round(j, 6))
+            #value = str(j)
             i.setText(value)
         
     def setValueX(self, position, value):
         # position int [0 to 3]
         # value float
-        #valueX = str(round(value,3))
-        valueX = str(value)
+        valueX = str(round(value, 6))
+        #valueX = str(value)
         self.abcd[position].setText(valueX)
         
     def VLine(self):
