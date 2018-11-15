@@ -289,7 +289,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         elif q.text() == "Update":
             status = self.checkupdates()
             if status in [0,1]:
-                self.updateSimcav()
                 import subprocess
                 subprocess.Popen([sys.executable, 'updater.py'])
                 sys.exit()
@@ -413,7 +412,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             return False
               
         # Plot cavity
-        self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, ymin=0)
+        self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, bottom=0)
         
         # Plot vertical marks
         self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
@@ -435,7 +434,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             return False
         
         # Plot stability
-        self.stabilityPlot.plotData('stability', z, stab_tan, z, stab_sag, xlabel=xname, ymin=0, ymax=1)
+        self.stabilityPlot.plotData('stability', z, stab_tan, z, stab_sag, xlabel=xname, bottom=0, ymax=1)
         return True
         
     def handle_button_calcBeamsize(self):
@@ -465,7 +464,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             maxValue = (zShape[0]*100)-1
         except:
-            print(zShape)
+            #print(zShape)
+            pass
         self.crossSectionSlider.setMaximum(maxValue)
         self.crossSectionSlider.setTickInterval(maxValue/10)
         
@@ -489,7 +489,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 if math.isinf(max_limit) or math.isnan(max_limit):
                     max_limit = 1E6
             # Plot
-            self.crossSectionPlot.plotData('crossSection', 0, wz_tan*1000, 0, wz_sag*1000, xmin=-max_limit, xmax=max_limit, ymin=-max_limit, ymax=max_limit)
+            self.crossSectionPlot.plotData('crossSection', 0, wz_tan*1000, 0, wz_sag*1000, xmin=-max_limit, xmax=max_limit, bottom=-max_limit, ymax=max_limit)
         except:
             print('Error with the slider')
             raise
@@ -709,7 +709,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     # ==========================================================================
     def checkupdates(self):
         status = updates.checkupdates(self.version)
-        print(self.version)
         self.inform_updating(status)
         return status
         
@@ -812,12 +811,12 @@ class PlotCanvas(FigureCanvas):
         #self.axes.plot(x,x)
         self.axes.set_xlabel(xlabel)
         self.axes.set_ylabel(ylabel)
-        self.axes.set_ylim(ymin=0) # Adjust the vertical min
+        self.axes.set_ylim(bottom=0) # Adjust the vertical min
         self.axes.set_title("λ = ") # Title
         self.axes.grid(linestyle='dashed')
         self.draw()
     
-    def plotData(self, plotType, x1, y1, x2, y2, xlabel=None, ylabel=None, xmin=None, xmax=None, ymin=None, ymax=None):
+    def plotData(self, plotType, x1, y1, x2, y2, xlabel=None, ylabel=None, hmin=None, hmax=None, vmin=None, vmax=None):
         # Get previous labels
         xlabel_old = self.axes.get_xlabel()
         ylabel_old = self.axes.get_ylabel()
@@ -866,8 +865,8 @@ class PlotCanvas(FigureCanvas):
             
         # Plot limits
         # xmin and xmax should be an input to the plot function
-        self.axes.set_xlim(left=xmin, right=xmax)
-        self.axes.set_ylim(bottom=ymin, top=ymax)
+        self.axes.set_xlim(left=hmin, right=hmax)
+        self.axes.set_ylim(bottom=vmin, top=vmax)
         
         # Plot title
         self.axes.set_title("λ = " + str(window.cavity.wl_mm*1E6) + " nm")
