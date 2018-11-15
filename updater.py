@@ -61,7 +61,7 @@ class Display(tk.Frame):
         try:
             pip = __import__('pip')
             self.printcmd("OK:	Pip")
-        except ModuleNotFoundError:
+        except NotModuleError:
             return 1
         try:
             from pip._internal import main as pipmain

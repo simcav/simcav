@@ -2,6 +2,7 @@
 import sys, os
 import tkinter as tk
 from tkinter import messagebox
+import urllib.error as webErrors
 
 # Add user site to path, just in case.
 import site
@@ -20,7 +21,7 @@ class NotModuleError(Exception):
 class UserCancel(Exception):
 	def __init__(self):
 		self.expression = "\nError: Cancelled by user."
-		self.message = ""
+		self.message = ""	
 
 class TheCode():
 	def __init__(self, gui_app):
@@ -59,8 +60,12 @@ class TheCode():
 		import urllib.request
 		try:
 			urllib.request.urlretrieve(url, folderfile)
+		except webErrors.HTTPError:
+			self.gui_app.printcmd("\nError: file " + folderfile + "not found in the repository.")
+			return 1
 		except:
 			raise
+		return 0
 
 	def writepath(self, user_site):
 		with open("user_path.txt") as f:
@@ -152,7 +157,7 @@ class TheCode():
 			simcav_url = 'https://gitlab.com/simcav/simcav/raw/pyqt-version/'
 			
 			# Required files
-			simcav_files = ['gui.ui', 'load_icons.py', 'main.py', 'matrixWidget.py', 'matrixWidget.ui', 'simcav_ABCD.py', 'simcav_conditions.py', 'simcav_designer.py', 'simcav_elementFeatures.py', 'simcav_physics.py', 'simcav_statusBar.py', 'simcav_updates.py', 'style_designerSolutions.css', 'style_main.css', 'updater.py']
+			simcav_files = ['gui.ui', 'load_icons.py', 'main.py', 'matrixWidget.py', 'matrixWidget.ui', 'simcav_ABCD.py', 'simcav_conditions.py', 'simcav_designer.py', 'simcav_elementFeatures.py', 'simcav_physics.py', 'simcav_statusBar.py', 'simcav_updates.py', 'style_designerSolutions.css', 'style_main.css', 'uninstaller.py', 'updater.py']
 			simcav_icons = []
 			simcav_saves = []
 			simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md', 'CHANGELOG']
@@ -191,6 +196,7 @@ class TheCode():
 				self.download_file(simcav_url + i, os.path.join(simcav_home, i))
 			
 			gui_app.printcmd('\n Downloading icons...')
+			gui_app.printcmd('     Downloading...')
 			for i in simcav_icons:
 				gui_app.printcmd("     Downloading " + i)
 				self.download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder, i))
@@ -207,7 +213,7 @@ class TheCode():
 				
 			gui_app.printcmd('\n Downloading manual...')
 			if not 'manual.pdf' in os.listdir(simcav_home):
-				self.download_file(simcav_url + 'Manual/manual.pdf', os.path.join(simcav_home, 'manual.pdf'))
+				self.download_file(simcav_url + 'Manual/manual.pdf', os.path.join(simcav_home, 'manual.pdf'))				
 			#gui_app.printcmd('\n Files downloaded')
 			#=================================================================
 			# Create system links
@@ -219,7 +225,7 @@ class TheCode():
 				def create_shortcut(thepath, thehome):
 					gui_app.printcmd('\n Creating shortcut in ' + thepath)
 					python_path = os.path.join(os.path.dirname(sys.executable),'pythonw.exe')
-					mainfile_path = os.path.join(thehome, 'simcav_main.py')
+					mainfile_path = os.path.join(thehome, 'main.py')
 					icons_folder = os.path.join(thehome,'Icons')
 					with winshell.shortcut(thepath) as thelink:
 						thelink.path = python_path
@@ -239,7 +245,7 @@ class TheCode():
 					
 			elif guestOS == 'linux':
 				desktop_path = os.path.join(os.path.join(user_home, 'Desktop'), 'SimCav.desktop')
-				desktop_content = "[Desktop Entry]\nType=Application\nName=SimCav\nGenericName=Laser cavity simulator\nComment=Application for design and simulation of laser resonators\nExec=python " + os.path.join(simcav_home, 'simcav_main.py') + "\nIcon=" + os.path.join(icons_folder, 'logo-tg3.png') + "\nPath=" + simcav_home + "\nTerminal=false\nStartupNotify=false\nCategories=Education;Science"
+				desktop_content = "[Desktop Entry]\nType=Application\nName=SimCav\nGenericName=Laser cavity simulator\nComment=Application for design and simulation of laser resonators\nExec=python " + os.path.join(simcav_home, 'main.py') + "\nIcon=" + os.path.join(icons_folder, 'logo-tg3.png') + "\nPath=" + simcav_home + "\nTerminal=false\nStartupNotify=false\nCategories=Education;Science"
 				
 				with open(desktop_path, 'w') as desktop_file:
 					desktop_file.write(desktop_content)
