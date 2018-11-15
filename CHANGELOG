@@ -1,0 +1,26 @@
+# 4.8.4
+Fully backwards compatible.
+
+## Features
+- Updater
+    Update to current version clicking a button.
+- Adapt to matplotlib 2.2 not backwards compatible changes.
+    NavigationToolbar2TkAgg -> NavigationToolbar2Tk and canvas.show() -> canvas.draw()
+
+## Bugs
+None?
+
+# 4.8.3
+Fully backwards compatible.
+
+## Features
+- Installer  
+    Installs SimCav in a system that has Python 3 and pip already installed. Works for Linux and Windows.
+- Uninstall  
+    Uninstalls SimCav deleting all the files the intaller creates.
+- Updater?  
+
+## Bugs
+### Minor
+- Proper path definition for icon.
+- Plotting from computation results was plot-looping several times.
