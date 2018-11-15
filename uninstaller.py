@@ -62,10 +62,23 @@ class TheCode():
 			
 			gui_app.printcmd("\nSave files must be deleted manually.\n")
 			# Final confirmation
-			user_asnwer = gui_app.askuserbox('Continue?')
+			message = 'Uninstalling from ' + uninstallPath + '\nContinue?'
+			user_asnwer = gui_app.askuserbox(message)
 			if not user_asnwer:
 			 		raise UserCancel
 					
+		except Exception as inst:
+			gui_app.printcmd('\nError: ' + type(inst).__name__)
+			if type(inst).__name__ in ['PythonVersionError', 
+										'NotModuleError',
+										'PipInstallError',
+										'UserCancel']:
+				gui_app.printcmd(inst.message)
+			else:
+				gui_app.printcmd(inst)
+				
+				
+		try:					
 			gui_app.printcmd('Deleting files...')
 			# Main files
 			for i in simcav_files:
@@ -85,36 +98,39 @@ class TheCode():
 			# Cache
 			gui_app.printcmd('Deleting cache...')
 			cachePath = os.path.join(uninstallPath, '__pycache__')
-			for i in os.listdir(cachePath):
-				self.deleteFile(cachePath, i)
-			shutil.rmtree(cachePath)
+			try:
+				for i in os.listdir(cachePath):
+					self.deleteFile(cachePath, i)
+				shutil.rmtree(cachePath)
+			except:
+				gui_app.printcmd('    No cache to delete.')
 				
-			# Removing shortcuts
+		except Exception as inst:
+			gui_app.printcmd('\nError: ' + type(inst).__name__)
+			gui_app.printcmd(inst)
+			raise
+				
+		# Removing shortcuts
+		try:
 			gui_app.printcmd('Deleting shortcuts')
 			gui_app.printcmd(    'Removing ' + desktop_path)
 			os.remove(desktop_path)
 			gui_app.printcmd(    'Removing ' + startmenu_path)
 			os.remove(startmenu_path)
-			
-			# And we are done!
-			gui_app.printcmd('\nUninstall finished!')
-			
-			# Remove installed Python modules
-			for i in self.installed_modules:
-				self.uninstall(i)
-			
 		except Exception as inst:
 			gui_app.printcmd('\nError: ' + type(inst).__name__)
-			if type(inst).__name__ in ['PythonVersionError', 
-										'NotModuleError',
-										'PipInstallError',
-										'UserCancel']:
-				gui_app.printcmd(inst.message)
-			else:
-				gui_app.printcmd(inst)
+			gui_app.printcmd(inst)
+			raise
+			
+		# And we are done!
+		gui_app.printcmd('\nSimCav files deleted!')
+		
+		# Remove installed Python modules
+		for i in self.installed_modules:
+			self.uninstall(i)
 				
-		finally:
-			gui_app.printcmd('You may close this window.')
+		gui_app.printcmd('\nUninstall finished!')
+		gui_app.printcmd('You may close this window.')
 			
 			
 	# Delete file function
@@ -123,8 +139,10 @@ class TheCode():
 		try:
 			os.remove(todelete)
 			self.gui_app.printcmd('    Removing ' + file)
+			return 0
 		except:
 			self.gui_app.printcmd('    Could not delete ' + file)
+			return 1
 		
 	# Install with pip
 	def install(self, package):
@@ -186,7 +204,7 @@ class Display(tk.Frame):
         self.update_idletasks()
 
     def askuserbox(self, message):
-        askbox = messagebox.askyesno('Question', message)
+        askbox = messagebox.askyesno('Confirm', message)
         return askbox
 		
 	# Python version

@@ -61,7 +61,7 @@ class TheCode():
 		try:
 			urllib.request.urlretrieve(url, folderfile)
 		except webErrors.HTTPError:
-			self.gui_app.printcmd("\nError: file " + folderfile + "not found in the repository.")
+			self.gui_app.printcmd("\nError: file " + folderfile + " not found in the repository.")
 			return 1
 		except:
 			raise
@@ -196,7 +196,6 @@ class TheCode():
 				self.download_file(simcav_url + i, os.path.join(simcav_home, i))
 			
 			gui_app.printcmd('\n Downloading icons...')
-			gui_app.printcmd('     Downloading...')
 			for i in simcav_icons:
 				gui_app.printcmd("     Downloading " + i)
 				self.download_file(simcav_url + 'Icons/' + i, os.path.join(icons_folder, i))
