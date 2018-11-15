@@ -1,0 +1,67 @@
+/*
+simcav-green = #005200
+simcav-green-light = #009f00
+
+stability             = #e0ffff = rgb(152, 251, 153)
+stability-alternative = #afeeef = rgb(50, 205, 50)
+
+results = #98fb99
+results-alternative = #32cd32
+
+cell = #ffffff
+cell-alternative = #f9f0e6
+*/
+
+QWidget#SolutionsTab {
+  
+}
+
+LabelTitle {
+  min-height: 40;
+  max-height: 40;
+  color: white;
+  background-color: #005200
+}
+
+LabelSubtitle {
+  min-height: 30;
+  max-height: 30;
+  color: white;
+  background-color: #009f00;
+  padding: 0px 10px 0px 10px
+}
+
+LabelCell {
+  min-height: 20;
+  max-height: 20;
+  background-color: #ffffff;
+  padding: 5px 5px 5px 5px
+}
+
+LabelCell[impar=true] {
+  min-height: 20;
+  max-height: 20;
+  background-color: #f9f0e6
+}
+
+LabelCell[grupo=stab] {
+  min-height: 20;
+  max-height: 20;
+  background-color: #e0ffff
+}
+LabelCell[impar=true][grupo=stab] {
+  min-height: 20;
+  max-height: 20;
+  background-color: #afeeef
+}
+
+LabelCell[grupo=solution] {
+  min-height: 20;
+  max-height: 20;
+  background-color: rgba(152, 251, 153, 50%)
+}
+LabelCell[impar=true][grupo=solution] {
+  min-height: 20;
+  max-height: 20;
+  background-color: rgb(152, 251, 153)
+}
