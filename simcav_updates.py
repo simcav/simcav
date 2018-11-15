@@ -1,6 +1,5 @@
 import requests
 
-
 # Read version from simcav.github.io website (program's own website).
 def checkupdates(versionnum):
     # TRY TO RUN THIS IN A SECONDARY THREAD
@@ -34,7 +33,6 @@ def checkupdates(versionnum):
             # Separate lines (version & important)
             s1 = s[:5]
             s2 = s[6:]
-            print(s1)
             if versionnum == s1:
                 #self.warningbar.warbar_message('SimCav is up-to-date (v%s)' %versionnum, 'lawn green')
                 status = 200
