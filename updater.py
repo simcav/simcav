@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys, os, requests, hashlib, urllib.request
 import tkinter as tk
 from tkinter import messagebox
@@ -22,10 +23,8 @@ class Display(tk.Frame):
         
         self.pythoncheck()
         self.pipimport()
-        if 'win' in self.guestOS():
-            self.install_winshell()
+        
 
-        self.count = 1
         self.configure(background='black')
         self.pack(fill='both', expand=1)
         #self.wait_window()
@@ -56,6 +55,33 @@ class Display(tk.Frame):
             self.printcmd("OK:	Python version.")
             return 0
 
+class TheCode():
+	def __init__(self, title=None):
+		self.Tk = tk.Tk()
+		self.Tk.title(title)
+		# Kill process when click on window close button
+		self.Tk.protocol("WM_DELETE_WINDOW", self.killing_root)
+		
+		self.installed_modules = []
+
+		gui_app = Display(self.Tk)
+		self.gui_app = gui_app
+		self.func_main(self.gui_app)
+		self.Tk.mainloop()
+
+	def killing_root(self):
+		self.Tk.destroy()
+        
+    def func_main(self, gui_app):
+        if 'win' in self.guestOS():
+            self.install_winshell()
+            
+        # Find path
+        updateFilePath = os.path.realpath(__file__)
+        updatePath = uninstallFilePath.replace('updater.py', '')
+        
+        self.download_simcav(updatePath)
+
     # Import pip installer
     def pipimport(self):
         try:
@@ -83,7 +109,7 @@ class Display(tk.Frame):
         simcav_icons = []
         simcav_api = self.get_api()
         # Get icons list from repo
-        r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
+        r = requests.get(simcav_api+'tree?ref=pyqt-version&per_page=100', params={'path':'Icons/'})
         for i in r.json():
             if not '.svg' in i['name']:
                 simcav_icons.append(i['name'])
@@ -93,7 +119,7 @@ class Display(tk.Frame):
         simcav_saves = []
         simcav_api = self.get_api()
         # Get icons list from repo
-        r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Saves/'})
+        r = requests.get(simcav_api+'tree?ref=pyqt-version&per_page=100', params={'path':'Saves/'})
         for i in r.json():
             simcav_saves.append(i['name'])
         return simcav_saves
@@ -113,7 +139,7 @@ class Display(tk.Frame):
         return api_url
 
     def get_repo(self):
-        repo_url = 'https://gitlab.com/simcav/simcav/raw/master/'
+        repo_url = 'https://gitlab.com/simcav/simcav/raw/pyqt-version/'
         return repo_url
         
     # DOWNLOADS
@@ -291,3 +317,6 @@ class UserCancel(Exception):
 	def __init__(self):
 		self.expression = "\nError: Cancelled by user."
 		self.message = ""
+        
+if __name__ == '__main__':
+	uninstall_window = TheCode('Updating SimCav')

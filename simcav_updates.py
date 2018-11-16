@@ -57,4 +57,4 @@ def checkupdates(versionnum):
         #self.warningbar.label_warning.config(cursor="hand2")
         #self.warningbar.clickable = True
         pass
-    return status
+    return status, s1

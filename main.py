@@ -283,17 +283,17 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.fileSave()
             
         elif q.text() == "Edit":
-            self.modifyCavity.setVisible(True)
+            pass
         elif q.text() == "Calculator":
             pass
         elif q.text() == "Update":
-            status = self.checkupdates()
-            if status in [0,1]:
+            goOn = QMessageBox.question(self, 'Update available', "Would you like to update now? \n(This will close SimCav)", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if goOn == QMessageBox.Yes:
                 import subprocess
                 subprocess.Popen([sys.executable, 'updater.py'])
                 sys.exit()
-            else:
-                self.statusBar.showMessage('Already up-to-date.', 10E3)
+            if goOn == QMessageBox.No:
+                self.statusBar.showMessage('Update cancelled', 10E3)
         elif q.text() == "Quit":
             pass
         else:
@@ -708,11 +708,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     # UPDATES
     # ==========================================================================
     def checkupdates(self):
-        status = updates.checkupdates(self.version)
-        self.inform_updating(status)
+        status, webVersion = updates.checkupdates(self.version)
+        self.inform_updating(status, webVersion)
         return status
         
-    def inform_updating(self, status):
+    def inform_updating(self, status, webVersion):
         if status == 200:
             message = 'SimCav is up-to-date (v{})'.format(self.version)
             timer = 10E3
@@ -720,7 +720,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             message = 'IMPORTANT UPDATE: please update ASAP.'
             timer = 0
         elif status == 1:
-            message = 'A new version is available'
+            message = 'A new version is available ({} -> {})'.format(self.version, webVersion)
             timer = 0
         elif status == 2:
             message = 'Error fetching version information: Unknown error.'
@@ -737,7 +737,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             message = 'Error fetching online version information: Timeout error.'
             timer = 10E3
         elif status == 1000:
-            message = 'You are living in the future!'
+            message = 'You are living in the future! (v{} beta)'.format(self.version)
             timer = 10E3
         else:
             message = "Not sure what's going on..."
