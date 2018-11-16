@@ -96,7 +96,7 @@ class TheCode():
         updatePath = updateFilePath.replace('updater.py', '')
         
         self.download_simcav(updatePath)
-        
+
         self.gui_app.printcmd('\n SimCav updated!')
         self.gui_app.printcmd('\n You may close this window')
 
