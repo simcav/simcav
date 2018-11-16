@@ -2,6 +2,7 @@
 import sys, os, requests, hashlib, urllib.request
 import tkinter as tk
 from tkinter import messagebox
+import urllib.error as webErrors
 
 # Add user site to path, just in case.
 import site
@@ -54,34 +55,7 @@ class Display(tk.Frame):
         else:
             self.printcmd("OK:	Python version.")
             return 0
-
-class TheCode():
-	def __init__(self, title=None):
-		self.Tk = tk.Tk()
-		self.Tk.title(title)
-		# Kill process when click on window close button
-		self.Tk.protocol("WM_DELETE_WINDOW", self.killing_root)
-		
-		self.installed_modules = []
-
-		gui_app = Display(self.Tk)
-		self.gui_app = gui_app
-		self.func_main(self.gui_app)
-		self.Tk.mainloop()
-
-	def killing_root(self):
-		self.Tk.destroy()
-        
-    def func_main(self, gui_app):
-        if 'win' in self.guestOS():
-            self.install_winshell()
             
-        # Find path
-        updateFilePath = os.path.realpath(__file__)
-        updatePath = uninstallFilePath.replace('updater.py', '')
-        
-        self.download_simcav(updatePath)
-
     # Import pip installer
     def pipimport(self):
         try:
@@ -95,6 +69,36 @@ class TheCode():
             from pip import main as pipmain
         self.pipmain = pipmain
         return 0
+
+class TheCode():
+    def __init__(self, title=None):
+        self.Tk = tk.Tk()
+        self.Tk.title(title)
+        # Kill process when click on window close button
+        self.Tk.protocol("WM_DELETE_WINDOW", self.killing_root)
+
+        self.installed_modules = []
+
+        gui_app = Display(self.Tk)
+        self.gui_app = gui_app
+        self.func_main(self.gui_app)
+        self.Tk.mainloop()
+        
+    def killing_root(self):
+        self.Tk.destroy()
+        
+    def func_main(self, gui_app):
+        if 'win' in self.guestOS():
+            self.install_winshell()
+            
+        # Find path
+        updateFilePath = os.path.realpath(__file__)
+        updatePath = updateFilePath.replace('updater.py', '')
+        
+        self.download_simcav(updatePath)
+        
+        self.gui_app.printcmd('\n SimCav updated!')
+        self.gui_app.printcmd('\n You may close this window')
 
     # SimCav
     def list_simcav_modules(self):
@@ -151,12 +155,15 @@ class TheCode():
         folderfile = os.path.join(simcav_home, 'manual.pdf')
         
         if self.compare_hash(folderfile, url):
-            self.printcmd("     Up-to-date: manual.pdf")
+            self.gui_app.printcmd("     Up-to-date: manual.pdf")
             return 0
 
         try:
             urllib.request.urlretrieve(url, folderfile)
             return 0
+        except webErrors.HTTPError:
+            self.gui_app.printcmd("\nError: file " + folderfile + " not found in the repository.")
+            return 1
         except:
             raise
             return 1
@@ -173,7 +180,11 @@ class TheCode():
             return 0
         
         # Web file hash
-        r = requests.get(remote_file)
+        try:
+            r = requests.get(remote_file)
+        except webErrors.HTTPError:
+            self.gui_app.printcmd("\nError: file " + folderfile + " not found in the repository.")
+            return 1
         hash2 = hashlib.md5(r._content).hexdigest()
         # Equal hash -> 1
         if hash1 == hash2:
@@ -196,13 +207,13 @@ class TheCode():
             remote_file = url
 
             if self.compare_hash(local_file, remote_file):
-                self.printcmd("     Up-to-date: " + thefile)
+                self.gui_app.printcmd("     Up-to-date: " + thefile)
                 return 0
         except:
             raise HashError()
             
         try:
-            self.printcmd("     Downloading " + thefile)
+            self.gui_app.printcmd("     Downloading " + thefile)
             urllib.request.urlretrieve(url, folderfile)
             return 0
         except:
@@ -213,7 +224,7 @@ class TheCode():
         for i in onegroup:
             download_error = self.download_file(i, group_folder)
             if download_error:
-                self.printcmd('Error downloading ' + i)
+                self.gui_app.printcmd('Error downloading ' + i)
                 raise
                 return 1
         return 0
@@ -221,25 +232,25 @@ class TheCode():
     # Download all files
     def download_simcav(self, simcav_home):
         #Downloading SimCav files
-        self.printcmd('\n Downloading modules...')
+        self.gui_app.printcmd('\n Downloading modules...')
         simcav_modules = self.list_simcav_modules()
         self.download_group(simcav_modules, simcav_home)
 
-        self.printcmd('\n Downloading icons...')
+        self.gui_app.printcmd('\n Downloading icons...')
         simcav_icons = self.list_simcav_icons()
         self.download_group(simcav_icons, os.path.join(simcav_home,'Icons'))
             
-        self.printcmd('\n Downloading examples...')
+        self.gui_app.printcmd('\n Downloading examples...')
         simcav_saves = self.list_simcav_saves()
         self.download_group(simcav_saves, os.path.join(simcav_home,'Saves'))
         
-        self.printcmd('\n Downloading other files...')
+        self.gui_app.printcmd('\n Downloading other files...')
         simcav_misc = self.list_simcav_misc()
         self.download_group(simcav_misc, simcav_home)
             
-        self.printcmd('\n Downloading manual...')
+        self.gui_app.printcmd('\n Downloading manual...')
         download_error = self.download_manual(simcav_home)
-        self.printcmd('\n Files downloaded')
+        self.gui_app.printcmd('\n Files downloaded')
         
     def get_hash(self, thefile):
         hasher = hashlib.md5()
@@ -253,7 +264,7 @@ class TheCode():
         return sys.platform
         
     def pipinstall(self, package):
-        self.printcmd("\n ---------------------\n Installing " + package)
+        self.gui_app.printcmd("\n ---------------------\n Installing " + package)
         try:
             try:
                 pipcode = self.pipmain(['install', package, '--user', '--disable-pip-version-check', '--no-warn-conflicts'])
@@ -265,8 +276,8 @@ class TheCode():
             else:
                 return False
         except Exception as inst:
-            self.printcmd(inst)
-            self.printcmd("Error")
+            self.gui_app.printcmd(inst)
+            self.gui_app.printcmd("Error")
             return False
             
     def pipuninstall(self, package):
@@ -274,26 +285,26 @@ class TheCode():
     		self.pipmain(['uninstall', package, '-y', '--disable-pip-version-check'])
     		return True
     	except Exception as inst:
-    		self.printcmd(inst)
-    		self.printcmd("Error")
+    		self.gui_app.printcmd(inst)
+    		self.gui_app.printcmd("Error")
     		return False
     
     def install_winshell(self):
         try:
             import winshell
         except:
-            self.printcmd("x: Winshell    --    Installing")
+            self.gui_app.printcmd("x: Winshell    --    Installing")
             self.pipimport()
             haveIinstalled = self.pipinstall('winshell')
             if haveIinstalled:
                 import winshell
             else:
-                self.printcmd("Error: Couldn't install Winshell")
+                self.gui_app.printcmd("Error: Couldn't install Winshell")
                 raise
                 return 1
         else:
             self.winshell = winshell
-            self.printcmd("OK:     Winshell")
+            self.gui_app.printcmd("OK:     Winshell")
             return 0
 
 # Defining exceptions
@@ -319,4 +330,4 @@ class UserCancel(Exception):
 		self.message = ""
         
 if __name__ == '__main__':
-	uninstall_window = TheCode('Updating SimCav')
+	update_window = TheCode('Updating SimCav')
