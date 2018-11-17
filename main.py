@@ -436,12 +436,20 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def handle_button_calcStability(self):
         # Get values, validating input
         elementOrder = self.stability_comboBox.currentIndex()
+        if elementOrder == -1:
+            self.bottomBar.showMessage('Error: Please add some optical elements.', 10E3, 'error')
+            return False
+            
         xstart = window.readEntry(self.stability_xstart)
         xend = window.readEntry(self.stability_xend)
+        if (xstart is False) or (xend is False):
+            self.bottomBar.showMessage('Please enter a variation range.', 5E3, 'warning')
+            return False
         
         z, stab_tan, stab_sag, xname = self.cavity.calcStability(elementOrder, xstart, xend)
         
         if z is False:
+            self.bottomBar.showMessage('Error: Please calculate a stable cavity first.', 10E3, 'error')
             return False
         
         # Plot stability
@@ -450,14 +458,27 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def handle_button_calcBeamsize(self):
         # Get values, validating input
-        watchElementOrder = int(self.beamsize_comboBox_watch.currentText()[0])
+        try:
+            watchElementOrder = int(self.beamsize_comboBox_watch.currentText()[0])
+        except:
+            self.bottomBar.showMessage('Error: Please add some optical elements.', 10E3, 'error')
+            return False
+            
         varElementOrder = self.beamsize_comboBox_var.currentIndex()
+        if varElementOrder == -1:
+            self.bottomBar.showMessage('Error: Please add some optical elements.', 10E3, 'error')
+            return False
+            
         xstart = window.readEntry(self.beamsize_xstart)
         xend = window.readEntry(self.beamsize_xend)
+        if (xstart is False) or (xend is False):
+            self.bottomBar.showMessage('Please enter a variation range.', 5E3, 'warning')
+            return False
         
         z, wz_tan, wz_sag, xname, yname = self.cavity.calcBeamsize(watchElementOrder, varElementOrder, xstart, xend)
         
         if z is False:
+            self.bottomBar.showMessage('Error: Please calculate a stable cavity first.', 10E3, 'error')
             return False
         
         # Plot beam size
@@ -468,7 +489,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # if not self.cavity.calcCavity():
         #     return False                      # I THINK NOT NEEDED (too much)
         # Get z and its shape
-        z = self.cavity.z_tan
+        try:
+            z = self.cavity.z_tan
+        except:
+            self.bottomBar.showMessage('Error: Please calculate a stable cavity first.', 10E3, 'error')
+            return False
         zShape = np.shape(z)
         # Adjust slider Max value accordingly:
         # number of colums times 100 (should be number of rows zshape[1], but shape may not get it), minus 1
