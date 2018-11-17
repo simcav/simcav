@@ -87,7 +87,9 @@ ElementWidget {
   background: blue;
 }
 
-
+QComboBox {
+  selection-background-color: rgba(0,140,0,75%);
+}
 
 /* QPushButton#button_calcCavity, QPushButton#button_calcSolutions {
   color: #005200;

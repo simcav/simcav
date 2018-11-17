@@ -614,7 +614,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         wl_mm = wl_nm/1E6
         if wl_mm != self.cavity.wl_mm:
             self.cavity.wl_mm = wl_mm
-            sBar.showWavelength(self.wlLabel, wl_mm)
+            self.bottomBar.showWavelength(self.wlLabel, wl_mm)
         
     ############################################################################
     # Move Up
@@ -954,6 +954,8 @@ class IconWidget(QtWidgets.QWidget):
         layout.setSpacing(0)
         layout.addWidget(self.icon)
         
+        self.setToolTip(eType)
+        
 # Element label
 class ElementWidget(QtWidgets.QWidget):
     def __init__(self, eOrder, etype, entry1=None, entry2=None, parent=None):
@@ -993,11 +995,12 @@ class ElementWidget(QtWidgets.QWidget):
             elif 'number' in item:
                 self.columns[item].setMinimumWidth(15)
                 #self.columns[item].setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-                pass
+                self.columns[item].setStyleSheet("background-color: rgba(0, 0, 0, 0);")
             elif 'name' in item:
                 # Set minimum width so all labels are equal whatever the element name
                 self.columns[item].setMinimumWidth(110)
-        
+                self.columns[item].setStyleSheet("background-color: rgba(0, 0, 0, 0);")
+
         # Validate entry boxes values
         self.columns['entry1'].setValidator(window.validatorFloat)
         self.columns['entry2'].setValidator(window.validatorFloat)
