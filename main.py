@@ -36,7 +36,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setStyleSheet(open('style_main.css').read())
         self.version = '5.0'
         
-        
         self.setupUi(self)
         self.initUI()
         
@@ -105,7 +104,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         dummy, self.savedMD5 = self.constructSavingList()
         
         self.checkupdates()
-        self.wlLabel = sBar.init_statusBar(self.statusBar, self.cavity.wl_mm)
+        self.wlLabel = self.bottomBar.init_statusBar(self.cavity.wl_mm)
         
     # End INIT
     #===========================================================================
@@ -126,6 +125,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolBar.addWidget(wlLabel)
         self.toolBar.addWidget(self.wlBox)
         self.toolBar.addWidget(wlUnitsLabel)
+        self.bottomBar = sBar.StatusBar(self.statusBar)
         
         # Add property to "calculate!" buttons to CSS them
         self.button_calcCavity.setProperty('calculate', True)
@@ -249,7 +249,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         if q.text() == "Save as...":
             self.fileSave(saveAs=True)
         elif q.text() == "Quit":
-            self.closeEvent(QtGui.QCloseEvent)
+            #self.closeEvent(self.QCloseEvent())
+            print('quit')
+            self.actionQuit.triggered.connect(self.close)
         else:
             pass
     def handle_viewMenu_actions(self, q):
@@ -293,7 +295,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 subprocess.Popen([sys.executable, 'updater.py'])
                 sys.exit()
             if goOn == QMessageBox.No:
-                self.statusBar.showMessage('Update cancelled', 10E3)
+                self.bottomBar.showMessage('Update cancelled', 10E3)
         elif q.text() == "Quit":
             pass
         else:
@@ -341,6 +343,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
         # Draw cavity
         self.handle_button_calcCavity()
+        
+        self.bottomBar.showMessage('Load successful', 5E3)
             
     def fileSave(self, saveAs=False, quit=False, theList=None, theHash=None):            
         try:
@@ -368,15 +372,22 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
             # If hash match, then dont save
             if self.checkHash(savingListMD5) and not saveAs:
+                self.bottomBar.showMessage('No changes to save.', 5E3)
                 return True
         else:
             savingList = theList
             savingListMD5 = theHash
             
-        # In any case (quit or not) if needed, save    
-        with open(self.saveFile, 'wb') as file:
-            pickle.dump(savingList, file)
+        # In any case (quit or not) if needed, save
+        try:  
+            with open(self.saveFile, 'wb') as file:
+                pickle.dump(savingList, file)
+        except:
+            self.bottomBar.showMessage('Error: could not save.')
+            return False
         self.savedMD5 = savingListMD5
+        
+        self.bottomBar.showMessage('Save successful', 5E3)
         return True
         
     def constructSavingList(self):
@@ -412,7 +423,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             return False
               
         # Plot cavity
-        self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, bottom=0)
+        self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, vmin=0)
         
         # Plot vertical marks
         self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
@@ -434,7 +445,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             return False
         
         # Plot stability
-        self.stabilityPlot.plotData('stability', z, stab_tan, z, stab_sag, xlabel=xname, bottom=0, ymax=1)
+        self.stabilityPlot.plotData('stability', z, stab_tan, z, stab_sag, xlabel=xname, vmin=0, vmax=1)
         return True
         
     def handle_button_calcBeamsize(self):
@@ -489,9 +500,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 if math.isinf(max_limit) or math.isnan(max_limit):
                     max_limit = 1E6
             # Plot
-            self.crossSectionPlot.plotData('crossSection', 0, wz_tan*1000, 0, wz_sag*1000, xmin=-max_limit, xmax=max_limit, bottom=-max_limit, ymax=max_limit)
+            self.crossSectionPlot.plotData('crossSection', 0, wz_tan*1000, 0, wz_sag*1000, hmin=-max_limit, hmax=max_limit, vmin=-max_limit, vmax=max_limit)
+        except AttributeError:
+            self.bottomBar.showMessage('Error: Please calculate a stable cavity first.', 10E3, 'warning')
         except:
-            print('Error with the slider')
+            self.bottomBar.showMessage('Error: Please report this error.', 10E3)
             raise
             
     def update_crossSectionBox(self, value):
@@ -688,7 +701,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             values_tan = list(itertools.chain.from_iterable(self.cavity.cavityMatrix[0]))
             values_sag = list(itertools.chain.from_iterable(self.cavity.cavityMatrix[1]))
         except:
-            self.statusBar.showMessage('Error: No matrices calculated yet.')
+            self.bottomBar.showMessage('Error: No matrices calculated yet.', 10E3, messageType='error')
             return False
             
         name = 'Cavity matrix'
@@ -742,7 +755,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             message = "Not sure what's going on..."
         # Corresponding message
-        self.statusBar.showMessage(message)
+        self.bottomBar.showMessage(message)
         # Enable/disable toolbar button.
         if status in [0,1]:
             self.actionUpdate.setEnabled(True)
@@ -756,13 +769,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
               child.widget().deleteLater()
     
     # Reimplement closing event
-    def closeEvent(self, event):
+    def closeEvent(self, theEvent):
+        print('close event called')
         # Construct saving list
         savingList, savingListMD5 = self.constructSavingList()
         # Check hash, if no changes then quit
         equalHash = self.checkHash(savingListMD5)
         if equalHash:
-            event.accept()
+            theEvent.accept()
         else:
             # If changes in hash, create modal dialogue and ask for instructions
             msgBox = QMessageBox()
@@ -777,13 +791,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             # If choosing Save 
             if reply == QtWidgets.QMessageBox.Save:
                 if self.fileSave(quit=True, theList=savingList, theHash=savingListMD5):
-                    event.accept()
+                    theEvent.accept()
                 else:
-                    event.ignore()
+                    theEvent.ignore()
             elif reply == QtWidgets.QMessageBox.Cancel:
-                event.ignore()
+                theEvent.ignore()
             else:
-                event.accept()
+                theEvent.accept()
     
 #===============================================================================
 

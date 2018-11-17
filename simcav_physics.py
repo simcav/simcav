@@ -97,7 +97,7 @@ class cavity():
                         results.append(answer)
                         
                 if results:
-                    print('We have results!')
+                    #print('We have results!')
                     combination_final.append(combination)
                     stablility_final.append(stability)
                     results_final.append(results)

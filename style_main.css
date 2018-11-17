@@ -66,10 +66,17 @@ QTabWidget {
 QStatusBar {
   color: white;
   background: black;
+  margin: 0;
+  padding: 0;
+  spacing: 0;
 }
-QStatusBar > QLabel {
+QStatusBar::item {
+    border: 5px solid black;
+    border-radius: 0;
+}
+/* QStatusBar > QLabel {
   color: white;
-}
+} */
 
 QLineEdit:focus {
   border-color: green;
