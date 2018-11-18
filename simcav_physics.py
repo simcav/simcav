@@ -4,6 +4,9 @@ import simcav_elementFeatures as EF
 import simcav_ABCD as abcd
 import simcav_conditions as SC
 
+import time
+
+
 class cavity():
     def __init__(self):
         self.elementList = []
@@ -175,64 +178,70 @@ class cavity():
     # Function to initiate cavity calculations
     def basicSetup(self):
         if not self.minimumElements():
-            print('Error, not enough elements')
+            #print('Error, not enough elements')
             return False
         
         # Assign matrix to elements
         if not self.calcElementData():
-            print('Error happened with calcElementData')
+            #print('Error happened with calcElementData')
             return False
             
         # Ensure working conditions
         # Check no 0-length distance elements
         if not self.elementLengths():
-            print('Error happened with elementLengths')
+            #print('Error happened with elementLengths')
             return False
-        else:
-            print('Lengths OK')
         # And also check that it is a closed cavity
         if not self.closedCavity():
-            print('Error happened with closedCavity')
+            #print('Error happened with closedCavity')
             return False
-        else:
-            print('Closed OK')
         return True
     
     ############################################################################
     # Function to calculate the optical cavity
     def calcCavity(self):
+        #time_start = time.time()
         if not self.basicSetup():
             return False
+        #print('basicSetup: {}'.format((time.time() - time_start)*1E6))
             
         # Calculate cavity matrix, for both saggital and tangential
         cavityMatrix = []
+        #time_start = time.time()
         cavityMatrix.append(self.calcCavityMatrix(self.elementList,0))
         cavityMatrix.append(self.calcCavityMatrix(self.elementList,1))
         self.cavityMatrix = cavityMatrix
+        #print('cavityMatrix: {}'.format((time.time() - time_start)*1E6))
         
         # Before anything check stability
+        #time_start = time.time()
         if not self.stabilityBool(cavityMatrix):
             print('Error happened with stabilityBool')
             return False
-        else:
-            print('Stability OK')
+        #print('StabilityBool: {}'.format((time.time() - time_start)*1E6))
             
         # Calculate complex beam parameter
         # This is the starting point to calculate the propagation
+        #time_start = time.time()
         self.q0 = []
         for matrix in cavityMatrix:
             self.q0.append(abcd.q_resonator(matrix))
+        #print('Beam parameter: {}'.format((time.time() - time_start)*1E6))
             
         # Calculate propagation through cavity, both proyections
         proy = 0
+        #time_start = time.time()
         self.z_tan, self.wz_tan, self.z_limits_tan, self.z_names_tan = abcd.propagation(self.elementList, self.q0[proy], self.wl_mm, proy)
         proy = 1
         self.z_sag, self.wz_sag, self.z_limits_sag, self.z_names_sag = abcd.propagation(self.elementList, self.q0[proy], self.wl_mm, proy)
+        #print('Propagation: {}'.format((time.time() - time_start)*1E6))
         
+        #time_start = time.time()
         self.z_tan = np.array(self.z_tan)
         self.z_sag = np.array(self.z_sag)
         self.wz_tan = np.array(self.wz_tan)
         self.wz_sag = np.array(self.wz_sag)
+        #print('selfVariables: {}'.format((time.time() - time_start)*1E6))
         
         return True
         
@@ -385,17 +394,32 @@ class cavity():
             # If any entry isn't valid return False to end loop
             if entry1 is False or entry2 is False:
                 return False
+                
+            time_start = time.time()
             try:
-                refr_index = self.elementList[element['Order']-1]['refr_index']
+                if (entry1 == element['entry1']) and (entry2 == element['entry2']):
+                    changedElement = False
+                else:
+                    changedElement = True
             except:
-                refr_index = 1.0
-            # Calculate matrix and assign distance/radius, etc.
-            element.update(EF.assign(element['Type'], entry1, entry2, refr_index))
-            # Update refractive index after interfaces
-            # if element['Type'] in ['Flat interface', 'Curved interface']:
-            #     self.refractiveIndex = element['refr_index']
-            # PROBABLY NOT NEEDED SINCE DEALING WITH REFR INDEX DIFFERENTLY
-            
+                changedElement = True
+            print('\nchangedElement: {}'.format((time.time() - time_start)*1E6))
+                
+            time_start = time.time()
+            if changedElement:
+                # Adjust refractive index
+                try:
+                    refr_index = self.elementList[element['Order']-1]['refr_index']
+                except:
+                    refr_index = 1.0
+                    
+                # Calculate matrix and assign distance/radius, etc.
+                element.update(EF.assign(element['Type'], entry1, entry2, refr_index))
+                # Update refractive index after interfaces
+                # if element['Type'] in ['Flat interface', 'Curved interface']:
+                #     self.refractiveIndex = element['refr_index']
+                # PROBABLY NOT NEEDED SINCE DEALING WITH REFR INDEX DIFFERENTLY
+                print('assignedValues: {}\n'.format((time.time() - time_start)*1E6))
         return True
     
     #================= PHYSICAL CALCULATIONS =============================

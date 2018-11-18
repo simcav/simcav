@@ -23,6 +23,8 @@ import simcav_statusBar as sBar
 import simcav_updates as updates
 import matrixWidget
 
+import time
+
 #===============================================================================
 # Creating the GUI
 qtCreatorFile = "gui.ui" # Enter file here.
@@ -51,6 +53,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
         self.elementFocus = []    # This will be a list, even if only one element
         self.conditionFocus = []    # This will be a list, even if only one element
+        self.cavityMD5 = hashlib.md5('0'.encode('utf-8'))
         
         # BUTTON FUNCTIONS =====================================================
         # Cavity buttons
@@ -413,24 +416,46 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             return False
             
             
-    ################################################    
+    ################################################
+    def cavityChanges(self):
+        discard, MD5 = self.constructSavingList()
+        if MD5.hexdigest() == self.cavityMD5.hexdigest():
+            return False
+        else:
+            self.cavityMD5 = MD5
+            return True
+        
     # Button functions Start            
     def handle_button_calcCavity(self):
-        # Calculate element matrixes
-        calcCavity = self.cavity.calcCavity()
-        # If not valid values, end calculations
-        if not calcCavity:
-            return False
+        if self.cavityChanges():
+            # Calculate element matrixes
+            self.bottomBar.showMessage('Calculating cavity...')
+            #time_start = time.time()
+            calcCavity = self.cavity.calcCavity()
+            #print('\ncalcCavity: {}'.format((time.time() - time_start)*1E6))
+            self.bottomBar.showMessage('Cavity calculated!')
+            # If not valid values, end calculations
+            if not calcCavity:
+                return False
               
         # Plot cavity
+        #time_start = time.time()
+        self.bottomBar.showMessage('Plotting cavity...')
         self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, vmin=0)
+        #print('\nplotCavity: {}'.format((time.time() - time_start)*1E6))
         
         # Plot vertical marks
+        #time_start = time.time()
         self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
+        self.bottomBar.showMessage('Plot finished!')
+        #print('\nplotVerticals: {}'.format((time.time() - time_start)*1E6))
         # Update cross section stuff
+        #time_start = time.time()
         self.handle_button_crossSectionUpdate()
+        #print('\ncrossSection: {}'.format((time.time() - time_start)*1E6))
         # Focus Cavity tab
         self.tabWidget_plots.setCurrentIndex(0)
+        self.bottomBar.showMessage('Done')
         return True
         
     def handle_button_calcStability(self):
@@ -542,8 +567,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def tab_designer_creation(self):
         # First of all actually build the cavity (and check for errors)
-        if not self.handle_button_calcCavity():
-            return False
+        if self.cavityChanges():
+            if not self.cavity.calcCavity():
+                return False
         layout = self.designerListLayout
         #self.scrollArea_computation.
         self.designerElements = []
