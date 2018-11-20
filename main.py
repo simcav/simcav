@@ -11,6 +11,7 @@ from matplotlib.patches import Ellipse
 import math
 import numpy as np
 import itertools
+from collections import OrderedDict
 import pickle           # To save and load files
 import hashlib, json    # For MD5 computation
 import atexit           # To run before exit
@@ -1001,12 +1002,11 @@ class ElementWidget(QtWidgets.QWidget):
         layout = QtWidgets.QHBoxLayout(self)
 
 
-        self.columns = {
-            'label_number': QtWidgets.QLabel(text=str(eOrder)),
-            'label_name': QtWidgets.QLabel(text=etype),
-            'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
-            'entry2': QtWidgets.QLineEdit()
-        }
+        self.columns = OrderedDict()
+        self.columns['label_number'] = QtWidgets.QLabel(text=str(eOrder))
+        self.columns['label_name'] = QtWidgets.QLabel(text=etype)
+        self.columns['entry1'] = QtWidgets.QLineEdit(placeholderText="mm")
+        self.columns['entry2'] = QtWidgets.QLineEdit()
         
 
         # CONFIG ---------------------------------------------------------------
@@ -1235,13 +1235,12 @@ class DesignerWidget(QtWidgets.QWidget):
 
         layout = QtWidgets.QHBoxLayout(self)
 
-        self.columns = {
-            'label_number': QtWidgets.QLabel(text=str(eOrder)),
-            'label_name': QtWidgets.QLabel(text=etype),
-            'entry1': QtWidgets.QLineEdit(placeholderText="mm"),
-            'entry2': QtWidgets.QLineEdit(placeholderText="mm"),
-            'entry3': QtWidgets.QLineEdit(text=str(entry3))
-        }
+        self.columns = OrderedDict()
+        self.columns['label_number'] = QtWidgets.QLabel(text=str(eOrder))
+        self.columns['label_name'] = QtWidgets.QLabel(text=etype)
+        self.columns['entry1'] = QtWidgets.QLineEdit(placeholderText="mm")
+        self.columns['entry2'] = QtWidgets.QLineEdit(placeholderText="mm")
+        self.columns['entry3'] = QtWidgets.QLineEdit(text=str(entry3))
 
         # CONFIG ---------------------------------------------------------------
         for item in self.columns:
@@ -1334,12 +1333,11 @@ class ConditionWidget(QtWidgets.QWidget):
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(3,3,8,3)
         
-        self.columns = {
-            'condition': QtWidgets.QComboBox(),
-            'onElement': QtWidgets.QComboBox(),
-            'entry1': QtWidgets.QLineEdit(placeholderText='µm'),
-            'entry2': QtWidgets.QLineEdit(placeholderText='µm')
-        }
+        self.columns = OrderedDict()
+        self.columns['condition'] = QtWidgets.QComboBox()
+        self.columns['onElement'] = QtWidgets.QComboBox()
+        self.columns['entry1'] = QtWidgets.QLineEdit(placeholderText='µm')
+        self.columns['entry2'] = QtWidgets.QLineEdit(placeholderText='µm')
         
         # Default values
         self.assignDefaults()
