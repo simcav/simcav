@@ -395,7 +395,7 @@ class cavity():
             if entry1 is False or entry2 is False:
                 return False
                 
-            time_start = time.time()
+            #time_start = time.time()
             try:
                 if (entry1 == element['entry1']) and (entry2 == element['entry2']):
                     changedElement = False
@@ -403,9 +403,9 @@ class cavity():
                     changedElement = True
             except:
                 changedElement = True
-            print('\nchangedElement: {}'.format((time.time() - time_start)*1E6))
+            #print('\nchangedElement: {}'.format((time.time() - time_start)*1E6))
                 
-            time_start = time.time()
+            #time_start = time.time()
             if changedElement:
                 # Adjust refractive index
                 try:
@@ -419,7 +419,7 @@ class cavity():
                 # if element['Type'] in ['Flat interface', 'Curved interface']:
                 #     self.refractiveIndex = element['refr_index']
                 # PROBABLY NOT NEEDED SINCE DEALING WITH REFR INDEX DIFFERENTLY
-                print('assignedValues: {}\n'.format((time.time() - time_start)*1E6))
+                #print('assignedValues: {}\n'.format((time.time() - time_start)*1E6))
         return True
     
     #================= PHYSICAL CALCULATIONS =============================
