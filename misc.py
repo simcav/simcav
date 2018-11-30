@@ -72,7 +72,7 @@ class Display(tk.Frame):
 
     # SimCav
     def list_simcav_modules(self):
-        simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py', 'simcav_updater.py', 'misc.py']
+        simcav_files = ['gui.ui', 'load_icons.py', 'main.py', 'matrixWidget.py', 'matrixWidget.ui', 'simcav_ABCD.py', 'simcav_conditions.py', 'simcav_designer.py', 'simcav_elementFeatures.py', 'simcav_physics.py', 'simcav_statusBar.py', 'simcav_updates.py', 'style_designerSolutions.css', 'style_main.css', 'updater.py']
         return simcav_files
 
     def list_simcav_misc(self):
@@ -131,8 +131,9 @@ class Display(tk.Frame):
         try:
             urllib.request.urlretrieve(url, folderfile)
             return 0
-        except:
-            raise
+        except Exception as e:
+            self.printcmd("     Error: manual.pdf not found")
+            print(e)
             return 1
             
     def compare_hash(self, local_file, remote_file):
@@ -174,13 +175,18 @@ class Display(tk.Frame):
                 return 0
         except:
             raise HashError()
-            
-        try:
-            self.printcmd("     Downloading " + thefile)
-            urllib.request.urlretrieve(url, folderfile)
-            return 0
-        except:
-            raise WebFileError(thefile)
+        
+        counter = 0
+        while counter <= 5:
+            try:
+                self.printcmd("     Downloading " + thefile)
+                urllib.request.urlretrieve(url, folderfile)
+                return 0
+            except:
+                counter = counter + 1
+        if counter == 6:
+            print("Error: '" + thefile + "' not found'")
+            #raise WebFileError(thefile)
             return 1
 
     def download_group(self, onegroup, group_folder):
@@ -188,9 +194,12 @@ class Display(tk.Frame):
             download_error = self.download_file(i, group_folder)
             if download_error:
                 self.printcmd('Error downloading ' + i)
-                raise
                 return 1
         return 0
+        
+    # Delete old version
+    def delete_old_version(self):
+        simcav_old_modules = self.list_simcav_old_modules()
         
     # Download all files
     def download_simcav(self, simcav_home):
