@@ -2049,7 +2049,7 @@ def mainfunc():
     except:
         root.attributes('-zoomed', True)
     # Program version
-    versionnumber = '4.8.4'
+    versionnumber = '4.9'
     # Window title (version cap to first two numbers)
     root.wm_title("SimCav %.3s" %versionnumber)
     try:
