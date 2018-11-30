@@ -159,6 +159,11 @@ class TheCode():
 			
 			# Get icons list from repo
 			r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
+			if r.status_code == requests.codes.ok:
+				gui_app.printcmd('\n Established connection.')
+			else:
+				gui_app.printcmd('\n Error connecting, try again later.')
+				return
 			for i in r.json():
 				if not '.svg' in i['name']:
 					simcav_icons.append(i['name'])
