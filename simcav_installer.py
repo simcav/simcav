@@ -149,7 +149,7 @@ class TheCode():
 			# Downloading files
 			import requests
 			simcav_api = 'https://gitlab.com/api/v4/projects/6789132/repository/'
-			simcav_url = 'https://gitlab.com/simcav/simcav/raw/master/'
+			simcav_url = 'https://gitlab.com/simcav/simcav/raw/master-old/'
 			
 			# Required files
 			simcav_files = ['simcav_main.py', 'simcav_CavityComputation.py', 'scrolledframe.py', 'simcav_ElementFeatures.py', 'simcav_abcd.py', 'simcav_simulator.py', 'tooltips.py', 'simcav_uninstaller.py', 'simcav_updater.py', 'misc.py']
@@ -158,7 +158,7 @@ class TheCode():
 			simcav_misc = ['LICENSE', 'Disclaimer.txt', 'README.md', 'CHANGELOG']
 			
 			# Get icons list from repo
-			r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Icons/'})
+			r = requests.get(simcav_api+'tree?ref=master-old&per_page=100', params={'path':'Icons/'})
 			if r.status_code == requests.codes.ok:
 				gui_app.printcmd('\n Established connection.')
 			else:
@@ -168,7 +168,7 @@ class TheCode():
 				if not '.svg' in i['name']:
 					simcav_icons.append(i['name'])
 			# Get saves list from repo
-			r = requests.get(simcav_api+'tree?ref=master&per_page=100', params={'path':'Saves/'})
+			r = requests.get(simcav_api+'tree?ref=master-old&per_page=100', params={'path':'Saves/'})
 			for i in r.json():
 				simcav_saves.append(i['name'])	
 			#=================================
