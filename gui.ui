@@ -135,6 +135,11 @@
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -219,7 +224,7 @@
              <x>0</x>
              <y>0</y>
              <width>296</width>
-             <height>446</height>
+             <height>441</height>
             </rect>
            </property>
            <property name="layoutDirection">
@@ -325,6 +330,13 @@
              </colorrole>
             </disabled>
            </palette>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
           </property>
           <property name="cursor">
            <cursorShape>PointingHandCursor</cursorShape>
@@ -839,8 +851,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>98</width>
-             <height>28</height>
+             <width>296</width>
+             <height>429</height>
             </rect>
            </property>
           </widget>
@@ -959,7 +971,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>98</width>
+             <width>296</width>
              <height>177</height>
             </rect>
            </property>
@@ -1050,6 +1062,13 @@
             </disabled>
            </palette>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
           <property name="cursor">
            <cursorShape>PointingHandCursor</cursorShape>
           </property>
@@ -1119,11 +1138,16 @@
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -1811,7 +1835,7 @@
              <x>0</x>
              <y>0</y>
              <width>807</width>
-             <height>699</height>
+             <height>697</height>
             </rect>
            </property>
           </widget>
@@ -1829,7 +1853,7 @@
      <x>0</x>
      <y>0</y>
      <width>1155</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <property name="palette">
@@ -1868,6 +1892,12 @@
       </colorrole>
      </disabled>
     </palette>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+     <kerning>true</kerning>
+    </font>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="palette">
@@ -1918,48 +1948,6 @@
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="palette">
-     <palette>
-      <active>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>140</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </active>
-      <inactive>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>140</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </inactive>
-      <disabled>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>145</red>
-          <green>145</green>
-          <blue>145</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </disabled>
-     </palette>
-    </property>
-    <property name="title">
-     <string>Edit</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuView">
     <property name="palette">
      <palette>
@@ -2005,10 +1993,15 @@
     <addaction name="actionABCD_matrices"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuView"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
