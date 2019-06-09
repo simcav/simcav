@@ -110,7 +110,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # If cavity doesnt change, was it calculated properly?
         self.calcCavityStatus = False
 
-        self.checkupdates()
+        try:
+            self.checkupdates()
+            # SHOULD DO PROPER DEBUGGING HERE
+        except:
+            self.bottomBar.showMessage('Error fetching updates.')
         self.wlLabel = self.bottomBar.init_statusBar(self.cavity.wl_mm)
 
     # End INIT
@@ -435,9 +439,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             # Calculate element matrixes
             self.bottomBar.showMessage('Calculating cavity...')
             #time_start = time.time()
-            # If not valid values, end calculations
+            # If not valid cavity, end calculations
+            if not self.cavity.basicSetup():
+                return False
+            # If not stable cavity, error!
             if not self.cavity.calcCavity():
                 self.calcCavityStatus = False
+                self.bottomBar.showMessage('Error calculating the cavity: Not stable!', messageType='error')
+                #self.cavityPlot.plot_init(xlabel='z (mm)', ylabel='w (µm)')
                 return False
             #print('\ncalcCavity: {}'.format((time.time() - time_start)*1E6))
             self.bottomBar.showMessage('Cavity calculated!')
