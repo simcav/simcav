@@ -107,9 +107,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.numberOfElements = 0
         dummy, self.savedMD5 = self.constructSavingList()
 
-        # If cavity doesnt change, was it calculated properly?
-        self.calcCavityStatus = False
-
         try:
             self.checkupdates()
             # SHOULD DO PROPER DEBUGGING HERE
@@ -441,6 +438,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             #time_start = time.time()
             # If not valid cavity, end calculations
             if not self.cavity.basicSetup():
+                self.bottomBar.showMessage('Error: construct a proper cavity first...')
                 return False
             # If not stable cavity, error!
             if not self.cavity.calcCavity():
@@ -452,27 +450,24 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.bottomBar.showMessage('Cavity calculated!')
             self.calcCavityStatus = True
 
-        if not self.calcCavityStatus:
-            return False
+            # Plot cavity
+            #time_start = time.time()
+            self.bottomBar.showMessage('Plotting cavity...')
+            self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, vmin=0)
+            #print('\nplotCavity: {}'.format((time.time() - time_start)*1E6))
 
-        # Plot cavity
-        #time_start = time.time()
-        self.bottomBar.showMessage('Plotting cavity...')
-        self.cavityPlot.plotData('cavity', self.cavity.z_tan, self.cavity.wz_tan*1000, self.cavity.z_sag, self.cavity.wz_sag*1000, vmin=0)
-        #print('\nplotCavity: {}'.format((time.time() - time_start)*1E6))
-
-        # Plot vertical marks
-        #time_start = time.time()
-        self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
-        self.bottomBar.showMessage('Plot finished!')
-        #print('\nplotVerticals: {}'.format((time.time() - time_start)*1E6))
-        # Update cross section stuff
-        #time_start = time.time()
-        self.handle_button_crossSectionUpdate()
-        #print('\ncrossSection: {}'.format((time.time() - time_start)*1E6))
-        # Focus Cavity tab
-        self.tabWidget_plots.setCurrentIndex(0)
-        self.bottomBar.showMessage('Done')
+            # Plot vertical marks
+            #time_start = time.time()
+            self.cavityPlot.plotVerticals(self.cavity.z_limits_tan, self.cavity.z_names_tan)
+            self.bottomBar.showMessage('Plot finished!')
+            #print('\nplotVerticals: {}'.format((time.time() - time_start)*1E6))
+            # Update cross section stuff
+            #time_start = time.time()
+            self.handle_button_crossSectionUpdate()
+            #print('\ncrossSection: {}'.format((time.time() - time_start)*1E6))
+            # Focus Cavity tab
+            self.tabWidget_plots.setCurrentIndex(0)
+            self.bottomBar.showMessage('Done')
         return True
 
     def handle_button_calcStability(self):

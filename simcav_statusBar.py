@@ -29,7 +29,6 @@ class StatusBar():
         self.statusBar.showMessage(message, timer)
 
     def statusChanged(self, args=None):
-        print(args)
         # This is handle by QT connection!!! (ie. needs args).
         # If there are no arguments (the message is being removed)
         # change the background back to black / text back to white
