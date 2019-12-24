@@ -639,12 +639,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         if results:
             self.presentResults(self.solutionsBox, iterElements, elementList, conditionList, combination, stablility, results)
 
-    def presentResults(self, theBox, iterElements, elementList, conditionList, combination, stablility, results):
+    def presentResults(self, the_box, iter_elements, element_list, condition_list, combination, stability, results):
         # Headers
-        theBox.addHeaders(iterElements, conditionList)
+        the_box.addHeaders(iter_elements, condition_list)
         # Results
         for i, j in enumerate(results):
-            theBox.addRow(combination[i], stablility[i], results[i], conditionList)
+            # Only results that match all conditions (maybe should be equal to...)
+            if len(j) > len(condition_list)-1:
+                the_box.addRow(combination[i], stability[i], results[i], condition_list)
 
 
     def setWavelength(self):
