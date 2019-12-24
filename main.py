@@ -640,6 +640,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.presentResults(self.solutionsBox, iterElements, elementList, conditionList, combination, stablility, results)
 
     def presentResults(self, the_box, iter_elements, element_list, condition_list, combination, stability, results):
+        no_valid_results = True
         # Headers
         the_box.addHeaders(iter_elements, condition_list)
         # Results
@@ -647,6 +648,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             # Only results that match all conditions (maybe should be equal to...)
             if len(j) > len(condition_list)-1:
                 the_box.addRow(combination[i], stability[i], results[i], condition_list)
+                no_valid_results = False
+
+        # Show message in status bar
+        if no_valid_results:
+            self.bottomBar.showMessage('Attention: No valid results.', messageType='warning')
+        else:
+            self.bottomBar.showMessage('Calculations finished')
 
 
     def setWavelength(self):

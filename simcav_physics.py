@@ -94,9 +94,7 @@ class cavity():
 
                     answer = SC.evalConditions(cavityMatrix, elementList, stability, conditionName, conditionAt, conditionAtNumber, condStart, condEnd, self.wl_mm)
 
-                    if not answer:
-                        print('No valid answer')
-                    else:
+                    if answer:
                         results.append(answer)
 
                 if results:
