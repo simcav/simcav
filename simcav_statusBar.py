@@ -9,15 +9,15 @@ class StatusBar():
 
     def init_statusBar(self, wl_mm):
         wavelength = wl_mm*1E6  # Convert to nanometres
-        wlLabel = QtWidgets.QLabel(text="λ = {} nm".format(wavelength))
-        wlLabel.setStyleSheet("QLabel{background-color: black; color: white; padding: 3px;}");
+        wlLabel = QtWidgets.QLabel(text="λ = {} nm".format(wavelength), autoFillBackground=False)
+        wlLabel.setStyleSheet("QLabel{background-color: transparent; color: white}");
         self.statusBar.addPermanentWidget(wlLabel)
 
         return wlLabel
 
     def showWavelength(self, label, wavelength):
         label.setText("λ = {} nm".format(wavelength*1E6))
-        #label.setStyleSheet("QLabel { background-color : red; color : blue;}");
+        #label.setStyleSheet("QLabel { background-color : transparent; color : blue;}");
 
     def showMessage(self, message, timer=10E3, messageType='info'):
         if messageType == 'error':
