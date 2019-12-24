@@ -141,11 +141,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Int validator
         self.validatorInt = QtGui.QIntValidator()
+        self.validatorFloatPositive = QtGui.QDoubleValidator(bottom=0)
         # Float validator
         self.validatorFloat = QtGui.QDoubleValidator()
         self.validatorFloat.setNotation(QtGui.QDoubleValidator.StandardNotation)
         # Set validator in wavelength, stability, beam size entries
-        self.wlBox.setValidator(self.validatorFloat)
+        self.wlBox.setValidator(self.validatorFloatPositive)
         self.stability_xstart.setValidator(self.validatorFloat)
         self.stability_xend.setValidator(self.validatorFloat)
         self.beamsize_xstart.setValidator(self.validatorFloat)
@@ -438,7 +439,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             #time_start = time.time()
             # If not valid cavity, end calculations
             if not self.cavity.basicSetup():
-                self.bottomBar.showMessage('Error: construct a proper cavity first...')
+                self.bottomBar.showMessage('Error: construct a proper cavity first...', messageType='error')
                 return False
             # If not stable cavity, error!
             if not self.cavity.calcCavity():
