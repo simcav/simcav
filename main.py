@@ -541,7 +541,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             #print(zShape)
             pass
         self.crossSectionSlider.setMaximum(maxValue)
-        self.crossSectionSlider.setTickInterval(maxValue/10)
+        self.crossSectionSlider.setTickInterval(round(maxValue/10))
 
         self.modified_crossSectionSlider(0)
 

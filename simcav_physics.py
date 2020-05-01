@@ -35,7 +35,7 @@ class cavity():
             a = element['Widget'].readEntry('entry1')
             b = element['Widget'].readEntry('entry2')
             c = element['Widget'].readEntry('entry3')
-            myDict['vector'] = np.linspace(a, b, c)
+            myDict['vector'] = np.linspace(a, b, int(c))
             element.update(myDict)
 
         iterElements = []
