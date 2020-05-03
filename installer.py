@@ -8,23 +8,43 @@ import urllib.error as webErrors
 import site
 sys.path.insert(0, site.USER_SITE)
 
+
 # Defining exceptions
 class PythonVersionError(Exception):
 	def __init__(self):
 		self.message = "  SimCav only works with Python 3, but an older version was detected.\n  Please update to Python 3.\n"
+
+
 class PipInstallError(Exception):
 	def __init__(self, package):
 		self.message = "Install the package '" + package + "' manually and try again."
+
+
 class NoPipError(Exception):
 	def __init(self):
 		self.message = "Please install Pip, then run this installer again."
+
+
 class NotModuleError(Exception):
 	def __init__(self, package):
 		self.message = "Please install '" + package + "' before installing SimCav."
+
+
 class UserCancel(Exception):
 	def __init__(self):
 		self.expression = "\nError: Cancelled by user."
-		self.message = ""	
+		self.message = ""
+
+
+class RequestsConnectionError(Exception):
+	def __init__(self):
+		self.message = 'Connection error.'
+
+
+class RequestsOtherError(Exception):
+	def __init__(self):
+		self.message = 'Something went wrong.'
+
 
 class TheCode():
 	def __init__(self, gui_app):
@@ -59,15 +79,21 @@ class TheCode():
 			self.gui_app.printcmd("Error")
 			return False
 
-	def download_file(self, url, folderfile):
-		import urllib.request
+	def download_file(self, url, folder_file):
+		import requests
 		try:
-			urllib.request.urlretrieve(url, folderfile)
-		except webErrors.HTTPError:
-			self.gui_app.printcmd("\nError: file " + folderfile + " not found in the repository.")
-			return 1
-		except:
-			raise
+			r = requests.get(url)
+			r.raise_for_status()
+		except requests.exceptions.HTTPError as err:
+			raise RequestsConnectionError(err)
+		except requests.exceptions.ConnectionError as err:
+			raise RequestsConnectionError(err)
+		except requests.exceptions.RequestException as err:
+			raise SystemExit(err)
+
+		# On successful connection save file
+		with open(folder_file, 'wb') as local_file:
+			local_file.write(r.content)
 		return 0
 
 	def writepath(self, user_site):
