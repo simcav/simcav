@@ -26,17 +26,31 @@ import matrixWidget
 
 import time
 
-#===============================================================================
+
+# File path function for deployment in single file with PuInstaller
+def resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
+# ==============================================================================
 # Creating the GUI
-qtCreatorFile = "gui.ui" # Enter file here.
+qtCreatorFile = resource_path("gui.ui")  # Enter GUI file here.
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
-#===============================================================================
+
+# ==============================================================================
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
-        self.setStyleSheet(open('style_main.css').read())
+        self.setStyleSheet(open(resource_path('style_main.css')).read())
         self.version = '5.0'
 
         self.setupUi(self)
@@ -1467,10 +1481,6 @@ class ConditionWidget(QtWidgets.QWidget):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
 
-    # # Load Icons
-    # small_del = QtGui.QIcon()
-    # small_del.addFile("Icons/small_del.png")
-    # #tk.PhotoImage(file=resource_path("Icons/small_del.png"))
     window = MyApp()
 
     window.show()
