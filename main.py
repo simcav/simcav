@@ -8,6 +8,7 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Ellipse
 
 # Other modules
+import os
 import math
 import numpy as np
 import itertools
