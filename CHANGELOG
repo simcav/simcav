@@ -1,3 +1,11 @@
+# 5.0
+Major changes.
+
+## Features
+- Change to PyQT.
+- New analysis functions.
+- Improve speed.
+
 # 4.8.4
 Fully backwards compatible.
 
