@@ -23,17 +23,19 @@ Follow this guide to publish any new SimCav version.
 
 2. Package with pyinstaller:
 
-    **ATTENTION!!! I used developer version of pyinstaller (pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip)**
+    **ATTENTION!!! I used developer version of pyinstaller**
 
     ### Windows
 
     1. Create python virtual environment with only required modules installed (this reduces exe size A LOT).
     
-        Needed: pyinstaller, numpy, matplotlib, requests. Got a size of 31MB (v4.8.4).
+        Needed: pyqt5, pyinstaller, numpy, matplotlib, requests. Got a size of 60MB (v5.0).
 
-        ATTENTION!!! I used developer version of pyinstaller (pip install -e https://github.com/pyinstaller/pyinstaller/archive/develop.zip)
+        ATTENTION!!! I used developer version of pyinstaller:
 
-    2. Package with pyinstaller: `pyinstaller SimCav.spec`.
+        `pip install https://github.com/pyinstaller/pyinstaller/tarball/develop`
+
+    2. Package with pyinstaller: `pyinstaller SimCav_windows.spec`.
 
     ### Linux
 
