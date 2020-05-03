@@ -15,6 +15,9 @@ class PythonVersionError(Exception):
 class PipInstallError(Exception):
 	def __init__(self, package):
 		self.message = "Install the package '" + package + "' manually and try again."
+class NoPipError(Exception):
+	def __init(self):
+		self.message = "Please install Pip, then run this installer again."
 class NotModuleError(Exception):
 	def __init__(self, package):
 		self.message = "Please install '" + package + "' before installing SimCav."
@@ -88,7 +91,9 @@ class TheCode():
 				gui_app.printcmd("OK:	Pip")
 			except ModuleNotFoundError:
 				gui_app.printcmd("Warning: Pip module not found.")
-				gui_app.printcmd("         Required dependencies won't be automatically installed.")
+				gui_app.printcmd("         Required dependencies can't be automatically installed.")
+				gui_app.printcmd("Please install pip and try again.")
+				raise NoPipError
 				
 			try:
 				from pip._internal import main as pipmain
@@ -97,7 +102,8 @@ class TheCode():
 			self.pipmain = pipmain
 
 			# List of modules required by SimCav
-			simcav_modules = ['tkinter',  'numpy', 'requests', 'matplotlib', 'PyQt5']#, 'itertools', 'os', 'pickle', 'webbrowser'] 
+			simcav_modules = ['numpy', 'requests', 'matplotlib', 'PyQt5']
+			# , 'tkinter', 'itertools', 'os', 'pickle', 'webbrowser']
 			# The last ones, commented, are part of the standard python distribution.
 			
 			# List of modules required by the installer
