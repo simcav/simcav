@@ -122,7 +122,7 @@ class TheCode():
         simcav_icons = []
         simcav_api = self.get_api()
         # Get icons list from repo
-        r = requests.get(simcav_api + 'tree?ref=pyqt-version&per_page=100',
+        r = requests.get(simcav_api + 'tree?ref=future&per_page=100',
                          params={'path': 'Icons/'})
         for i in r.json():
             if not '.svg' in i['name']:
@@ -133,7 +133,7 @@ class TheCode():
         simcav_saves = []
         simcav_api = self.get_api()
         # Get icons list from repo
-        r = requests.get(simcav_api + 'tree?ref=pyqt-version&per_page=100',
+        r = requests.get(simcav_api + 'tree?ref=future&per_page=100',
                          params={'path': 'Saves/'})
         for i in r.json():
             simcav_saves.append(i['name'])
@@ -154,7 +154,7 @@ class TheCode():
         return api_url
 
     def get_repo(self):
-        repo_url = 'https://gitlab.com/simcav/simcav/raw/pyqt-version/'
+        repo_url = 'https://gitlab.com/simcav/simcav/raw/future/'
         return repo_url
 
     # DOWNLOADS

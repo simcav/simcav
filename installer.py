@@ -209,7 +209,7 @@ class TheCode:
             # Downloading files
             import requests
             simcav_api = 'https://gitlab.com/api/v4/projects/6789132/repository/'
-            simcav_url = 'https://gitlab.com/simcav/simcav/raw/pyqt-version/'
+            simcav_url = 'https://gitlab.com/simcav/simcav/raw/future/'
 
             # Required files
             simcav_files = ['gui.ui', 'load_icons.py', 'main.py',
@@ -225,13 +225,13 @@ class TheCode:
                            'CHANGELOG']
 
             # Get icons list from repo
-            r = requests.get(simcav_api + 'tree?ref=pyqt-version&per_page=100',
+            r = requests.get(simcav_api + 'tree?ref=future&per_page=100',
                              params={'path': 'Icons/'})
             for i in r.json():
                 if not '.svg' in i['name']:
                     simcav_icons.append(i['name'])
             # Get saves list from repo
-            r = requests.get(simcav_api + 'tree?ref=pyqt-version&per_page=100',
+            r = requests.get(simcav_api + 'tree?ref=future&per_page=100',
                              params={'path': 'Saves/'})
             for i in r.json():
                 simcav_saves.append(i['name'])
