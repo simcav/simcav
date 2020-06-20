@@ -52,7 +52,7 @@ Follow this guide to publish any new SimCav version.
 
 1. Create GPG signatures for installer and portable versions.
 
-2. Calculate SHA1 hashes for said files.
+2. Calculate SHA256 hashes for said files.
 
 
 ## On Github (for Zenodo integration)
@@ -70,7 +70,7 @@ Follow this guide to publish any new SimCav version.
 
 2. Change version number wherever corresponds.
 
-3. Add signatures and SHA1 hashes.
+3. Add signatures and SHA256 hashes.
 
 4. After Zenodo update, change DOI badge.
 
