@@ -52,7 +52,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setStyleSheet(open(resource_path('style_main.css')).read())
-        self.version = '5.0'
+        self.version = '5.0.1'
 
         self.setupUi(self)
         self.initUI()
@@ -189,7 +189,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tab_beamSize.layout().addWidget(self.beamsizePlot_toolbar)
 
         # crossSection tab
-        self.crossSectionPlot = PlotCanvas(xlabel='Tangential (µm)', ylabel='Saggital (µm)')
+        self.crossSectionPlot = PlotCanvas(xlabel='Tangential (µm)', ylabel='Sagittal (µm)')
         self.crossSectionPlot_toolbar = NavigationToolbar(self.crossSectionPlot, self)
         self.tab_crossSection.layout().addWidget(self.crossSectionPlot)
         self.tab_crossSection.layout().addWidget(self.crossSectionPlot_toolbar)
@@ -832,7 +832,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             message = 'Error fetching version information: Connection error (no internet?)'
             timer = 10E3
         elif status == 404:
-            #message = 'Error fetching version information: HTTP error' #(rare invalid HTTP response)'
             message = 'Unable to retrieve online information, please try again later.'
             timer = 10E3
         elif status == 408:
@@ -934,7 +933,7 @@ class PlotCanvas(FigureCanvas):
                 for zrow, wrow in zip(x1,y1):
                     tan, = self.axes.plot(zrow, wrow, 'g', label='Tangential')
                 for zrow, wrow in zip(x2,y2):
-                    sag, = self.axes.plot(zrow, wrow, 'b', label='Saggital')
+                    sag, = self.axes.plot(zrow, wrow, 'b', label='Sagittal')
             else:
                 x1.append(0)
                 y1.append(0)
@@ -943,7 +942,7 @@ class PlotCanvas(FigureCanvas):
                 for zrow, wrow in zip(x1, y1):
                     tan, = self.axes.plot(zrow, wrow, 'g', label='Tangential')
                 for zrow, wrow in zip(x2, y2):
-                    sag, = self.axes.plot(zrow, wrow, 'b', label='Saggital')
+                    sag, = self.axes.plot(zrow, wrow, 'b', label='Sagittal')
             self.axes.legend(handles=[tan,sag], loc='upper left')
         elif plotType == 'crossSection':
             self.axes.set_aspect('equal')
@@ -952,7 +951,7 @@ class PlotCanvas(FigureCanvas):
         else:
             # Other plots
             tan, = self.axes.plot(x1, y1, 'g', label='Tangential')
-            sag, = self.axes.plot(x2, y2, 'b', label='Saggital')
+            sag, = self.axes.plot(x2, y2, 'b', label='Sagittal')
             self.axes.legend(handles=[tan,sag], loc='upper left')
 
         # Plot Labels

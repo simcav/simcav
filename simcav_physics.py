@@ -69,7 +69,7 @@ class cavity():
                     except:
                         pass
 
-            # Calculate cavity matrix, for both saggital and tangential
+            # Calculate cavity matrix, for both sagittal and tangential
             cavityMatrix = []
             cavityMatrix.append(self.calcCavityMatrix(elementList,0))
             cavityMatrix.append(self.calcCavityMatrix(elementList,1))
@@ -203,7 +203,7 @@ class cavity():
             return False
         #print('basicSetup: {}'.format((time.time() - time_start)*1E6))
 
-        # Calculate cavity matrix, for both saggital and tangential
+        # Calculate cavity matrix, for both sagittal and tangential
         cavityMatrix = []
         #time_start = time.time()
         cavityMatrix.append(self.calcCavityMatrix(self.elementList,0))
@@ -264,7 +264,7 @@ class cavity():
         for number in xvec:
             stabilityList = self.updateOtherList(element['ID'], stabilityList, 'entry1', number)
 
-            # Calculate cavity matrix, for both saggital and tangential
+            # Calculate cavity matrix, for both sagittal and tangential
             stabilityMatrix = [self.calcCavityMatrix(stabilityList,0),
                                self.calcCavityMatrix(stabilityList,1)]
             stab_val = self.stabilityValue(stabilityMatrix)
@@ -428,7 +428,7 @@ class cavity():
         # "proy" states for the proyection, either 0 for tangential or 1 for sagital.
         M_cav = np.identity(2)
 
-        # Tangential or saggital proyection
+        # Tangential or sagittal proyection
         for element in E_list[1:]:
             M_cav = np.dot(element['matrix'][proy],M_cav)
 
