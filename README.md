@@ -3,7 +3,7 @@
 
 ![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.594565.svg) 
 
-Please visit the [website](https://simcav.gitlab.io/) for more information, downloads, screenshots... 
+Please visit the [website](https://simcav.org/) for more information, downloads, screenshots... 
 
 Simcav is a PC program to design and simulate laser cavities. 
 It is able to calculate a stable cavity for some conditions given by the user, being this its best feature. 
