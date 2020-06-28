@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1155</width>
+    <width>1250</width>
     <height>887</height>
    </rect>
   </property>
@@ -25,16 +25,7 @@
     <property name="sizeConstraint">
      <enum>QLayout::SetDefaultConstraint</enum>
     </property>
-    <property name="leftMargin">
-     <number>9</number>
-    </property>
-    <property name="topMargin">
-     <number>9</number>
-    </property>
-    <property name="rightMargin">
-     <number>9</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>9</number>
     </property>
     <item row="1" column="1">
@@ -77,8 +68,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>809</width>
-         <height>48</height>
+         <width>897</width>
+         <height>46</height>
         </rect>
        </property>
       </widget>
@@ -223,8 +214,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>296</width>
-             <height>441</height>
+             <width>294</width>
+             <height>387</height>
             </rect>
            </property>
            <property name="layoutDirection">
@@ -368,6 +359,12 @@
           </property>
           <item row="0" column="1">
            <widget class="QPushButton" name="button_curvedMirror">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -377,7 +374,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -397,6 +394,12 @@
           </item>
           <item row="3" column="1">
            <widget class="QPushButton" name="button_curvedInterface">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -406,7 +409,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -429,6 +432,12 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -438,7 +447,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -458,6 +467,12 @@
           </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="button_distance">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -467,7 +482,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -487,6 +502,12 @@
           </item>
           <item row="2" column="1">
            <widget class="QPushButton" name="button_brewsterCrystal">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -496,7 +517,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -516,6 +537,12 @@
           </item>
           <item row="3" column="0">
            <widget class="QPushButton" name="button_flatInterface">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -525,7 +552,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -545,6 +572,12 @@
           </item>
           <item row="2" column="0">
            <widget class="QPushButton" name="button_brewsterPlate">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -554,7 +587,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -574,6 +607,12 @@
           </item>
           <item row="4" column="0">
            <widget class="QPushButton" name="button_thinLens">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -583,7 +622,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -603,6 +642,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="button_block">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -612,7 +657,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -632,6 +677,12 @@
           </item>
           <item row="0" column="0">
            <widget class="QPushButton" name="button_flatMirror">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>142</width>
@@ -641,7 +692,7 @@
             <property name="maximumSize">
              <size>
               <width>142</width>
-              <height>36</height>
+              <height>50</height>
              </size>
             </property>
             <property name="text">
@@ -840,9 +891,6 @@
           <property name="horizontalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOff</enum>
           </property>
-          <property name="sizeAdjustPolicy">
-           <enum>QAbstractScrollArea::AdjustIgnored</enum>
-          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -851,8 +899,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>296</width>
-             <height>429</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
           </widget>
@@ -971,8 +1019,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>296</width>
-             <height>177</height>
+             <width>96</width>
+             <height>175</height>
             </rect>
            </property>
           </widget>
@@ -1152,7 +1200,7 @@
       <property name="movable">
        <bool>true</bool>
       </property>
-      <property name="tabBarAutoHide">
+      <property name="tabBarAutoHide" stdset="0">
        <bool>true</bool>
       </property>
       <widget class="QWidget" name="tab_cavity">
@@ -1385,16 +1433,7 @@
         <property name="spacing">
          <number>0</number>
         </property>
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>0</number>
         </property>
         <item>
@@ -1834,8 +1873,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>807</width>
-             <height>697</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
           </widget>
@@ -1852,8 +1891,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1155</width>
-     <height>23</height>
+     <width>1250</width>
+     <height>33</height>
     </rect>
    </property>
    <property name="palette">
