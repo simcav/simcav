@@ -288,8 +288,6 @@ class TheCode:
             gui_app.print_cmd('\n Creating shortcuts...')
             # Create desktop shortcut
             if guest_os == 'win32':
-                # NOT WORKING YET
-
                 def create_shortcut(the_path, the_home):
                     gui_app.print_cmd('\n Creating shortcut in ' + the_path)
                     python_path = os.path.join(os.path.dirname(sys.executable),

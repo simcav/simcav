@@ -91,7 +91,7 @@ class TheCode():
         self.Tk.destroy()
 
     def func_main(self, gui_app):
-        if 'win' in self.guestOS():
+        if self.guestOS() == 'win32':
             self.install_winshell()
 
         # Find path
