@@ -91,10 +91,6 @@ QComboBox {
   selection-background-color: rgba(0,140,0,75%);
 }
 
-QPushButton {
-  padding: 1px;
-}
-
 /* QPushButton#button_calcCavity, QPushButton#button_calcSolutions {
   color: #005200;
   background-color: white;
