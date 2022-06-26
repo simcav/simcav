@@ -26,7 +26,7 @@ class StatusBar():
             self.statusBar.setStyleSheet("QStatusBar{background:rgba(255,175,0,255);color:black;font-weight:bold;}")
         elif messageType == 'info':
             self.statusBar.setStyleSheet("QStatusBar{background:black;color:white;font-weight:normal;}")
-        self.statusBar.showMessage(message, timer)
+        self.statusBar.showMessage(message, int(timer))
 
     def statusChanged(self, args=None):
         # This is handle by QT connection!!! (ie. needs args).
