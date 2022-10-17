@@ -946,7 +946,7 @@ class PlotCanvas(FigureCanvas):
             self.axes.legend(handles=[tan,sag], loc='upper left')
         elif plotType == 'crossSection':
             self.axes.set_aspect('equal')
-            ellipse = Ellipse(xy=(x1,x2), width=y2, height=y1)
+            ellipse = Ellipse(xy=(x1,x2), width=2*y2, height=2*y1)
             self.axes.add_artist(ellipse)
         else:
             # Other plots
@@ -967,8 +967,12 @@ class PlotCanvas(FigureCanvas):
 
         # Plot limits
         # xmin and xmax should be an input to the plot function
-        self.axes.set_xlim(left=hmin, right=hmax)
-        self.axes.set_ylim(bottom=vmin, top=vmax)
+        if plotType == 'crossSection':
+            self.axes.set_xlim(left=2*hmin, right=2*hmax)
+            self.axes.set_ylim(bottom=2*vmin, top=2*vmax)
+        else:
+            self.axes.set_xlim(left=hmin, right=hmax)
+            self.axes.set_ylim(bottom=vmin, top=vmax)
 
         # Plot title
         self.axes.set_title("λ = " + str(window.cavity.wl_mm*1E6) + " nm")
