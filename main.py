@@ -52,7 +52,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setStyleSheet(open(resource_path('style_main.css')).read())
-        self.version = '5.0.1'
+        self.version = '5.0.2'
 
         self.setupUi(self)
         self.initUI()
