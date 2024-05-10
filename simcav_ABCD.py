@@ -150,8 +150,8 @@ def q_resonator(M):
     C = M[1,0]
     D = M[1,1]
     
-    q = (-(D-A) + csqrt((D-A)**2 + 4*B*C))/(2*np.abs(C))
-    return q
+    q_inv = (D-A) / (2*B) - np.abs(1/B) * csqrt((A+D)**2 / 4 - 1)
+    return 1 / q_inv
     
 #%% ----------------------------------------------------------------------------
 # Calculate q1 for propagation from q0
@@ -216,7 +216,7 @@ def propagation(E_list, q0, wl, proy, chivato=False):
     
     refr_index_global = 1.0 
       
-    for element in E_list:
+    for counter, element in enumerate(E_list):
         # Some debugging
         if chivato:
             print(element['Type'])
@@ -231,7 +231,11 @@ def propagation(E_list, q0, wl, proy, chivato=False):
             (element['Type']=="Custom Element") ):
             
             # Calculate complex beam parameter (q)
-            q = q_propagation(element['matrix'][proy],q0)
+            if counter == 0:
+                q = q0
+                # First list element must be ignored since SimCav calculates q0 just after the first element
+            else:
+                q = q_propagation(element['matrix'][proy],q0)
             q0 = q
             
             # Modify refractive index of the medium
@@ -256,7 +260,7 @@ def propagation(E_list, q0, wl, proy, chivato=False):
         
         # ------------------- Distance -------------------            
         elif element['Type']=="Distance":
-            aux_vector = np.linspace(0,element['distance'],num=100)
+            aux_vector = np.linspace(0,element['distance'],num=1001)
             z.append(aux_vector+zmax)
             zmax = zmax + max(aux_vector)
             q = q0 + aux_vector
