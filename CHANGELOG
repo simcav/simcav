@@ -1,3 +1,11 @@
+# 5.0.3
+Fix bug where beam radius would be calculated wrong if initial mirror wasn't flat.
+
+# 5.0.2
+Change timer to int due to (external) module update.
+Fix cross-section plot using radius as diameter.
+Fix base path for script files.
+
 # 5.0.1
 Fix version bug.
 Fix typos.
