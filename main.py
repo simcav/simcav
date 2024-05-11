@@ -314,9 +314,19 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             pass
         elif q.text() == "Update":
             goOn = QMessageBox.question(self, 'Update available', "Would you like to update now? \n(This will close SimCav)", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+
             if goOn == QMessageBox.Yes:
+                # Location
+                guest_os = sys.platform
+                if guest_os == 'win32':
+                    import winshell
+                    user_home = winshell.folder("profile")
+                else:
+                    user_home = os.path.expanduser('~')
+                simcav_home = os.path.join(user_home, 'SimCav')
+
                 import subprocess
-                subprocess.Popen([sys.executable, 'updater.py'])
+                subprocess.Popen([sys.executable, os.path.join(simcav_home, 'updater.py')])
                 sys.exit()
             if goOn == QMessageBox.No:
                 self.bottomBar.showMessage('Update cancelled', 10E3)
