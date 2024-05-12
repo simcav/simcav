@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtWidgets import QMessageBox
 
@@ -317,16 +318,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
             if goOn == QMessageBox.Yes:
                 # Location
-                guest_os = sys.platform
-                if guest_os == 'win32':
-                    import winshell
-                    user_home = winshell.folder("profile")
-                else:
-                    user_home = os.path.expanduser('~')
-                simcav_home = os.path.join(user_home, 'SimCav')
+                running_file = Path(sys.argv[0])
 
                 import subprocess
-                subprocess.Popen([sys.executable, os.path.join(simcav_home, 'updater.py')])
+                subprocess.Popen([sys.executable, running_file.parent / 'updater.py'])
                 sys.exit()
             if goOn == QMessageBox.No:
                 self.bottomBar.showMessage('Update cancelled', 10E3)
